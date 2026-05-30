@@ -325,11 +325,11 @@
       ให้นำ URL ที่ลงท้ายด้วย /exec มาแทนค่าด้านล่างก่อนอัปขึ้น GitHub Pages
       ตัวอย่าง: https://script.google.com/macros/s/AKfycbxxxxxxxx/exec
     */
-    const GAS_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzgIqLb0DxpAIj_dRO1wH6jR7bE-4vgJ4S-oRMLYcKwAeIVlLpa5wvgJtSxE2QYzAg4/exec';
 
     function getGasUrl(){
       const url = String(GAS_URL || '').trim();
-      if(!url || url === 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE'){
+      if(!url || url === 'https://script.google.com/macros/s/AKfycbzgIqLb0DxpAIj_dRO1wH6jR7bE-4vgJ4S-oRMLYcKwAeIVlLpa5wvgJtSxE2QYzAg4/exec'){
         throw new Error('ยังไม่ได้ตั้งค่า GAS_URL ในไฟล์ index.html');
       }
       return url;
