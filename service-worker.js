@@ -1,6 +1,9 @@
-// No-cache service worker: keeps GitHub Pages from serving old broken files.
 self.addEventListener('install', event => { self.skipWaiting(); });
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => self.clients.claim()));
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => caches.delete(k)));
+    await self.registration.unregister();
+  })());
 });
 self.addEventListener('fetch', event => { event.respondWith(fetch(event.request)); });
