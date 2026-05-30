@@ -3,313 +3,130 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>M1 Good Good</title>
+  <title>M1 Good Good | ระบบบันทึกพฤติกรรมนักเรียน</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#fff7fb" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --pink:#ff8fbc; --pink-dark:#f05b93; --blue:#75b8ff; --green:#55c78a;
-      --orange:#ffae42; --red:#ef5b5b; --ink:#433d5b; --muted:#817991;
-      --line:rgba(110,95,140,.16); --card:rgba(255,255,255,.92);
-      --shadow:0 24px 70px rgba(75,68,102,.14);
+    :root{
+      --pink:#ff8fbc;--pink-dark:#f05b93;--blue:#75b8ff;--green:#55c78a;--orange:#ffae42;--red:#ef5b5b;
+      --ink:#3f3b52;--muted:#7b7890;--line:rgba(143,132,170,.18);--card:rgba(255,255,255,.94);
+      --shadow:0 18px 48px rgba(96,79,122,.16);
     }
-    *{box-sizing:border-box;font-family: system-ui,-apple-system,BlinkMacSystemFont,"Sarabun","Noto Sans Thai",sans-serif}
-    body{margin:0;min-height:100vh;color:var(--ink);background:
-      radial-gradient(circle at 10% 20%, rgba(255,143,188,.35), transparent 34%),
-      radial-gradient(circle at 90% 10%, rgba(117,184,255,.35), transparent 30%),
-      linear-gradient(135deg,#fff7fb,#eef8ff);}
-    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-    .card{width:min(640px,100%);background:var(--card);border:1px solid rgba(255,255,255,.8);border-radius:30px;box-shadow:var(--shadow);padding:28px}
-    .logo{width:96px;height:96px;display:block;margin:0 auto 12px;border-radius:24px}
-    h1{text-align:center;font-size:clamp(34px,6vw,48px);margin:0;font-weight:900;letter-spacing:-1px}
-    .sub{text-align:center;color:var(--muted);font-weight:800;margin:4px 0 24px}
-    label{display:block;font-weight:900;margin:0 0 8px}
-    .searchbar{display:flex;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:white;box-shadow:0 8px 20px rgba(75,68,102,.06)}
-    input,textarea,button,select{font-size:18px}
-    input{flex:1;border:0;padding:16px;outline:0;font-weight:800;min-width:0}
-    .clear{border:0;background:white;color:#566;min-width:44px;font-weight:900}
-    .search{border:0;background:linear-gradient(135deg,var(--pink-dark),var(--pink));color:white;min-width:76px;font-weight:900}
-    .ghost{width:100%;border:1px solid var(--line);background:#fff;border-radius:18px;padding:14px;margin-top:14px;font-weight:900;color:var(--ink);box-shadow:0 8px 20px rgba(75,68,102,.06)}
-    .hint,.status{text-align:center;color:var(--muted);font-weight:800;margin:14px 0 0}
-    .status.err{color:var(--red)} .status.ok{color:var(--green)}
-    .list{display:grid;gap:10px;margin-top:14px}
-    .student-btn{border:1px solid var(--line);background:#fff;border-radius:20px;padding:14px;text-align:left;font-weight:900;color:var(--ink);box-shadow:0 8px 18px rgba(75,68,102,.06)}
-    .student-btn small{display:block;color:var(--muted);margin-top:4px;font-weight:800}
-    .top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}
-    .back{border:0;background:#fff;border-radius:16px;width:48px;height:48px;font-weight:900;box-shadow:0 8px 18px rgba(75,68,102,.08)}
-    .pill{display:inline-flex;align-items:center;justify-content:center;background:#f8f4ff;border:1px solid var(--line);border-radius:999px;padding:8px 12px;font-weight:900;color:var(--muted)}
-    .profile{background:#fff;border:1px solid var(--line);border-radius:24px;padding:18px;margin-bottom:14px}
-    .name{font-size:clamp(24px,5vw,34px);font-weight:900}
-    .meta{color:var(--muted);font-weight:900;margin-top:4px}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
-    .option{border:2px solid transparent;background:#fff;border-radius:20px;padding:14px;min-height:72px;font-weight:900;text-align:left;box-shadow:0 8px 18px rgba(75,68,102,.06)}
-    .option.active{border-color:var(--pink-dark);background:#fff0f6}
-    textarea{width:100%;border:1px solid var(--line);border-radius:20px;padding:14px;font-weight:800;min-height:96px;outline:0;resize:vertical;margin-top:14px}
-    .save{width:100%;border:0;background:linear-gradient(135deg,#40bb7a,#82dca8);color:#fff;border-radius:20px;padding:16px;margin-top:14px;font-weight:900}
-    .dash{display:block;text-align:center;text-decoration:none;color:var(--ink);font-weight:900;margin-top:18px}
-    .hidden{display:none!important}
-    .spinner{display:inline-block;width:20px;height:20px;border:3px solid rgba(255,255,255,.55);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-4px;margin-right:8px}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @media(max-width:600px){.wrap{padding:14px}.card{padding:22px;border-radius:28px}.grid{grid-template-columns:1fr}}
+    *{box-sizing:border-box;font-family:'Sarabun',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;min-height:100%;color:var(--ink);background:radial-gradient(circle at 10% 10%,rgba(255,194,219,.75),transparent 30%),radial-gradient(circle at 90% 10%,rgba(196,232,255,.82),transparent 30%),linear-gradient(135deg,#fff7ec,#eef8ff);}
+    body{min-height:100dvh;overflow-x:hidden}
+    .shell{min-height:100dvh;padding:clamp(12px,2vw,24px);display:flex;align-items:center;justify-content:center}
+    .app{width:min(1040px,100%);min-height:min(760px,calc(100dvh - 28px));background:rgba(255,255,255,.68);border:1px solid rgba(255,255,255,.85);box-shadow:var(--shadow);border-radius:30px;padding:clamp(14px,2.4vw,28px);display:flex;align-items:center;justify-content:center}
+    .screen{display:none;width:100%;animation:fade .18s ease-out}.screen.active{display:block}@keyframes fade{from{opacity:.45;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .panel{width:min(590px,100%);margin:auto;background:var(--card);border:1px solid var(--line);box-shadow:0 12px 30px rgba(96,79,122,.10);border-radius:28px;padding:clamp(18px,3vw,28px)}
+    .logo{width:92px;height:92px;display:block;margin:0 auto 10px;border-radius:24px;object-fit:contain}.title{text-align:center;font-size:clamp(30px,6vw,42px);font-weight:900;letter-spacing:-.6px;margin:0}.subtitle{text-align:center;color:var(--muted);font-weight:800;margin:4px 0 18px}
+    label{font-weight:900;margin-bottom:8px;display:block}.search-row{display:flex;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 8px 16px rgba(96,79,122,.07)}
+    input,textarea,button{font:inherit}input,textarea{font-size:18px;border:0;outline:none;background:#fff;color:var(--ink)}.search-input{flex:1;min-width:0;padding:15px 16px;font-weight:800}.icon-btn{border:0;background:var(--pink);color:#fff;font-size:20px;font-weight:900;padding:0 20px;min-width:58px;cursor:pointer}.clear-btn{border:0;background:#fff;color:#617;font-size:18px;min-width:44px;display:none;cursor:pointer}.clear-btn.show{display:block}
+    .btn{border:0;border-radius:18px;min-height:52px;padding:12px 16px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:0 10px 20px rgba(96,79,122,.10)}.btn-primary{background:linear-gradient(135deg,var(--pink-dark),var(--pink));color:white}.btn-soft{background:#fff;color:var(--ink);border:1px solid var(--line)}.btn-green{background:linear-gradient(135deg,#42bd7c,#86dfad);color:#fff}.btn-orange{background:linear-gradient(135deg,#ff9e32,#ffc46f);color:#fff}.btn:disabled{opacity:.65;cursor:not-allowed}.mt{margin-top:12px}.hint{text-align:center;color:var(--muted);font-weight:800;margin-top:12px;font-size:14px}
+    .suggestions{margin-top:12px;display:grid;gap:9px;max-height:285px;overflow:auto}.student-suggest{border:1px solid var(--line);border-radius:18px;background:#fff;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;box-shadow:0 8px 18px rgba(96,79,122,.07);text-align:left}.student-suggest b{font-size:17px}.meta{font-size:13px;color:var(--muted);font-weight:900;white-space:nowrap}.empty{padding:18px;text-align:center;color:var(--muted);font-weight:800}.status{margin-top:10px;font-size:14px;color:var(--muted);font-weight:800;text-align:center}
+    .topbar{width:min(980px,100%);margin:0 auto 14px;display:flex;gap:10px;align-items:center}.back{width:48px;height:48px;border-radius:16px;border:1px solid var(--line);background:#fff;font-size:22px;cursor:pointer}.page-title{font-size:20px;font-weight:900}.layout{width:min(980px,100%);margin:0 auto;display:grid;gap:14px}.student-card,.section{background:var(--card);border:1px solid var(--line);box-shadow:0 12px 28px rgba(96,79,122,.10);border-radius:26px;padding:18px}.profile{display:flex;gap:14px;align-items:center}.avatar{width:64px;height:64px;border-radius:21px;background:linear-gradient(135deg,#bde0fe,#ffd6e7);display:flex;align-items:center;justify-content:center;font-size:34px;flex:0 0 auto}.student-name{font-size:clamp(25px,5vw,34px);font-weight:900;line-height:1.08;word-break:break-word}.student-sub{color:var(--muted);font-weight:800;margin-top:4px}.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.pill{background:#f8f7ff;border:1px solid var(--line);border-radius:18px;padding:12px;text-align:center;font-weight:900}.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.section-title{font-size:20px;font-weight:900;margin:0 0 14px;display:flex;gap:8px;align-items:center}.behavior-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.behavior{min-height:84px;border:2px solid transparent;background:#fff;border-radius:20px;box-shadow:0 8px 18px rgba(96,79,122,.08);padding:12px;text-align:left;font-weight:900;cursor:pointer;display:flex;flex-direction:column;justify-content:center}.behavior .emoji{font-size:25px;margin-bottom:4px}.behavior small{color:var(--muted);font-weight:800}.behavior.active{border-color:var(--pink-dark);background:#fff0f6;box-shadow:0 0 0 4px rgba(240,91,147,.12)}textarea{width:100%;min-height:96px;border:1px solid var(--line);border-radius:18px;padding:13px 14px;font-weight:700;resize:vertical}.history-list{display:grid;gap:10px}.history-item{background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px}.history-date{font-size:13px;color:var(--muted);font-weight:900}.history-type{font-size:17px;font-weight:900;margin-top:3px}.history-note{margin-top:6px;background:#fff7fb;border-radius:14px;padding:8px 10px;color:var(--ink)}.notice{border-radius:18px;padding:12px 14px;margin-top:12px;font-weight:800;background:#fff7fb;color:#8a4165;border:1px solid rgba(240,91,147,.18)}.loader{width:18px;height:18px;border:3px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:spin .75s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    @media(min-width:820px){.layout.two{grid-template-columns:.9fr 1.1fr;align-items:start}.behavior-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:700px){.shell{padding:10px}.app{min-height:calc(100dvh - 20px);border-radius:24px;padding:12px}.panel{border-radius:24px}.actions{grid-template-columns:1fr}.behavior-grid{grid-template-columns:1fr}.search-input{font-size:16px}.student-suggest{align-items:flex-start}.meta{white-space:normal;text-align:right}.topbar{margin-top:0}.logo{width:78px;height:78px}}
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <section class="card" id="searchScreen">
-      <img class="logo" src="icons/icon-192.png" alt="M1 Good Good">
-      <h1>M1 Good Good</h1>
-      <div class="sub">ระบบบันทึกพฤติกรรมนักเรียน</div>
-
-      <label for="q">ค้นหานักเรียน</label>
-      <div class="searchbar">
-        <input id="q" autocomplete="off" placeholder="พิมพ์เลขประจำตัว / ชื่อ / ห้อง" />
-        <button class="clear" id="clearBtn" title="ล้าง">×</button>
-        <button class="search" id="searchBtn">⌕</button>
+  <div class="shell"><main class="app">
+    <section id="searchScreen" class="screen active">
+      <div class="panel">
+        <img src="good ลำนำ.png" class="logo" onerror="this.style.display='none'" alt="M1 Good Good">
+        <h1 class="title">M1 Good Good</h1>
+        <div class="subtitle">ระบบบันทึกพฤติกรรมนักเรียน</div>
+        <label for="q">ค้นหานักเรียน</label>
+        <div class="search-row">
+          <input id="q" class="search-input" autocomplete="off" inputmode="text" placeholder="พิมพ์รหัส เลขที่ ชื่อ หรือห้อง อย่างน้อย 2 ตัว" />
+          <button id="clearSearch" class="clear-btn" type="button">×</button>
+          <button id="searchBtn" class="icon-btn" type="button">🔍</button>
+        </div>
+        <div id="status" class="status">พิมพ์อย่างน้อย 2 ตัวอักษร ระบบจะแนะนำรายชื่อให้อัตโนมัติ</div>
+        <div id="suggestions" class="suggestions"></div>
+        <button class="btn btn-soft mt" type="button" onclick="refreshStudents()">🔄 อัปเดตรายชื่อนักเรียน</button>
+        <button class="btn btn-soft mt" type="button" onclick="location.href='dashboard-v2.html'">📊 เปิด M1 DD Dashboard</button>
       </div>
-
-      <button class="ghost" id="refreshBtn">↻ อัปเดตรายชื่อนักเรียน</button>
-      <div id="status" class="status">พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อให้ระบบช่วยค้นหา</div>
-      <div id="list" class="list"></div>
-      <a class="dash" href="dashboard-v2.html">เปิด M1 DD Dashboard →</a>
     </section>
 
-    <section class="card hidden" id="recordScreen">
-      <div class="top">
-        <button class="back" id="backBtn">‹</button>
-        <span class="pill">บันทึกพฤติกรรม</span>
+    <section id="studentScreen" class="screen">
+      <div class="topbar"><button class="back" onclick="showSearch()">‹</button><div class="page-title">ข้อมูลนักเรียน</div></div>
+      <div class="layout">
+        <div class="student-card">
+          <div class="profile"><div class="avatar">🧑‍🎓</div><div><div id="studentName" class="student-name">-</div><div id="studentSub" class="student-sub">-</div></div></div>
+          <div class="info-grid"><div class="pill" id="roomPill">ห้อง -</div><div class="pill" id="numberPill">เลขที่ -</div></div>
+          <div class="actions">
+            <button class="btn btn-primary" onclick="showRecord()">📝 บันทึก</button>
+            <button class="btn btn-orange" onclick="showHistory()">🕘 ดูประวัติ</button>
+            <button class="btn btn-soft" onclick="showSearch()">🔎 ค้นใหม่</button>
+          </div>
+        </div>
       </div>
-
-      <div class="profile">
-        <div class="name" id="studentName">-</div>
-        <div class="meta" id="studentMeta">-</div>
-      </div>
-
-      <label>เลือกประเภทพฤติกรรม</label>
-      <div class="grid" id="behaviorGrid"></div>
-
-      <textarea id="note" placeholder="หมายเหตุเพิ่มเติม (ไม่บังคับ)"></textarea>
-      <button class="save" id="saveBtn">บันทึกข้อมูล</button>
-      <div id="recordStatus" class="status"></div>
-      <div id="history" class="list"></div>
     </section>
-  </main>
+
+    <section id="recordScreen" class="screen">
+      <div class="topbar"><button class="back" onclick="showStudent()">‹</button><div class="page-title">บันทึกพฤติกรรม</div></div>
+      <div class="layout two">
+        <div class="student-card"><div class="profile"><div class="avatar">🧑‍🎓</div><div><div id="recordName" class="student-name">-</div><div id="recordSub" class="student-sub">-</div></div></div><div class="actions"><button class="btn btn-orange" onclick="showHistory()">🕘 ดูประวัติ</button><button class="btn btn-soft" onclick="showSearch()">🔎 ค้นใหม่</button><button class="btn btn-soft" onclick="showStudent()">👤 ข้อมูล</button></div></div>
+        <div class="section">
+          <h2 class="section-title">📌 เลือกประเภทพฤติกรรม</h2>
+          <div id="behaviorGrid" class="behavior-grid"></div>
+          <label class="mt" for="note">หมายเหตุ</label><textarea id="note" placeholder="ระบุรายละเอียดเพิ่มเติม ถ้ามี"></textarea>
+          <button id="saveBtn" class="btn btn-green mt" onclick="saveBehavior()">✅ บันทึกข้อมูล</button>
+          <div id="saveNotice"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="historyScreen" class="screen">
+      <div class="topbar"><button class="back" onclick="showStudent()">‹</button><div class="page-title">ประวัตินักเรียน</div></div>
+      <div class="layout two">
+        <div class="student-card"><div class="profile"><div class="avatar">🧑‍🎓</div><div><div id="historyName" class="student-name">-</div><div id="historySub" class="student-sub">-</div></div></div><div class="actions"><button class="btn btn-primary" onclick="showRecord()">📝 บันทึก</button><button class="btn btn-soft" onclick="showSearch()">🔎 ค้นใหม่</button></div></div>
+        <div class="section"><h2 class="section-title">🕘 ประวัติย้อนหลัง</h2><div id="historyList" class="history-list"><div class="empty">กำลังโหลด...</div></div></div>
+      </div>
+    </section>
+  </main></div>
 
 <script>
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzQ8YCMoXcem6E64Eqfdbl-7ogx5mIfVor6kjV5xivy34xSjItMmU56rGVN6KhU-YAgiA/exec";
-const BEHAVIOR_TYPES = ['สายเช้า','สายเที่ยง','สายพัก 10','ขาดแถวเที่ยง','เครื่องแต่งกาย','อื่น ๆ'];
-
-let currentStudent = null;
-let selectedBehavior = '';
-let isBusy = false;
-let searchTimer = null;
-
-const $ = id => document.getElementById(id);
-
-function jsonp(params, timeoutMs = 15000) {
-  return new Promise((resolve, reject) => {
-    const cb = '__m1gg_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-    const url = new URL(GAS_URL);
-    Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, v == null ? '' : String(v)));
-    url.searchParams.set('callback', cb);
-
-    const script = document.createElement('script');
-    let done = false;
-
-    const timer = setTimeout(() => {
-      if (done) return;
-      done = true;
-      cleanup();
-      reject(new Error('เชื่อมต่อช้าเกินไป กรุณาลองใหม่'));
-    }, timeoutMs);
-
-    function cleanup() {
-      clearTimeout(timer);
-      delete window[cb];
-      script.remove();
-    }
-
-    window[cb] = data => {
-      if (done) return;
-      done = true;
-      cleanup();
-      resolve(data);
-    };
-
-    script.onerror = () => {
-      if (done) return;
-      done = true;
-      cleanup();
-      reject(new Error('เชื่อมต่อ Apps Script ไม่สำเร็จ'));
-    };
-
-    script.src = url.toString();
-    document.body.appendChild(script);
-  });
-}
-
-function setStatus(text, type='') {
-  $('status').textContent = text;
-  $('status').className = 'status ' + type;
-}
-
-function setRecordStatus(text, type='') {
-  $('recordStatus').textContent = text;
-  $('recordStatus').className = 'status ' + type;
-}
-
-function setSearchBusy(busy) {
-  isBusy = busy;
-  $('searchBtn').disabled = busy;
-  $('searchBtn').innerHTML = busy ? '<span class="spinner"></span>กำลังทำงาน...' : '⌕';
-}
-
-function escapeHtml(v) {
-  return String(v || '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-}
-
-async function searchStudent() {
-  const q = $('q').value.trim();
-  $('list').innerHTML = '';
-
-  if (q.length < 2) {
-    setStatus('พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อให้ระบบช่วยค้นหา');
-    return;
-  }
-
-  setSearchBusy(true);
-  setStatus('กำลังค้นหานักเรียน...');
-
-  try {
-    const res = await jsonp({ action:'searchStudent', q });
-    if (!res.success) throw new Error(res.message || 'ค้นหาไม่สำเร็จ');
-
-    const students = res.students || [];
-    if (!students.length) {
-      setStatus('ไม่พบนักเรียนจากคำค้นนี้', 'err');
-      return;
-    }
-
-    setStatus(`พบ ${students.length} รายการ`, 'ok');
-    $('list').innerHTML = students.map((s, i) => `
-      <button class="student-btn" data-i="${i}">
-        ${escapeHtml(s.fullName)}
-        <small>รหัส ${escapeHtml(s.studentId)} · ห้อง ${escapeHtml(s.room)} · เลขที่ ${escapeHtml(s.number)}</small>
-      </button>
-    `).join('');
-
-    [...document.querySelectorAll('.student-btn')].forEach(btn => {
-      btn.addEventListener('click', () => selectStudent(students[Number(btn.dataset.i)]));
-    });
-  } catch (err) {
-    setStatus(err.message, 'err');
-  } finally {
-    setSearchBusy(false);
-  }
-}
-
-function selectStudent(s) {
-  currentStudent = s;
-  selectedBehavior = '';
-  $('studentName').textContent = s.fullName;
-  $('studentMeta').textContent = `รหัส ${s.studentId} · ห้อง ${s.room} · เลขที่ ${s.number}`;
-  $('note').value = '';
-  setRecordStatus('');
-  renderBehavior();
-  $('searchScreen').classList.add('hidden');
-  $('recordScreen').classList.remove('hidden');
-  loadHistory();
-}
-
-function renderBehavior() {
-  $('behaviorGrid').innerHTML = BEHAVIOR_TYPES.map(t => `
-    <button class="option ${selectedBehavior === t ? 'active' : ''}" data-type="${t}">${t}</button>
-  `).join('');
-  [...document.querySelectorAll('.option')].forEach(btn => {
-    btn.addEventListener('click', () => {
-      selectedBehavior = btn.dataset.type;
-      renderBehavior();
-    });
-  });
-}
-
-async function loadHistory() {
-  if (!currentStudent) return;
-  $('history').innerHTML = '';
-  try {
-    const res = await jsonp({ action:'getHistory', studentId: currentStudent.studentId });
-    const items = res.history || [];
-    if (!items.length) return;
-    $('history').innerHTML = '<div class="status">ประวัติล่าสุด</div>' + items.slice(0,5).map(h => `
-      <div class="student-btn">
-        ${escapeHtml(h.behaviorType)}
-        <small>${escapeHtml(h.date)} ${escapeHtml(h.time)} ${h.note ? '· ' + escapeHtml(h.note) : ''}</small>
-      </div>
-    `).join('');
-  } catch(e) {}
-}
-
-async function saveBehavior() {
-  if (!currentStudent) return;
-  if (!selectedBehavior) {
-    setRecordStatus('กรุณาเลือกประเภทพฤติกรรม', 'err');
-    return;
-  }
-
-  $('saveBtn').disabled = true;
-  $('saveBtn').innerHTML = '<span class="spinner"></span>กำลังบันทึก...';
-  setRecordStatus('กำลังบันทึกข้อมูล...');
-
-  try {
-    const res = await jsonp({
-      action:'saveBehavior',
-      studentId: currentStudent.studentId,
-      room: currentStudent.room,
-      number: currentStudent.number,
-      fullName: currentStudent.fullName,
-      behaviorType: selectedBehavior,
-      note: $('note').value.trim()
-    });
-
-    if (!res.success) throw new Error(res.message || 'บันทึกไม่สำเร็จ');
-
-    setRecordStatus('บันทึกข้อมูลเรียบร้อยแล้ว', 'ok');
-    selectedBehavior = '';
-    $('note').value = '';
-    renderBehavior();
-    loadHistory();
-  } catch (err) {
-    setRecordStatus(err.message, 'err');
-  } finally {
-    $('saveBtn').disabled = false;
-    $('saveBtn').textContent = 'บันทึกข้อมูล';
-  }
-}
-
-$('searchBtn').addEventListener('click', searchStudent);
-$('q').addEventListener('input', () => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(searchStudent, 450);
-});
-$('q').addEventListener('keydown', e => {
-  if (e.key === 'Enter') searchStudent();
-});
-$('clearBtn').addEventListener('click', () => {
-  $('q').value = '';
-  $('list').innerHTML = '';
-  setStatus('พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อให้ระบบช่วยค้นหา');
-});
-$('refreshBtn').addEventListener('click', searchStudent);
-$('backBtn').addEventListener('click', () => {
-  $('recordScreen').classList.add('hidden');
-  $('searchScreen').classList.remove('hidden');
-});
-$('saveBtn').addEventListener('click', saveBehavior);
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister())).catch(() => {});
-}
-if ('caches' in window) { caches.keys().then(keys => keys.forEach(k => caches.delete(k))).catch(() => {}); }
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzQ8YCMoXcem6E64Eqfdbl-7ogx5mIfVor6kjV5xivy34xSjItMmU56rGVN6KhU-YAgiA/exec';
+const BEHAVIORS = [
+  {type:'สายเช้า',emoji:'🌅',hint:'มาสายช่วงเช้า'},
+  {type:'สายเที่ยง',emoji:'☀️',hint:'เข้าแถวเที่ยงสาย'},
+  {type:'สายพัก 10',emoji:'🕙',hint:'กลับจากพักสาย'},
+  {type:'ขาดแถวเที่ยง',emoji:'🚶‍♂️',hint:'ไม่อยู่ในแถว'},
+  {type:'เครื่องแต่งกาย',emoji:'👕',hint:'แต่งกายไม่เรียบร้อย'},
+  {type:'อื่น ๆ',emoji:'📝',hint:'พฤติกรรมอื่น ๆ'}
+];
+let currentStudent=null, selectedBehavior='', timer=null, lastQ='', jsonpSeq=0, studentsCache=[];
+function $(id){return document.getElementById(id)}
+function escapeHtml(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');window.scrollTo(0,0)}
+function setStatus(t){$('status').textContent=t}
+function setSearchLoading(on){$('searchBtn').disabled=on;$('searchBtn').innerHTML=on?'<span class="loader"></span>':'🔍'}
+function jsonp(params, timeout=12000){return new Promise((resolve,reject)=>{const cb='m1gg_cb_'+Date.now()+'_'+(++jsonpSeq);const u=new URL(GAS_URL);Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));u.searchParams.set('callback',cb);const s=document.createElement('script');let done=false;const to=setTimeout(()=>{if(done)return;done=true;cleanup();reject(new Error('เชื่อมต่อช้าเกินไป'))},timeout);function cleanup(){clearTimeout(to);delete window[cb];s.remove()}window[cb]=(data)=>{if(done)return;done=true;cleanup();resolve(data)};s.onerror=()=>{if(done)return;done=true;cleanup();reject(new Error('เชื่อมต่อ Apps Script ไม่สำเร็จ'))};s.src=u.toString();document.body.appendChild(s)})}
+async function refreshStudents(){setStatus('กำลังอัปเดตรายชื่อ...');setSearchLoading(true);try{const res=await jsonp({action:'getStudents'});if(!res.success)throw new Error(res.message||'โหลดไม่สำเร็จ');studentsCache=res.students||[];setStatus('อัปเดตรายชื่อแล้ว '+(res.count||studentsCache.length)+' คน');}catch(e){setStatus('อัปเดตไม่ได้: '+e.message)}finally{setSearchLoading(false)}}
+async function doSearch(force=false){const q=$('q').value.trim();$('clearSearch').classList.toggle('show',!!q);if(!force && q===lastQ)return;lastQ=q;if(q.length<2){$('suggestions').innerHTML='';setStatus('พิมพ์อย่างน้อย 2 ตัวอักษร ระบบจะแนะนำรายชื่อให้อัตโนมัติ');return}setStatus('กำลังค้นหา...');setSearchLoading(true);try{const res=await jsonp({action:'searchStudent',q});if(!res.success)throw new Error(res.message||'ค้นหาไม่สำเร็จ');renderSuggestions(res.students||[],q)}catch(e){$('suggestions').innerHTML='<div class="notice">เชื่อมต่อไม่ได้: '+escapeHtml(e.message)+'</div>';setStatus('เกิดข้อผิดพลาดในการค้นหา')}finally{setSearchLoading(false)}}
+function renderSuggestions(list,q){const box=$('suggestions');if(!list.length){box.innerHTML='<div class="empty">ไม่พบนักเรียนจากคำค้น “'+escapeHtml(q)+'”</div>';setStatus('ไม่พบรายชื่อที่ตรงกับคำค้น');return}box.innerHTML=list.map((s,i)=>`<button class="student-suggest" type="button" onclick="selectStudent(${i})"><span><b>${escapeHtml(s.fullName)}</b><br><span class="student-sub">รหัส ${escapeHtml(s.studentId)}</span></span><span class="meta">${escapeHtml(s.room)}<br>เลขที่ ${escapeHtml(s.number)}</span></button>`).join('');box._data=list;setStatus('พบ '+list.length+' รายการ กดชื่อนักเรียนเพื่อไปหน้าบันทึก')}
+function selectStudent(i){const data=$('suggestions')._data||[];currentStudent=data[i];if(!currentStudent)return;fillStudent();show('studentScreen')}
+function fillStudent(){if(!currentStudent)return;['studentName','recordName','historyName'].forEach(id=>$(id).textContent=currentStudent.fullName||'-');const sub=`รหัส ${currentStudent.studentId||'-'} • ${currentStudent.room||'-'} • เลขที่ ${currentStudent.number||'-'}`;['studentSub','recordSub','historySub'].forEach(id=>$(id).textContent=sub);$('roomPill').textContent='ห้อง '+(currentStudent.room||'-');$('numberPill').textContent='เลขที่ '+(currentStudent.number||'-')}
+function showSearch(){currentStudent=null;selectedBehavior='';$('note').value='';$('q').focus();show('searchScreen')}
+function showStudent(){fillStudent();show('studentScreen')}
+function showRecord(){fillStudent();selectedBehavior='';$('note').value='';$('saveNotice').innerHTML='';renderBehaviors();show('recordScreen')}
+function renderBehaviors(){const g=$('behaviorGrid');g.innerHTML=BEHAVIORS.map(b=>`<button class="behavior" data-type="${b.type}" onclick="chooseBehavior('${b.type.replace(/'/g,"\\'")}')"><span class="emoji">${b.emoji}</span><span>${b.type}</span><small>${b.hint}</small></button>`).join('')}
+function chooseBehavior(type){selectedBehavior=type;document.querySelectorAll('.behavior').forEach(b=>b.classList.toggle('active',b.dataset.type===type))}
+async function saveBehavior(){if(!currentStudent)return alert('กรุณาเลือกนักเรียน');if(!selectedBehavior){$('saveNotice').innerHTML='<div class="notice">กรุณาเลือกประเภทพฤติกรรมก่อนบันทึก</div>';return}const btn=$('saveBtn');btn.disabled=true;btn.innerHTML='<span class="loader"></span> กำลังบันทึก...';$('saveNotice').innerHTML='';try{const res=await jsonp({action:'saveBehavior',studentId:currentStudent.studentId,room:currentStudent.room,number:currentStudent.number,fullName:currentStudent.fullName,behaviorType:selectedBehavior,note:$('note').value.trim()});if(!res.success)throw new Error(res.message||'บันทึกไม่สำเร็จ');$('saveNotice').innerHTML='<div class="notice" style="background:#f1fff6;color:#27784b;border-color:#bfe8cf">✅ บันทึกเรียบร้อยแล้ว</div>';setTimeout(()=>showStudent(),700)}catch(e){$('saveNotice').innerHTML='<div class="notice">บันทึกไม่ได้: '+escapeHtml(e.message)+'</div>'}finally{btn.disabled=false;btn.innerHTML='✅ บันทึกข้อมูล'}}
+async function showHistory(){fillStudent();show('historyScreen');$('historyList').innerHTML='<div class="empty">กำลังโหลด...</div>';try{const res=await jsonp({action:'getHistory',studentId:currentStudent.studentId});if(!res.success)throw new Error(res.message||'โหลดประวัติไม่สำเร็จ');renderHistory(res.history||[])}catch(e){$('historyList').innerHTML='<div class="notice">โหลดประวัติไม่ได้: '+escapeHtml(e.message)+'</div>'}}
+function renderHistory(items){if(!items.length){$('historyList').innerHTML='<div class="empty">ยังไม่มีประวัติพฤติกรรมของนักเรียนคนนี้</div>';return}$('historyList').innerHTML=items.map(h=>`<div class="history-item"><div class="history-date">${escapeHtml(h.date)} เวลา ${escapeHtml(h.time)}</div><div class="history-type">${emojiFor(h.behaviorType)} ${escapeHtml(h.behaviorType)}</div>${h.note?`<div class="history-note">${escapeHtml(h.note)}</div>`:''}</div>`).join('')}
+function emojiFor(t){return (BEHAVIORS.find(b=>b.type===t)||{emoji:'📌'}).emoji}
+$('q').addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>doSearch(false),280);$('clearSearch').classList.toggle('show',!!$('q').value.trim())});$('q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doSearch(true)}});$('searchBtn').addEventListener('click',()=>doSearch(true));$('clearSearch').addEventListener('click',()=>{$('q').value='';$('suggestions').innerHTML='';lastQ='';setStatus('พิมพ์อย่างน้อย 2 ตัวอักษร ระบบจะแนะนำรายชื่อให้อัตโนมัติ');$('clearSearch').classList.remove('show');$('q').focus()});
+// ล้าง service worker เก่าเพื่อไม่ให้จำหน้าเก่าที่พัง
+if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});}
+if(window.caches){caches.keys().then(keys=>keys.forEach(k=>caches.delete(k))).catch(()=>{});}
+renderBehaviors();
 </script>
 </body>
 </html>
