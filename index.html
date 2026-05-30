@@ -71,7 +71,7 @@
       <button class="ghost" id="refreshBtn">↻ อัปเดตรายชื่อนักเรียน</button>
       <div id="status" class="status">พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อให้ระบบช่วยค้นหา</div>
       <div id="list" class="list"></div>
-      <a class="dash" href="dashboard.html">เปิด M1 DD Dashboard →</a>
+      <a class="dash" href="dashboard-v2.html">เปิด M1 DD Dashboard →</a>
     </section>
 
     <section class="card hidden" id="recordScreen">
@@ -307,8 +307,9 @@ $('backBtn').addEventListener('click', () => {
 $('saveBtn').addEventListener('click', saveBehavior);
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+  navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister())).catch(() => {});
 }
+if ('caches' in window) { caches.keys().then(keys => keys.forEach(k => caches.delete(k))).catch(() => {}); }
 </script>
 </body>
 </html>
