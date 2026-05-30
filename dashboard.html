@@ -1,62 +1,164 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>M1 DD | Dashboard</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ff8fbc">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>M1 DD Dashboard</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#fff7fb" />
   <style>
-    :root{--pink:#ff8fbc;--pink-dark:#f05b93;--blue:#75b8ff;--green:#55c78a;--orange:#ffae42;--red:#ef5b5b;--ink:#3f3b52;--muted:#7b7890;--line:rgba(143,132,170,.18);--card:rgba(255,255,255,.92);--shadow:0 16px 40px rgba(96,79,122,.14)}
-    *{box-sizing:border-box;font-family:'Sarabun',sans-serif;-webkit-tap-highlight-color:transparent} body{margin:0;color:var(--ink);background:radial-gradient(circle at 15% 8%,rgba(255,194,219,.75) 0,transparent 28%),radial-gradient(circle at 86% 10%,rgba(196,232,255,.82) 0,transparent 30%),linear-gradient(135deg,#fff7ec,#eef8ff);min-height:100vh} .shell{max-width:1120px;margin:0 auto;padding:18px} .hero{background:rgba(255,255,255,.74);border:1px solid rgba(255,255,255,.86);border-radius:28px;box-shadow:var(--shadow);padding:18px;backdrop-filter:blur(12px)} .top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.title{display:flex;align-items:center;gap:12px}.logo{width:58px;height:58px;border-radius:18px}.title h1{margin:0;font-size:clamp(26px,5vw,40px);font-weight:900}.sub{color:var(--muted);font-weight:800}.btn{border:0;border-radius:18px;min-height:46px;padding:0 16px;font-weight:900;box-shadow:0 10px 20px rgba(96,79,122,.10);display:inline-flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none}.btn-primary{background:linear-gradient(135deg,var(--pink-dark),var(--pink));color:white}.btn-soft{background:white;color:var(--ink);border:1px solid var(--line)}.filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}.field{background:white;border:1px solid var(--line);border-radius:18px;padding:10px}.field label{display:block;font-size:13px;color:var(--muted);font-weight:900;margin-bottom:4px}.field input,.field select{width:100%;border:0;outline:0;font-size:16px;font-weight:800;background:white;color:var(--ink)}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0}.card{background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:0 12px 28px rgba(96,79,122,.10);padding:16px}.stat .num{font-size:34px;font-weight:900;line-height:1}.stat .label{color:var(--muted);font-weight:900;margin-top:6px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.section-title{font-size:20px;font-weight:900;margin:0 0 12px;display:flex;align-items:center;gap:8px}.pill{display:inline-flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px 12px;margin:4px;font-weight:900}.list{display:grid;gap:10px}.item{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px}.item b{font-weight:900}.muted{color:var(--muted);font-weight:800}.empty{text-align:center;color:var(--muted);font-weight:900;padding:28px 8px}.loading{position:fixed;inset:0;background:rgba(255,255,255,.62);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:999}.loading.show{display:flex}.box{background:white;border-radius:24px;padding:22px 26px;box-shadow:var(--shadow);font-weight:900}@media(max-width:760px){.shell{padding:12px}.filters{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.hero{border-radius:22px}.top .btn{width:100%;justify-content:center}}@media(max-width:430px){.filters,.stats{grid-template-columns:1fr}.title{align-items:flex-start}.logo{width:48px;height:48px}}
+    :root{--pink:#ff8fbc;--pink-dark:#f05b93;--blue:#75b8ff;--green:#55c78a;--ink:#433d5b;--muted:#817991;--line:rgba(110,95,140,.16);--card:#fff;--shadow:0 18px 50px rgba(75,68,102,.12)}
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Sarabun","Noto Sans Thai",sans-serif}
+    body{margin:0;min-height:100vh;color:var(--ink);background:linear-gradient(135deg,#fff7fb,#eef8ff);padding:18px}
+    .wrap{max-width:1180px;margin:0 auto}
+    .head{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+    h1{font-size:clamp(30px,5vw,46px);margin:0;font-weight:900}
+    a{color:var(--ink);font-weight:900;text-decoration:none;background:white;border-radius:16px;padding:12px 14px;box-shadow:var(--shadow)}
+    .panel,.card{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);padding:18px}
+    .filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+    input,select,button{font-size:17px;border:1px solid var(--line);border-radius:16px;padding:12px;font-weight:800;background:white;color:var(--ink)}
+    button{border:0;background:linear-gradient(135deg,var(--pink-dark),var(--pink));color:white;font-weight:900}
+    .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0}
+    .num{font-size:34px;font-weight:900}
+    .label{color:var(--muted);font-weight:800}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    table{width:100%;border-collapse:collapse;background:white;border-radius:18px;overflow:hidden}
+    th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;font-weight:750}
+    th{background:#fff7fb;color:var(--muted);font-weight:900}
+    .status{font-weight:900;color:var(--muted);padding:12px}
+    @media(max-width:800px){.filters,.cards,.grid{grid-template-columns:1fr}.head{align-items:flex-start;flex-direction:column}}
   </style>
 </head>
 <body>
-  <div class="shell">
-    <section class="hero">
-      <div class="top">
-        <div class="title"><img class="logo" src="icons/icon-192.png" alt=""><div><h1>M1 DD</h1><div class="sub">Dashboard สถิติพฤติกรรมนักเรียน</div></div></div>
-        <a class="btn btn-soft" href="index.html"><i class="fa-solid fa-house"></i> กลับหน้าบันทึก</a>
-      </div>
-      <div class="filters">
-        <div class="field"><label>โหมด</label><select id="mode" onchange="syncMode();loadDashboard()"><option value="daily">รายวัน</option><option value="monthly" selected>รายเดือน</option></select></div>
-        <div class="field" id="dateWrap"><label>วันที่</label><input id="dateInput" type="date" onchange="loadDashboard()"></div>
-        <div class="field" id="monthWrap"><label>เดือน</label><input id="monthInput" type="month" onchange="loadDashboard()"></div>
-        <div class="field"><label>ห้อง</label><select id="room" onchange="loadDashboard()"><option value="ALL">ทุกห้อง</option></select></div>
-      </div>
-    </section>
-    <section class="stats">
-      <div class="card stat"><div id="total" class="num">0</div><div class="label">รายการในช่วงที่เลือก</div></div>
-      <div class="card stat"><div id="studentCount" class="num">0</div><div class="label">นักเรียนที่ถูกบันทึก</div></div>
-      <div class="card stat"><div id="roomCount" class="num">0</div><div class="label">ห้องที่พบข้อมูล</div></div>
-      <div class="card stat"><div id="topCount" class="num">0</div><div class="label">จำนวนสูงสุดต่อคน</div></div>
-    </section>
-    <section class="grid">
-      <div class="card"><h2 class="section-title"><i class="fa-solid fa-chart-pie"></i> สรุปตามประเภท</h2><div id="typeList"></div></div>
-      <div class="card"><h2 class="section-title"><i class="fa-solid fa-school"></i> สรุปตามห้อง</h2><div id="roomList"></div></div>
-      <div class="card"><h2 class="section-title"><i class="fa-solid fa-user-group"></i> นักเรียนที่ต้องติดตาม</h2><div id="topStudents" class="list"></div></div>
-      <div class="card"><h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> รายการล่าสุด</h2><div id="recent" class="list"></div></div>
-    </section>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>M1 DD</h1>
+      <div class="status">Dashboard สถิติพฤติกรรมนักเรียน</div>
+    </div>
+    <a href="index.html">← กลับ M1 Good Good</a>
   </div>
-  <div id="loading" class="loading"><div class="box"><i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลดข้อมูล...</div></div>
+
+  <section class="panel">
+    <div class="filters">
+      <select id="mode">
+        <option value="daily">รายวัน</option>
+        <option value="monthly">รายเดือน</option>
+      </select>
+      <input id="date" type="date">
+      <input id="month" type="month">
+      <select id="room">
+        <option value="ALL">ทุกห้อง</option>
+        <option value="ม.1/1">ม.1/1</option>
+        <option value="ม.1/2">ม.1/2</option>
+        <option value="ม.1/3">ม.1/3</option>
+        <option value="ม.1/4">ม.1/4</option>
+        <option value="ม.1/5">ม.1/5</option>
+        <option value="ม.1/6">ม.1/6</option>
+        <option value="ม.1/7">ม.1/7</option>
+        <option value="ม.1/A">ม.1/A</option>
+        <option value="ม.1/B">ม.1/B</option>
+      </select>
+    </div>
+    <button id="loadBtn">โหลดสถิติ</button>
+    <div id="status" class="status">กดโหลดสถิติเพื่อดูข้อมูล</div>
+  </section>
+
+  <section class="cards" id="cards"></section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>แยกตามประเภท</h2>
+      <div id="byType"></div>
+    </div>
+    <div class="card">
+      <h2>แยกตามห้อง</h2>
+      <div id="byRoom"></div>
+    </div>
+    <div class="card">
+      <h2>นักเรียนที่ต้องติดตาม</h2>
+      <div id="topStudents"></div>
+    </div>
+    <div class="card">
+      <h2>รายการล่าสุด</h2>
+      <div id="recent"></div>
+    </div>
+  </section>
+</div>
+
 <script>
-const GAS_URL='https://script.google.com/macros/s/AKfycbzVbcyEL6dzCp5LM1Ew7k9kQdaMYCZOFT_BaleHoc0cFf6YqfQfnVKLlI9JYUjMfTnwEQ/exec';
-const ROOMS=['ม.1/1','ม.1/2','ม.1/3','ม.1/4','ม.1/5','ม.1/6','ม.1/7','ม.1/8','ม.1/9','ม.1/10','ม.1/A','ม.1/B'];
-function $(id){return document.getElementById(id)}
-function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
-function month(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
-function esc(s){return String(s||'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
-function apiGet(action, params={}){const u=new URL(GAS_URL);u.searchParams.set('action',action);Object.entries(params).forEach(([k,v])=>{if(v!=null)u.searchParams.set(k,v)});return fetch(u.toString(),{cache:'no-store'}).then(r=>r.json())}
-function setLoading(v){$('loading').classList.toggle('show',!!v)}
-function syncMode(){const m=$('mode').value;$('dateWrap').style.display=m==='daily'?'':'none';$('monthWrap').style.display=m==='monthly'?'':'none'}
-function loadDashboard(){setLoading(true);apiGet('getDashboard',{mode:$('mode').value,date:$('dateInput').value,month:$('monthInput').value,room:$('room').value}).then(render).catch(e=>{alert('โหลดข้อมูลไม่ได้: '+(e.message||e));}).finally(()=>setLoading(false))}
-function render(data){if(!data.success){alert(data.message||'โหลดข้อมูลไม่ได้');return} const top=data.topStudents||[], recent=data.recentRecords||[], byType=data.byType||{}, byRoom=data.byRoom||{};$('total').textContent=data.total||0;$('studentCount').textContent=top.length;$('roomCount').textContent=Object.keys(byRoom).filter(k=>byRoom[k]>0).length;$('topCount').textContent=top[0]?.count||0;$('typeList').innerHTML=Object.entries(byType).filter(([,v])=>v>0).map(([k,v])=>`<span class="pill"><span>${esc(k)}</span><b>${v}</b></span>`).join('')||'<div class="empty">ยังไม่มีข้อมูล</div>';$('roomList').innerHTML=Object.entries(byRoom).sort().map(([k,v])=>`<span class="pill"><span>${esc(k)}</span><b>${v}</b></span>`).join('')||'<div class="empty">ยังไม่มีข้อมูล</div>';$('topStudents').innerHTML=top.map(s=>`<div class="item"><b>${esc(s.fullName)}</b><div class="muted">${esc(s.room)} · เลขที่ ${esc(s.number)} · ${s.count} ครั้ง</div></div>`).join('')||'<div class="empty">ยังไม่มีข้อมูล</div>';$('recent').innerHTML=recent.map(r=>`<div class="item"><b>${esc(r.fullName)}</b><div class="muted">${esc(r.date)} ${esc(r.time)} · ${esc(r.room)} · เลขที่ ${esc(r.number)}</div><div>${esc(r.behaviorType)}${r.note?' — '+esc(r.note):''}</div></div>`).join('')||'<div class="empty">ยังไม่มีข้อมูล</div>'}
-document.addEventListener('DOMContentLoaded',()=>{ROOMS.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;$('room').appendChild(o)});$('dateInput').value=today();$('monthInput').value=month();syncMode();loadDashboard();if('serviceWorker' in navigator)navigator.serviceWorker.register('./service-worker.js')});
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzVbcyEL6dzCp5LM1Ew7k9kQdaMYCZOFT_BaleHoc0cFf6YqfQfnVKLlI9JYUjMfTnwEQ/exec";
+const $ = id => document.getElementById(id);
+
+function today() { return new Date().toISOString().slice(0,10); }
+function month() { return new Date().toISOString().slice(0,7); }
+$('date').value = today();
+$('month').value = month();
+
+function jsonp(params, timeoutMs = 15000) {
+  return new Promise((resolve, reject) => {
+    const cb = '__m1dd_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const url = new URL(GAS_URL);
+    Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, v == null ? '' : String(v)));
+    url.searchParams.set('callback', cb);
+    const script = document.createElement('script');
+    let done = false;
+    const timer = setTimeout(() => {
+      if (done) return; done = true; cleanup(); reject(new Error('เชื่อมต่อช้าเกินไป'));
+    }, timeoutMs);
+    function cleanup() { clearTimeout(timer); delete window[cb]; script.remove(); }
+    window[cb] = data => { if(done)return; done=true; cleanup(); resolve(data); };
+    script.onerror = () => { if(done)return; done=true; cleanup(); reject(new Error('เชื่อมต่อ Apps Script ไม่สำเร็จ')); };
+    script.src = url.toString();
+    document.body.appendChild(script);
+  });
+}
+
+function escapeHtml(v) {
+  return String(v || '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+function table(rows, heads) {
+  if (!rows.length) return '<div class="status">ยังไม่มีข้อมูล</div>';
+  return `<table><thead><tr>${heads.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
+}
+async function loadDashboard() {
+  $('status').textContent = 'กำลังโหลดข้อมูล...';
+  try {
+    const res = await jsonp({
+      action:'getDashboard',
+      mode:$('mode').value,
+      date:$('date').value,
+      month:$('month').value,
+      room:$('room').value
+    });
+    if(!res.success) throw new Error(res.message || 'โหลดข้อมูลไม่สำเร็จ');
+    $('status').textContent = `โหลดสำเร็จ · รวม ${res.total} รายการ`;
+    $('cards').innerHTML = `
+      <div class="card"><div class="num">${res.total}</div><div class="label">รายการทั้งหมด</div></div>
+      <div class="card"><div class="num">${Object.keys(res.byRoom||{}).length}</div><div class="label">จำนวนห้องที่มีข้อมูล</div></div>
+      <div class="card"><div class="num">${(res.topStudents||[]).length}</div><div class="label">นักเรียนที่มีรายการ</div></div>
+      <div class="card"><div class="num">${res.mode === 'daily' ? 'วัน' : 'เดือน'}</div><div class="label">โหมดที่กำลังดู</div></div>
+    `;
+    const byTypeRows = Object.entries(res.byType||{}).map(([k,v])=>`<tr><td>${escapeHtml(k)}</td><td>${v}</td></tr>`);
+    $('byType').innerHTML = table(byTypeRows, ['ประเภท','จำนวน']);
+    const byRoomRows = Object.entries(res.byRoom||{}).sort().map(([k,v])=>`<tr><td>${escapeHtml(k)}</td><td>${v}</td></tr>`);
+    $('byRoom').innerHTML = table(byRoomRows, ['ห้อง','จำนวน']);
+    const topRows = (res.topStudents||[]).map(s=>`<tr><td>${escapeHtml(s.fullName)}</td><td>${escapeHtml(s.room)}</td><td>${s.count}</td></tr>`);
+    $('topStudents').innerHTML = table(topRows, ['ชื่อ','ห้อง','จำนวน']);
+    const recentRows = (res.recentRecords||[]).map(r=>`<tr><td>${escapeHtml(r.time)}</td><td>${escapeHtml(r.fullName)}</td><td>${escapeHtml(r.behaviorType)}</td></tr>`);
+    $('recent').innerHTML = table(recentRows, ['เวลา','ชื่อ','ประเภท']);
+  } catch(e) {
+    $('status').textContent = e.message;
+  }
+}
+$('loadBtn').addEventListener('click', loadDashboard);
+$('mode').addEventListener('change', () => {
+  $('date').style.display = $('mode').value === 'daily' ? '' : 'none';
+  $('month').style.display = $('mode').value === 'monthly' ? '' : 'none';
+});
+$('mode').dispatchEvent(new Event('change'));
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./service-worker.js').catch(() => {}); }
+loadDashboard();
 </script>
 </body>
 </html>
