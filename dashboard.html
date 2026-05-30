@@ -241,11 +241,11 @@
       ให้นำ URL ที่ลงท้ายด้วย /exec มาแทนค่าด้านล่างก่อนอัปขึ้น GitHub Pages
       ตัวอย่าง: https://script.google.com/macros/s/AKfycbxxxxxxxx/exec
     */
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzgIqLb0DxpAIj_dRO1wH6jR7bE-4vgJ4S-oRMLYcKwAeIVlLpa5wvgJtSxE2QYzAg4/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzo9kW2ieqpNG5lm7l4RLkB5Lywrv13pGvIgHR7os_WeDaH65E7eByzkR5NXCo66hPCAw/exec';
 
     function getGasUrl(){
       const url = String(GAS_URL || '').trim();
-      if(!url || url === 'https://script.google.com/macros/s/AKfycbzgIqLb0DxpAIj_dRO1wH6jR7bE-4vgJ4S-oRMLYcKwAeIVlLpa5wvgJtSxE2QYzAg4/exec'){
+      if(!url || url === 'https://script.google.com/macros/s/AKfycbzo9kW2ieqpNG5lm7l4RLkB5Lywrv13pGvIgHR7os_WeDaH65E7eByzkR5NXCo66hPCAw/exec'){
         throw new Error('ยังไม่ได้ตั้งค่า GAS_URL ในไฟล์ dashboard.html');
       }
       return url;
