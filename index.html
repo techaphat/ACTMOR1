@@ -14,7 +14,9 @@
   <meta name="application-name" content="ACTMOR 1">
   <meta name="apple-mobile-web-app-title" content="ACTMOR 1">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#eef6ff">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#72cfff">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <style>
@@ -107,8 +109,20 @@
     .swal2-success-circular-line-left,.swal2-success-circular-line-right,.swal2-success-fix{background:transparent!important}
     .swal-summary{margin-top:12px;padding:14px;border-radius:22px;background:linear-gradient(180deg,rgba(246,251,255,.96),rgba(236,247,255,.88));border:1px solid rgba(84,164,255,.16);text-align:left;box-shadow:inset 0 1px 0 rgba(255,255,255,.95)}
     .swal-summary b{font-weight:560;color:#25364a}.swal-summary ul{margin:8px 0 10px 20px;padding:0;color:#1f65c7;font-weight:460}
+    html,body{height:100%;min-height:100%;overflow:hidden;overscroll-behavior:none;touch-action:manipulation}
+    body{position:fixed;inset:0;width:100%;min-height:0;background-color:#eaf6ff}
+    .app-shell{position:fixed;inset:0;width:100%;height:100dvh;min-height:0;padding:0;align-items:stretch;justify-content:center;overflow:hidden;overscroll-behavior:none;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.16)),var(--page-bg) var(--page-bg-position) / cover no-repeat}
+    .app{width:min(100%,430px);height:100dvh;min-height:0;border-radius:0;padding:10px;overflow:hidden}
+    .screen{height:100%;min-height:0;overflow:hidden}
+    .screen.active{height:100%;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;padding-bottom:112px}
+    .screen.active::-webkit-scrollbar{display:none}
+    .panel{min-height:100%;padding-bottom:132px}
+    .feedback-pop{animation:feedbackPop .34s cubic-bezier(.2,.9,.2,1)}
+    .feedback-wiggle{animation:feedbackWiggle .38s cubic-bezier(.2,.9,.2,1)}
+    @keyframes feedbackPop{0%{transform:scale(1)}38%{transform:scale(.92)}72%{transform:scale(1.06)}100%{transform:scale(1)}}
+    @keyframes feedbackWiggle{0%,100%{transform:translateY(-2px) rotate(0) scale(1.02)}25%{transform:translateY(-3px) rotate(-4deg) scale(1.08)}55%{transform:translateY(-2px) rotate(3deg) scale(1.04)}}
     @media (min-width:760px){.app{width:430px}.app-shell{padding-top:34px;padding-bottom:34px}}
-    @media (max-width:460px){body{--page-bg-position:center top}.app-shell{padding:0;align-items:stretch}.app{width:100%;min-height:100dvh;border-radius:0;padding:10px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.18)),var(--page-bg) var(--page-bg-position) / cover no-repeat;border-color:rgba(255,255,255,.18);box-shadow:none}.app:before{inset:7px;border-radius:24px}.screen.active{min-height:calc(100dvh - 20px);padding-bottom:104px}.panel{padding:22px 14px 104px}.brand-logo{width:min(214px,58vw);margin-top:58px;margin-bottom:30px}.bottom-nav{width:min(82%,318px);bottom:calc(24px + env(safe-area-inset-bottom))}.avatar{width:82px;height:82px;border-radius:28px}.suggestions{max-height:45dvh}.button-stack .btn{white-space:normal;min-height:48px}}
+    @media (max-width:460px){body{--page-bg-position:center top}.app-shell{padding:0;align-items:stretch}.app{width:100%;height:100dvh;min-height:0;border-radius:0;padding:10px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.18)),var(--page-bg) var(--page-bg-position) / cover no-repeat;border-color:rgba(255,255,255,.18);box-shadow:none}.app:before{inset:7px;border-radius:24px}.screen.active{height:100%;min-height:0;padding-bottom:112px}.panel{padding:22px 14px 132px}.brand-logo{width:min(214px,58vw);margin-top:58px;margin-bottom:30px}.bottom-nav{width:min(82%,318px);bottom:calc(24px + env(safe-area-inset-bottom))}.avatar{width:82px;height:82px;border-radius:28px}.suggestions{max-height:45dvh}.button-stack .btn{white-space:normal;min-height:48px}}
   </style>
 </head>
 <body>
@@ -238,9 +252,66 @@ function rememberStudents(q,students){if(q&&students)cacheSet(searchCacheKey(q),
 function getCachedStudents(q){return cacheGet(searchCacheKey(q))||[]}
 function invalidateHistory(studentId){cacheDel(historyCacheKey(studentId))}
 const screens={search:document.getElementById('searchScreen'),group:document.getElementById('groupScreen'),student:document.getElementById('studentScreen'),form:document.getElementById('formScreen'),history:document.getElementById('historyScreen')};
+let feedbackAudioCtx=null,lastFeedbackAt=0;
+function playTapTone(kind='tap'){
+  try{
+    const AudioCtx=window.AudioContext||window.webkitAudioContext;
+    if(!AudioCtx)return;
+    feedbackAudioCtx=feedbackAudioCtx||new AudioCtx();
+    if(feedbackAudioCtx.state==='suspended')feedbackAudioCtx.resume();
+    const now=feedbackAudioCtx.currentTime;
+    const freqs=kind==='success'?[660,880,1175]:kind==='error'?[220,165]:kind==='warning'?[440,620]:kind==='nav'?[520,760]:kind==='select'?[680,900]:[600,760];
+    freqs.forEach((freq,i)=>{
+      const start=now+i*.055;
+      const osc=feedbackAudioCtx.createOscillator();
+      const gain=feedbackAudioCtx.createGain();
+      osc.type=kind==='error'?'triangle':'sine';
+      osc.frequency.setValueAtTime(freq,start);
+      gain.gain.setValueAtTime(.0001,start);
+      gain.gain.exponentialRampToValueAtTime(kind==='success'?.06:kind==='error'?.045:.035,start+.01);
+      gain.gain.exponentialRampToValueAtTime(.0001,start+.105);
+      osc.connect(gain).connect(feedbackAudioCtx.destination);
+      osc.start(start);osc.stop(start+.12);
+    });
+  }catch(e){}
+}
+function alertFeedback(icon){
+  const kind=icon==='success'?'success':icon==='error'?'error':icon==='warning'?'warning':'tap';
+  if(navigator.vibrate)navigator.vibrate(kind==='success'?[18,30,18]:kind==='error'?[30,40,30]:12);
+  playTapTone(kind);
+}
+function installSwalFeedback(){
+  if(!window.Swal||window.Swal.__m1FeedbackInstalled)return;
+  const originalFire=window.Swal.fire.bind(window.Swal);
+  window.Swal.fire=(...args)=>{
+    const opts=typeof args[0]==='object'?args[0]:{title:args[0],html:args[1],icon:args[2]};
+    const result=originalFire(...args);
+    setTimeout(()=>alertFeedback(opts.icon),80);
+    return result;
+  };
+  window.Swal.__m1FeedbackInstalled=true;
+}
+function tactileFeedback(target,kind='tap'){
+  const now=Date.now();
+  if(now-lastFeedbackAt<45)return;
+  lastFeedbackAt=now;
+  if(navigator.vibrate)navigator.vibrate(kind==='nav'?[12,24,12]:kind==='select'?18:10);
+  playTapTone(kind);
+  const el=target?.closest?.('button,a,.behavior-option,.bottom-nav-item,.suggestion-item,.student-card')||target;
+  if(el&&el.classList){
+    const cls=kind==='nav'?'feedback-wiggle':'feedback-pop';
+    el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);
+    setTimeout(()=>el.classList.remove(cls),420);
+  }
+}
+document.addEventListener('pointerdown',e=>{
+  const target=e.target.closest('button,a,.behavior-option,.suggestion-item,.student-card');
+  if(!target||target.disabled)return;
+  tactileFeedback(target,target.closest('.bottom-nav')?'nav':target.classList.contains('behavior-option')?'select':'tap');
+},{passive:true});
 function jsonp(action,params={}){return new Promise((resolve,reject)=>{const cb='m1gg_cb_'+Date.now()+'_'+Math.floor(Math.random()*100000);const script=document.createElement('script');const timeout=setTimeout(()=>{cleanup();reject(new Error('เชื่อมต่อช้าเกินไป กรุณาลองใหม่'));},12000);function cleanup(){clearTimeout(timeout);delete window[cb];script.remove();}window[cb]=data=>{cleanup();resolve(data)};const qs=new URLSearchParams(Object.assign({},params,{action,callback:cb}));script.onerror=()=>{cleanup();reject(new Error('เชื่อมต่อ Apps Script ไม่สำเร็จ'))};script.src=GAS_URL+'?'+qs.toString();document.body.appendChild(script);});}
 async function clearOldServiceWorker(){try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();for(const r of regs) await r.unregister();} if(window.caches){const keys=await caches.keys(); for(const k of keys) await caches.delete(k);}}catch(e){}}
-document.addEventListener('DOMContentLoaded',()=>{clearOldServiceWorker();const input=document.getElementById('studentIdInput');input.addEventListener('input',handleTyping);input.addEventListener('keydown',e=>{if(e.key==='Enter') searchStudent()});const groupInput=document.getElementById('groupSearchInput');groupInput.addEventListener('input',handleGroupTyping);groupInput.addEventListener('keydown',e=>{if(e.key==='Enter') searchGroupStudent()});updateSaveButtonState();updateGroupSaveButtonState();input.focus();openInitialStudentFromUrl();});
+document.addEventListener('DOMContentLoaded',()=>{installSwalFeedback();clearOldServiceWorker();const input=document.getElementById('studentIdInput');input.addEventListener('input',handleTyping);input.addEventListener('keydown',e=>{if(e.key==='Enter') searchStudent()});const groupInput=document.getElementById('groupSearchInput');groupInput.addEventListener('input',handleGroupTyping);groupInput.addEventListener('keydown',e=>{if(e.key==='Enter') searchGroupStudent()});updateSaveButtonState();updateGroupSaveButtonState();input.focus();openInitialStudentFromUrl();});
 function moveBottomNav(active){const nav=document.querySelector('.bottom-nav');const item=document.querySelector(`.bottom-nav-item[data-nav="${active}"]`);if(nav&&item){nav.style.setProperty('--active-index',item.dataset.index||0);nav.dataset.active=active}document.querySelectorAll('.bottom-nav-item').forEach(navItem=>{const isActive=navItem.dataset.nav===active;navItem.classList.toggle('is-active',isActive);navItem.setAttribute('aria-current',isActive?'page':'false')})}
 function updateBottomNav(name){moveBottomNav('home')}
 function updatePageBackground(name){document.body.classList.toggle('record-bg',name==='group'||name==='form'||name==='history')}
@@ -388,7 +459,16 @@ async function submitGroupBehavior(){
 }
 async function loadHistory(){if(!currentStudent)return goToSearch();const id=currentStudent.studentId;latestHistoryStudentId=String(id);const cached=cacheGet(historyCacheKey(id));if(cached){currentHistory=cached;renderStudent();renderHistory(currentHistory);showScreen('history')}else{setLoading(true)}try{const res=await jsonp('getHistory',{studentId:id});if(String(id)!==latestHistoryStudentId)return;if(!res.success){if(!cached)Swal.fire('โหลดประวัติไม่ได้',res.message||'เกิดข้อผิดพลาด','error');return}currentHistory=res.history||[];cacheSet(historyCacheKey(id),currentHistory);renderStudent();renderHistory(currentHistory);showScreen('history')}catch(e){if(!cached)Swal.fire('เชื่อมต่อไม่ได้',e.message||String(e),'error')}finally{setLoading(false)}}
 function renderHistory(history){const list=document.getElementById('historyList');document.getElementById('pdfBtn').style.display=history.length?'inline-flex':'none';if(!history.length){list.innerHTML='<div class="empty-state">ยังไม่มีประวัติพฤติกรรม</div>';return}list.innerHTML=history.map(item=>`<div class="history-item"><div class="history-date">${escapeHtml(item.date||'-')} เวลา ${escapeHtml(item.time||'-')}</div><div class="history-type"><span class="badge text-bg-secondary">${escapeHtml(item.behaviorType||'-')}</span></div>${item.note?`<div class="history-note"><b>หมายเหตุ:</b> ${escapeHtml(item.note)}</div>`:''}</div>`).join('')}
-function exportHistoryPdf(){if(!currentStudent)return;if(!currentHistory.length){Swal.fire('ยังไม่มีข้อมูล','ไม่มีประวัติสำหรับส่งออก PDF','info');return}const rows=currentHistory.map((item,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(item.date||'-')}</td><td>${escapeHtml(item.time||'-')}</td><td>${escapeHtml(item.behaviorType||'-')}</td><td>${escapeHtml(item.note||'-')}</td></tr>`).join('');const html=`<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>ประวัติพฤติกรรม ${escapeHtml(currentStudent.fullName||'')}</title><link href="https://cdn.jsdelivr.net/gh/lazywasabi/thai-web-fonts@7/fonts/LINESeedSansTH/LINESeedSansTH.css" rel="stylesheet"><style>*{box-sizing:border-box;font-family:'LINE Seed Sans TH','Noto Sans Thai',Arial,sans-serif}body{margin:0;padding:28px;color:#172033}h1{font-size:26px;margin:0 0 8px}.meta{font-weight:700;color:#58657a;margin-bottom:20px}.card{border:1px solid #d9e2ef;border-radius:16px;padding:18px;margin-bottom:18px}table{width:100%;border-collapse:collapse;font-size:14px}th,td{border:1px solid #d9e2ef;padding:10px;text-align:left;vertical-align:top}th{background:#eef6ff;font-weight:900}.footer{margin-top:18px;color:#697386;font-size:12px}@media print{body{padding:18mm}.no-print{display:none}}</style></head><body><div class="card"><h1>ประวัติพฤติกรรม</h1><div class="meta">${escapeHtml(currentStudent.fullName||'-')}<br>${escapeHtml(currentStudent.room||'-')} · เลขที่ ${escapeHtml(currentStudent.number||'-')} · เลขประจำตัว ${escapeHtml(currentStudent.studentId||'-')}</div></div><table><thead><tr><th>#</th><th>วันที่</th><th>เวลา</th><th>พฤติกรรม</th><th>หมายเหตุ</th></tr></thead><tbody>${rows}</tbody></table><div class="footer">ส่งออกจาก M1 Good Good</div><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),250));<\\/script></body></html>`;const win=window.open('','_blank');if(!win){Swal.fire('เปิดหน้าต่างไม่ได้','กรุณาอนุญาต popup เพื่อส่งออก PDF','warning');return}win.document.open();win.document.write(html);win.document.close()}
+function reportPreviewHtml(title, content, filename){
+  const returnUrl=escapeAttr(location.href);
+  return `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${escapeHtml(title)}</title><link href="https://cdn.jsdelivr.net/gh/lazywasabi/thai-web-fonts@7/fonts/LINESeedSansTH/LINESeedSansTH.css" rel="stylesheet"><style>*{box-sizing:border-box;font-family:'LINE Seed Sans TH','Noto Sans Thai',Arial,sans-serif}body{margin:0;background:#f6f8fb;color:#172033}.report-toolbar{position:sticky;top:0;z-index:10;display:flex;gap:8px;align-items:center;justify-content:space-between;padding:12px max(14px,env(safe-area-inset-left)) 12px;background:rgba(255,255,255,.92);border-bottom:1px solid #e2e8f0;backdrop-filter:blur(16px)}.toolbar-title{font-weight:620;color:#28364a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.toolbar-actions{display:flex;gap:8px}.tool-btn{min-height:42px;border:1px solid #d9e5f2;border-radius:999px;background:#fff;color:#225caa;padding:0 14px;font-weight:560;box-shadow:0 8px 18px rgba(31,45,70,.08)}.tool-btn.print{background:#e7f1ff}.tool-btn.back{color:#59687a}.page{width:min(100%,900px);margin:0 auto;padding:22px 16px 80px}.card{border:1px solid #d9e2ef;border-radius:16px;padding:18px;margin-bottom:18px;background:white}h1{font-size:26px;margin:0 0 8px;font-weight:620}.meta{font-weight:520;color:#58657a;line-height:1.65}.table-wrap{overflow:auto;background:white;border:1px solid #d9e2ef;border-radius:14px}table{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}th,td{border:1px solid #d9e2ef;padding:10px;text-align:left;vertical-align:top}th{background:#eef6ff;font-weight:620}.footer{margin-top:18px;color:#697386;font-size:12px}@media print{body{background:white}.report-toolbar{display:none}.page{width:auto;padding:18mm}.card,.table-wrap{break-inside:avoid}}</style></head><body><div class="report-toolbar"><button class="tool-btn back" type="button" onclick="goBack()">กลับ</button><div class="toolbar-title">${escapeHtml(title)}</div><div class="toolbar-actions"><button class="tool-btn" type="button" onclick="downloadHtml()">ดาวน์โหลดไฟล์</button><button class="tool-btn print" type="button" onclick="window.print()">พิมพ์ / บันทึก PDF</button></div></div><main class="page">${content}</main><script>const returnUrl='${returnUrl}';const filename='${escapeAttr(filename)}';function goBack(){if(history.length>1)history.back();else location.href=returnUrl}function downloadHtml(){const blob=new Blob([document.documentElement.outerHTML],{type:'text/html;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename.replace(/\\.pdf$/i,'.html');document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},800)}<\\/script></body></html>`;
+}
+function openReportPreview(title, content, filename){
+  const blob=new Blob([reportPreviewHtml(title,content,filename)],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  location.href=url;
+}
+function exportHistoryPdf(){if(!currentStudent)return;if(!currentHistory.length){Swal.fire('ยังไม่มีข้อมูล','ไม่มีประวัติสำหรับส่งออก PDF','info');return}const rows=currentHistory.map((item,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(item.date||'-')}</td><td>${escapeHtml(item.time||'-')}</td><td>${escapeHtml(item.behaviorType||'-')}</td><td>${escapeHtml(item.note||'-')}</td></tr>`).join('');const title=`ประวัติพฤติกรรม ${currentStudent.fullName||''}`.trim();const content=`<div class="card"><h1>ประวัติพฤติกรรม</h1><div class="meta">${escapeHtml(currentStudent.fullName||'-')}<br>${escapeHtml(currentStudent.room||'-')} · เลขที่ ${escapeHtml(currentStudent.number||'-')} · เลขประจำตัว ${escapeHtml(currentStudent.studentId||'-')}</div></div><div class="table-wrap"><table><thead><tr><th>#</th><th>วันที่</th><th>เวลา</th><th>พฤติกรรม</th><th>หมายเหตุ</th></tr></thead><tbody>${rows}</tbody></table></div><div class="footer">ส่งออกจาก ACTMOR 1</div>`;openReportPreview(title,content,`history-${currentStudent.studentId||'student'}.pdf`)}
 function refreshStudents(){try{Object.keys(sessionStorage).filter(k=>k.startsWith('m1gg:search:')).forEach(k=>sessionStorage.removeItem(k))}catch(e){}clearSuggestions();clearSearchBox();Swal.fire({toast:true,position:'top-end',icon:'success',title:'ล้าง cache รายชื่อแล้ว พร้อมค้นหาล่าสุด',showConfirmButton:false,timer:1600});}
 </script>
 </body>
