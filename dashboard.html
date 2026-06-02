@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <link rel="icon" href="app-icon.webp" type="image/webp" />
+  <link rel="icon" href="app-icon.png" type="image/png" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link href="https://cdn.jsdelivr.net/gh/lazywasabi/thai-web-fonts@7/fonts/LINESeedSansTH/LINESeedSansTH.css" rel="stylesheet">
@@ -103,7 +103,7 @@
     .top {
       position: sticky;
       top: 8px;
-      z-index: 10;
+      z-index: 90;
       padding: 13px 13px 13px 10px;
       display: grid;
       gap: 10px;
@@ -121,6 +121,55 @@
       align-items: center;
       gap: 8px;
       flex: 0 0 auto;
+    }
+
+    .top-tool {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      border: 1.5px solid rgba(255, 255, 255, .86);
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: #3a7fc6;
+      background: linear-gradient(180deg, rgba(237, 248, 255, .94), rgba(220, 240, 255, .80));
+      box-shadow: 0 12px 24px rgba(52, 112, 176, .10), inset 0 1px 0 rgba(255, 255, 255, .92);
+      transition: scale 160ms ease, box-shadow 180ms ease;
+    }
+
+    .top-tool:active {
+      scale: .92;
+    }
+
+    .top-tool.search-tool::before {
+      content: "";
+      width: 26px;
+      height: 26px;
+      background: currentColor;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z' fill='none' stroke='black' stroke-width='2.45' stroke-linecap='round'/%3E%3Cpath d='M16.1 16.1 21 21' fill='none' stroke='black' stroke-width='2.45' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z' fill='none' stroke='black' stroke-width='2.45' stroke-linecap='round'/%3E%3Cpath d='M16.1 16.1 21 21' fill='none' stroke='black' stroke-width='2.45' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+
+    .top-tool.search-tool::after {
+      content: none;
+    }
+
+    .top-tool.refresh-tool::before {
+      content: "";
+      width: 25px;
+      height: 25px;
+      background: currentColor;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 12a8 8 0 1 1-2.35-5.65' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M20 4v6h-6' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 12a8 8 0 1 1-2.35-5.65' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M20 4v6h-6' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+
+    .top-tool.is-active,
+    .top-tool[aria-expanded="true"] {
+      color: #3a7fc6;
+      background: linear-gradient(180deg, rgba(237, 248, 255, .94), rgba(220, 240, 255, .80));
+      border-color: rgba(255, 255, 255, .86);
+      box-shadow: 0 14px 28px rgba(52, 112, 176, .14), inset 0 1px 0 rgba(255, 255, 255, .94);
+      animation: topToolPop 360ms cubic-bezier(.18, 1.35, .34, 1) both;
     }
 
     .goodgood-link {
@@ -275,9 +324,25 @@
     .toolbar {
       padding: 10px;
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr);
       gap: 8px;
       align-items: center;
+    }
+
+    #searchPanel,
+    #filterPanel {
+      position: fixed;
+      left: max(12px, env(safe-area-inset-left));
+      right: max(12px, env(safe-area-inset-right));
+      top: var(--float-panel-top, calc(112px + env(safe-area-inset-top)));
+      width: auto;
+      max-width: 430px;
+      transform: none;
+      z-index: 86;
+      margin-inline: auto;
+      box-shadow: 0 22px 48px rgba(35, 61, 86, .16), inset 0 1px 0 rgba(255, 255, 255, .94);
+      backdrop-filter: blur(18px) saturate(1.15);
+      -webkit-backdrop-filter: blur(18px) saturate(1.15);
     }
 
     body.untimed-page .toolbar {
@@ -288,6 +353,10 @@
     body.untimed-page .actions,
     body.untimed-page #filterPanel {
       display: none !important;
+    }
+
+    body.overview-page [data-sort="room-asc"] {
+      display: none;
     }
 
     .segmented,
@@ -427,24 +496,39 @@
       box-shadow: 0 10px 22px rgba(238, 130, 178, .24);
     }
 
-    #pdfBtn {
-      background: linear-gradient(135deg, var(--brand-dark), var(--brand));
-      box-shadow: 0 10px 22px rgba(184, 50, 38, .22);
-    }
-
     .filter-panel {
       position: relative;
-      z-index: 30;
+      z-index: 50;
       overflow: visible;
       padding: 10px;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: 1fr;
       gap: 8px;
       animation: slideIn var(--speed) ease both;
     }
 
+    .filter-panel .segmented {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      min-width: 0;
+    }
+
     .filter-panel.hidden {
       display: none;
+    }
+
+    .floating-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 82;
+      padding: 0;
+      border: 0;
+      appearance: none;
+      -webkit-appearance: none;
+      background: rgba(244, 249, 255, .34);
+      backdrop-filter: blur(12px) saturate(1.08);
+      -webkit-backdrop-filter: blur(12px) saturate(1.08);
+      cursor: pointer;
+      animation: backdropFade 180ms ease both;
     }
 
     .filter-control {
@@ -565,12 +649,6 @@
       box-shadow: 0 16px 30px rgba(35, 128, 77, .14), inset 0 1px 0 rgba(255, 255, 255, .95);
     }
 
-    #pdfBtn {
-      color: #b8323c;
-      background: linear-gradient(180deg, rgba(255, 235, 237, .98), rgba(255, 210, 216, .92));
-      border-color: rgba(218, 68, 85, .34);
-      box-shadow: 0 16px 30px rgba(184, 50, 60, .16), inset 0 1px 0 rgba(255, 255, 255, .95);
-    }
 
     .ghost-button,
     .calendar-button {
@@ -588,6 +666,35 @@
       box-shadow: 0 12px 26px rgba(31, 45, 70, .08), inset 0 1px 0 rgba(255, 255, 255, .9);
     }
 
+    .search {
+      min-height: 54px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .86), rgba(238, 248, 255, .70));
+      border-color: rgba(189, 220, 248, .72);
+    }
+
+    .search span {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #3a7fc6;
+      background: rgba(229, 244, 255, .78);
+      border: 1px solid rgba(133, 190, 238, .28);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .search input {
+      color: #233348;
+      font-weight: 420;
+    }
+
+    .search input::placeholder {
+      color: #8291a4;
+      opacity: .92;
+    }
+
     body {
       --surface: rgba(255, 255, 255, .72);
       --surface-soft: rgba(255, 255, 255, .58);
@@ -598,7 +705,7 @@
       --shadow-soft: 0 9px 22px rgba(55, 72, 92, .07);
       background:
         linear-gradient(180deg, rgba(255, 255, 255, .58), rgba(255, 255, 255, .76)),
-        url("m1-dashboard-bg.webp") center / cover no-repeat fixed;
+        url("m1-dashboard-bg.png") center / cover no-repeat fixed;
       font-weight: 520;
     }
 
@@ -1409,7 +1516,7 @@
       position: fixed;
       z-index: 80;
       left: 50%;
-      bottom: calc(18px + env(safe-area-inset-bottom));
+      bottom: max(0px, env(safe-area-inset-bottom));
       transform: translateX(-50%);
       width: min(88vw, 356px);
       height: 84px;
@@ -1474,6 +1581,130 @@
     .floating-bottom-nav a:focus-visible {
       outline: 3px solid rgba(240, 97, 103, .38);
       outline-offset: 3px;
+    }
+
+    .detail-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 140;
+      display: grid;
+      place-items: end center;
+      padding: 18px 14px calc(18px + env(safe-area-inset-bottom));
+      background: rgba(18, 28, 42, .16);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .detail-modal.hidden {
+      display: none;
+    }
+
+    .detail-sheet {
+      width: min(430px, 100%);
+      max-height: min(72dvh, 620px);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 14px;
+      padding: 18px;
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, .9);
+      background:
+        radial-gradient(circle at 80% 0%, color-mix(in srgb, var(--modal-accent, #72cfff), transparent 70%), transparent 46%),
+        rgba(255, 255, 255, .86);
+      box-shadow: 0 24px 62px rgba(26, 42, 65, .22), inset 0 1px 0 rgba(255, 255, 255, .95);
+      animation: modalUp .24s cubic-bezier(.2, .86, .22, 1);
+    }
+
+    .detail-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .detail-title {
+      margin: 0;
+      color: #172236;
+      font-size: 23px;
+      line-height: 1.1;
+      font-weight: 560;
+    }
+
+    .detail-subtitle {
+      margin-top: 5px;
+      color: #758195;
+      font-size: 13px;
+      font-weight: 420;
+    }
+
+    .detail-close {
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(255, 255, 255, .84);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .62);
+      color: #667487;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .detail-list {
+      min-height: 0;
+      overflow-y: auto;
+      display: grid;
+      gap: 9px;
+      padding-right: 2px;
+      scrollbar-width: none;
+    }
+
+    .detail-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    .detail-person {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 13px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, .62);
+      border: 1px solid rgba(255, 255, 255, .8);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .88);
+      text-decoration: none;
+    }
+
+    .detail-person-name {
+      min-width: 0;
+      color: #20324a;
+      font-size: 15px;
+      font-weight: 500;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .detail-person-meta {
+      margin-top: 3px;
+      color: #7b8798;
+      font-size: 12px;
+      font-weight: 420;
+    }
+
+    .detail-count {
+      min-width: 54px;
+      min-height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: var(--modal-accent, #49718d);
+      background: color-mix(in srgb, var(--modal-accent, #72cfff), #fff 86%);
+      border: 1px solid color-mix(in srgb, var(--modal-accent, #72cfff), #fff 68%);
+      font-weight: 620;
+    }
+
+    @keyframes modalUp {
+      from { opacity: 0; transform: translateY(18px) scale(.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     h1,
@@ -1592,6 +1823,288 @@
       box-shadow: 0 15px 28px var(--tone-shadow, rgba(35, 61, 86, .12)), inset 0 1px 0 rgba(255, 255, 255, .92);
     }
 
+    .bar-row.stack-card.behavior-hero-card,
+    .behavior-hero-card {
+      flex: 0 0 min(82vw, 348px);
+      aspect-ratio: 1.18;
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      padding: 18px;
+      border-radius: 34px;
+      border: 0 !important;
+      color: #fff;
+      background: transparent !important;
+      box-shadow: 0 22px 48px rgba(18, 42, 68, .24);
+      isolation: isolate;
+      perspective: 900px;
+      transform-style: preserve-3d;
+      scroll-snap-align: center;
+      transform: rotate(5deg) scale(.9);
+      transform-origin: center center;
+    }
+
+    .behavior-hero-img {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: inherit;
+      transform: scale(1.01);
+      transition: transform .5s cubic-bezier(.2, .86, .22, 1);
+    }
+
+    .behavior-hero-card:hover .behavior-hero-img,
+    .behavior-hero-card.is-flipped .behavior-hero-img {
+      transform: scale(1.06) rotate(.5deg);
+    }
+
+    .behavior-hero-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        linear-gradient(90deg, rgba(0, 0, 0, .46), rgba(0, 0, 0, .08) 52%, rgba(0, 0, 0, .42)),
+        linear-gradient(180deg, rgba(0, 0, 0, .04), rgba(0, 0, 0, .44));
+      pointer-events: none;
+    }
+
+    .behavior-hero-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(255, 255, 255, .22), transparent 35%, rgba(255, 255, 255, .10));
+      opacity: 0;
+      transform: translateX(-30%);
+      transition: opacity .28s ease, transform .44s ease;
+      pointer-events: none;
+    }
+
+    .behavior-hero-card.is-flipped::after,
+    .behavior-hero-card:hover::after {
+      opacity: 1;
+      transform: translateX(8%);
+    }
+
+    .behavior-hero-card.is-flipped {
+      transform: rotateY(4deg) translateY(-3px);
+    }
+
+    .behavior-hero-card.is-focused,
+    .behavior-hero-card.is-flipped.is-focused {
+      z-index: 30 !important;
+      transform: rotate(0deg) scale(1.02) translateY(-2px);
+      box-shadow: 0 26px 48px rgba(18, 42, 68, .24), inset 0 1px 0 rgba(255, 255, 255, .28);
+    }
+
+    .behavior-carousel .behavior-hero-card + .behavior-hero-card {
+      margin-left: -118px;
+    }
+
+    .behavior-carousel .behavior-hero-card:nth-child(2n) {
+      transform: rotate(-4deg) scale(.9);
+    }
+
+    .behavior-carousel .behavior-hero-card:nth-child(3n) {
+      transform: rotate(7deg) scale(.88);
+    }
+
+    .behavior-hero-card > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    .behavior-hero-card > .behavior-hero-img {
+      z-index: 0;
+    }
+
+    .behavior-hero-title,
+    .behavior-hero-stat {
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .behavior-hero-title {
+      display: grid;
+      gap: 2px;
+      align-self: end;
+    }
+
+    .behavior-hero-name {
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 680;
+      text-shadow: 0 3px 12px rgba(0, 0, 0, .24);
+    }
+
+    .behavior-hero-sub {
+      font-size: 13px;
+      font-weight: 520;
+      opacity: .9;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, .24);
+    }
+
+    .behavior-hero-stat {
+      text-align: right;
+      align-self: end;
+      display: grid;
+      gap: 0;
+      text-shadow: 0 3px 12px rgba(0, 0, 0, .26);
+    }
+
+    .behavior-hero-count {
+      font-size: 42px;
+      line-height: .92;
+      font-weight: 680;
+    }
+
+    .behavior-hero-unit,
+    .behavior-hero-people {
+      font-size: 15px;
+      font-weight: 560;
+    }
+
+    .behavior-carousel {
+      display: flex !important;
+      gap: 12px !important;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 8px 4px 20px;
+      margin-inline: 0;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: 4px;
+      scrollbar-width: none;
+      touch-action: pan-x;
+      overscroll-behavior-y: contain;
+    }
+
+    .behavior-carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .behavior-summary-card {
+      flex: 0 0 min(74vw, 292px);
+      min-height: 116px;
+      display: grid;
+      align-content: space-between;
+      gap: 9px;
+      padding: 13px;
+      border-radius: 24px;
+      scroll-snap-align: center;
+      border: 1px solid rgba(255, 255, 255, .86);
+      background:
+        radial-gradient(circle at 72% 0%, color-mix(in srgb, var(--tone-accent, #72cfff), transparent 70%), transparent 42%),
+        linear-gradient(180deg, rgba(255, 255, 255, .84), var(--tone-card-bottom, rgba(236, 250, 255, .66)));
+      box-shadow: 0 22px 48px var(--tone-shadow, rgba(35, 61, 86, .13)), inset 0 1px 0 rgba(255, 255, 255, .94);
+      color: #1d2b3e;
+      transform: none;
+      transform-origin: center;
+      transition: transform .34s cubic-bezier(.2, .86, .22, 1), box-shadow .28s ease;
+    }
+
+    .behavior-carousel .behavior-summary-card + .behavior-summary-card {
+      margin-left: 0;
+    }
+
+    .behavior-carousel .behavior-summary-card:nth-child(2n) {
+      transform: none;
+    }
+
+    .behavior-carousel .behavior-summary-card:nth-child(3n) {
+      transform: none;
+    }
+
+    .behavior-summary-card.is-focused {
+      z-index: 30 !important;
+      transform: translateY(-2px);
+      box-shadow: 0 28px 54px rgba(18, 42, 68, .20), inset 0 1px 0 rgba(255, 255, 255, .96);
+    }
+
+    .behavior-summary-top {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .behavior-summary-icon {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--tone-accent, #72cfff), #fff 84%);
+      border: 1px solid color-mix(in srgb, var(--tone-accent, #72cfff), #fff 64%);
+      color: var(--tone-accent, #49718d);
+      font-size: 21px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .86);
+    }
+
+    .behavior-summary-name {
+      margin: 0;
+      color: #172236;
+      font-size: 22px;
+      line-height: 1.05;
+      font-weight: 560;
+    }
+
+    .behavior-summary-sub {
+      color: #748196;
+      font-size: 12px;
+      font-weight: 420;
+    }
+
+    .behavior-summary-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+    }
+
+    .behavior-summary-stat {
+      min-width: 0;
+      padding: 7px 10px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .54);
+      border: 1px solid rgba(255, 255, 255, .72);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .88);
+    }
+
+    .behavior-summary-number {
+      color: var(--tone-accent, #49718d);
+      font-size: 22px;
+      line-height: .95;
+      font-weight: 620;
+    }
+
+    .behavior-summary-label {
+      margin-top: 4px;
+      color: #6e7b8d;
+      font-size: 11px;
+      font-weight: 420;
+    }
+
+    .behavior-detail-button {
+      width: auto;
+      min-height: 32px;
+      align-self: center;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, .86);
+      border-radius: 999px;
+      color: #20324a;
+      background: rgba(255, 255, 255, .62);
+      box-shadow: 0 12px 26px rgba(35, 61, 86, .08), inset 0 1px 0 rgba(255, 255, 255, .92);
+      font-weight: 520;
+      font-size: 12px;
+    }
+
     .bar-row.stack-card {
       min-height: 66px;
       padding: 12px 14px;
@@ -1700,6 +2213,57 @@
 
     .hidden {
       display: none !important;
+    }
+
+    #searchPanel,
+    #filterPanel {
+      box-sizing: border-box;
+      position: fixed !important;
+      left: max(12px, env(safe-area-inset-left)) !important;
+      right: max(12px, env(safe-area-inset-right)) !important;
+      top: var(--float-panel-top, calc(112px + env(safe-area-inset-top))) !important;
+      width: auto !important;
+      max-width: min(430px, calc(100vw - 24px)) !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      transform: none !important;
+      overflow: visible;
+      z-index: 86;
+      animation: floatingPanelPop 300ms cubic-bezier(.18, 1.18, .34, 1) both;
+    }
+
+    @keyframes backdropFade {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes topToolPop {
+      0% {
+        scale: .9;
+      }
+      55% {
+        scale: 1.08;
+      }
+      100% {
+        scale: 1;
+      }
+    }
+
+    @keyframes floatingPanelPop {
+      from {
+        opacity: 0;
+        translate: 0 -10px;
+        scale: .96;
+      }
+      to {
+        opacity: 1;
+        translate: 0 0;
+        scale: 1;
+      }
     }
 
     @keyframes fadeLift {
@@ -1876,7 +2440,7 @@
       height: 68px;
       padding: 8px 14px;
       gap: 8px;
-      bottom: calc(20px + env(safe-area-inset-bottom));
+      bottom: max(0px, env(safe-area-inset-bottom));
       box-shadow: 0 16px 34px rgba(42, 57, 82, .15), inset 0 1px 0 rgba(255, 255, 255, .96);
     }
 
@@ -2029,12 +2593,6 @@
       pointer-events: auto;
     }
 
-    #pdfBtn {
-      min-width: 82px;
-      min-height: 44px;
-      padding-inline: 18px;
-    }
-
     .panel {
       overflow: hidden;
     }
@@ -2144,6 +2702,18 @@
       border-radius: 0;
     }
 
+    .panel.overview-panel {
+      max-width: 430px;
+      max-height: none;
+      overflow-y: visible;
+      overflow-x: hidden;
+      padding: 0 4px calc(118px + env(safe-area-inset-bottom));
+    }
+
+    .panel.overview-panel .unit-note {
+      display: none;
+    }
+
     .panel::-webkit-scrollbar {
       display: none;
     }
@@ -2153,6 +2723,16 @@
       min-height: 0;
       padding: 4px 0 22px;
       gap: 0;
+    }
+
+    .panel.overview-panel .bars.behavior-carousel {
+      min-height: 144px;
+      padding: 8px 4px 22px;
+      gap: 12px !important;
+    }
+
+    body.overview-page .room-nav {
+      display: none;
     }
 
     .panel .bar-row {
@@ -2192,11 +2772,11 @@
       position: sticky;
       top: 0;
       z-index: 40;
-      margin: 0 0 7px;
-      padding: 6px 4px 8px;
-      border-radius: 0 0 18px 18px;
-      background: linear-gradient(180deg, rgba(238, 247, 255, .98), rgba(238, 247, 255, .92));
-      box-shadow: 0 8px 18px rgba(35, 61, 86, .06);
+      margin: 0 0 4px;
+      padding: 2px 4px 4px;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
     }
 
     .panel-sticky .panel-head {
@@ -2216,7 +2796,7 @@
     }
 
     .panel-sticky::after {
-      content: "";
+      content: none;
       position: absolute;
       left: 0;
       right: 0;
@@ -2227,19 +2807,68 @@
       pointer-events: none;
     }
 
-    .bottom-actions {
-      left: 50%;
-      right: auto;
-      bottom: calc(96px + env(safe-area-inset-bottom));
-      transform: translateX(72px);
+    .panel-sticky,
+    .panel.overview-panel .panel-sticky {
+      position: sticky;
+      top: 0;
+      z-index: 42;
+      margin: 0 4px 10px;
+      padding: 10px 12px;
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, .82);
+      background: linear-gradient(180deg, rgba(255, 255, 255, .72), rgba(245, 251, 255, .54));
+      box-shadow: 0 14px 28px rgba(35, 61, 86, .09), inset 0 1px 0 rgba(255, 255, 255, .92);
+      backdrop-filter: blur(14px) saturate(1.12);
+      -webkit-backdrop-filter: blur(14px) saturate(1.12);
     }
 
-    #pdfBtn {
-      min-width: 74px;
-      min-height: 44px;
-      padding-inline: 16px;
+    .panel-sticky .panel-head,
+    .panel.overview-panel .panel-head {
+      min-height: 32px;
+      margin: 0 !important;
+      align-items: center;
+    }
+
+    .panel-sticky h2 {
+      color: #233348;
+      font-size: clamp(15px, 3.7vw, 17px);
+      line-height: 1.15;
+      font-weight: 560;
+      letter-spacing: 0;
+    }
+
+    .panel-sticky .status {
+      min-height: 28px;
+      display: inline-flex;
+      align-items: center;
       border-radius: 999px;
-      font-size: 16px;
+      padding: 5px 10px;
+      color: #23804d;
+      background: rgba(226, 250, 236, .72);
+      border: 1px solid rgba(97, 199, 143, .22);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9);
+      font-size: 12px;
+      font-weight: 520;
+      white-space: nowrap;
+    }
+
+    .panel-sticky .unit-note {
+      margin: 8px 0 0;
+      min-height: 26px;
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 10px;
+      color: #49718d;
+      background: rgba(237, 248, 255, .68);
+      border: 1px solid rgba(121, 183, 230, .20);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .88);
+      font-size: 11.5px;
+      font-weight: 420;
+    }
+
+    .bottom-actions {
+      display: none !important;
     }
 
     @media (max-width: 430px) {
@@ -2265,6 +2894,17 @@
         margin-bottom: 124px;
         max-height: min(58dvh, 520px);
         padding-bottom: 128px;
+      }
+
+      .panel.overview-panel {
+        max-height: none;
+        overflow-y: visible;
+        padding-bottom: calc(118px + env(safe-area-inset-bottom));
+      }
+
+      .panel.overview-panel .panel-sticky {
+        position: sticky;
+        top: 0;
       }
 
       .bottom-actions {
@@ -2308,9 +2948,12 @@
     <section class="top card">
       <div class="title-row">
         <div class="brand">
-          <img class="brand-logo" src="m1dd-logo-transparent.webp" alt="M1 ดี๊ดี ระบบข้อมูลสถิตินักเรียน">
+          <img class="brand-logo" src="m1dd-logo-transparent.png" alt="M1 ดี๊ดี ระบบข้อมูลสถิตินักเรียน">
         </div>
         <div class="top-actions">
+          <button id="filterBtn" class="top-tool calendar-button" type="button" aria-label="ตัวกรองปฏิทิน"><span class="calendar-icon" aria-hidden="true"></span></button>
+          <button id="refreshBtn" class="top-tool refresh-tool" type="button" aria-label="อัปเดตข้อมูล"></button>
+          <button id="searchToggle" class="top-tool search-tool" type="button" aria-label="ค้นหานักเรียน"></button>
           <div class="live" id="liveBadge">พร้อม</div>
         </div>
       </div>
@@ -2318,23 +2961,21 @@
       <div id="status" class="status">กำลังเตรียมข้อมูล</div>
     </section>
 
-    <section class="toolbar card">
-      <div class="segmented" aria-label="เลือกช่วงเวลา">
-        <button id="dailyBtn" class="active" type="button">รายวัน</button>
-        <button id="monthlyBtn" type="button">รายเดือน</button>
-      </div>
+    <button id="floatingBackdrop" class="floating-backdrop hidden" type="button" aria-label="ปิดแถบลอย"></button>
 
+    <section id="searchPanel" class="toolbar card hidden">
       <label class="search">
         <span>⌕</span>
         <input id="searchInput" type="search" placeholder="ค้นหาแล้วแตะชื่อนักเรียนเพื่อดูประวัติ">
       </label>
-
-      <div class="actions">
-        <button id="filterBtn" class="ghost-button calendar-button" type="button" aria-label="เลือกวันที่"><span class="calendar-icon" aria-hidden="true"></span></button>
-      </div>
     </section>
 
     <section id="filterPanel" class="filter-panel card hidden">
+      <div class="segmented" aria-label="เลือกช่วงเวลา">
+        <button id="academicBtn" type="button">ปีการศึกษา</button>
+        <button id="dailyBtn" class="active" type="button">รายวัน</button>
+        <button id="monthlyBtn" type="button">รายเดือน</button>
+      </div>
       <div id="dateWrap" class="filter-control date-control">
         <span class="filter-symbol date-icon" aria-hidden="true"></span>
         <input id="date" type="hidden">
@@ -2374,29 +3015,39 @@
 
     <section id="mainPanel" class="panel card"></section>
 
-    <div class="bottom-actions">
-      <button id="pdfBtn" class="primary-button" type="button">PDF</button>
-    </div>
   </main>
+
+  <section id="detailModal" class="detail-modal hidden" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <div id="detailSheet" class="detail-sheet">
+      <div class="detail-head">
+        <div>
+          <h2 id="detailTitle" class="detail-title">รายละเอียด</h2>
+          <div id="detailSubtitle" class="detail-subtitle"></div>
+        </div>
+        <button id="detailClose" class="detail-close" type="button" aria-label="ปิด">×</button>
+      </div>
+      <div id="detailList" class="detail-list"></div>
+    </div>
+  </section>
 
   <nav class="floating-bottom-nav" aria-label="เมนูหลัก">
     <a href="index.html" data-index="0" aria-label="M1 Good Good">
-      <img src="ggicon.webp" alt="">
+      <img src="ggicon.png" alt="">
     </a>
     <a href="dashboard.html" data-index="1" aria-label="M1 DD dashboard" aria-current="page">
-      <img src="m1ddicon.webp" alt="">
+      <img src="m1ddicon.png" alt="">
     </a>
     <a href="dashboard.html" data-index="2" aria-label="ACT ม.1">
-      <img src="m1-logo.webp" alt="">
+      <img src="m1-logo.png" alt="">
     </a>
   </nav>
 
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzQ8YCMoXcem6E64Eqfdbl-7ogx5mIfVor6kjV5xivy34xSjItMmU56rGVN6KhU-YAgiA/exec";
-    const ROOMS = ["ALL", "ม.1/1", "ม.1/2", "ม.1/3", "ม.1/4", "ม.1/5", "ม.1/6", "ม.1/7", "ม.1/A", "ม.1/B"];
+    const ROOMS = ["ALL", "ม.1/1", "ม.1/2", "ม.1/3", "ม.1/4", "ม.1/5", "ม.1/6", "ม.1/7", "ม.1/8", "ม.1/A", "ม.1/B"];
     const FALLBACK = {
       success: true,
-      mode: "daily",
+      mode: "academic",
       total: 15,
       byType: {"สายเช้า": 4, "สายเที่ยง": 3, "สายพัก 10": 5, "ขาดแถวเที่ยง": 3, "เครื่องแต่งกาย": 4, "อื่น ๆ": 0},
       byRoom: {"ม.1/1": 2, "ม.1/2": 1, "ม.1/3": 1, "ม.1/4": 0},
@@ -2433,6 +3084,14 @@
       "เครื่องแต่งกาย": ["#2e9b63", "rgba(225, 249, 235, .9)", "rgba(66, 184, 112, .24)", "rgba(66, 184, 112, .12)"],
       "อื่น ๆ": ["#6b7280", "rgba(244, 246, 248, .9)", "rgba(170, 180, 194, .24)", "rgba(120, 135, 150, .10)"]
     };
+    const BEHAVIOR_IMAGES = {
+      "สายเช้า": "behavior-morning.webp",
+      "สายเที่ยง": "behavior-lunch.webp",
+      "สายพัก 10": "behavior-break10.webp",
+      "ขาดแถวเที่ยง": "behavior-missing-lunch.webp",
+      "เครื่องแต่งกาย": "behavior-uniform.webp",
+      "อื่น ๆ": "behavior-other.webp"
+    };
     function toneStyle(source, fallback = "ALL") {
       const [text, bg, line, shadow] = source || ROOM_TONES[fallback] || ROOM_TONES.ALL;
       const cardTop = bg.replace(".92)", ".82)").replace(".9)", ".82)");
@@ -2441,6 +3100,7 @@
     }
     const roomToneStyle = room => toneStyle(ROOM_TONES[room] || ROOM_TONES.ALL);
     const behaviorToneStyle = behavior => toneStyle(BEHAVIOR_TONES[behavior] || BEHAVIOR_TONES["อื่น ๆ"]);
+    const behaviorImage = behavior => BEHAVIOR_IMAGES[behavior] || BEHAVIOR_IMAGES["อื่น ๆ"];
     let feedbackAudioCtx = null;
     let lastFeedbackAt = 0;
     function playTapTone(kind = "tap") {
@@ -2534,6 +3194,25 @@
 
     function thisMonth() {
       return new Date().toISOString().slice(0, 7);
+    }
+
+    function currentAcademicYear() {
+      const now = new Date();
+      const year = now.getFullYear();
+      return String(now.getMonth() + 1 >= 5 ? year : year - 1);
+    }
+
+    function dashboardPeriod() {
+      if (state.mode === "academic") return "year";
+      if (state.mode === "monthly") return "month";
+      return "today";
+    }
+
+    function formatUpdatedAt(value) {
+      if (!value) return "";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return String(value);
+      return date.toLocaleString("th-TH", {dateStyle: "short", timeStyle: "short"});
     }
 
     function parseDateValue(value) {
@@ -2822,6 +3501,37 @@
       };
     }
 
+    function behaviorDetailStudents(behavior) {
+      const records = roomSourceRecords().filter(student => student.behaviorType === behavior);
+      const fallback = (state.data.topStudents || [])
+        .filter(student => (state.room === "ALL" || student.room === state.room) && student.behaviorType === behavior);
+      return aggregateStudents(records.length ? records : fallback, false)
+        .sort((a, b) => b.count - a.count || a.fullName.localeCompare(b.fullName, "th"));
+    }
+
+    function openBehaviorDetails(behavior) {
+      const students = behaviorDetailStudents(behavior);
+      const tone = BEHAVIOR_TONES[behavior] || BEHAVIOR_TONES["อื่น ๆ"];
+      $("detailSheet").style.setProperty("--modal-accent", tone[0]);
+      $("detailTitle").textContent = behavior;
+      $("detailSubtitle").textContent = state.mode === "academic" ? "รายชื่อนักเรียนที่ถูกบันทึกในปีการศึกษานี้" : "รายชื่อนักเรียนในช่วงเวลาที่เลือก";
+      $("detailList").innerHTML = students.length ? students.map(student => `
+        <a class="detail-person" href="${escapeHtml(studentHistoryHref(student))}" aria-label="ดูประวัติ ${escapeHtml(student.fullName)}">
+          <div>
+            <div class="detail-person-name">${escapeHtml(student.fullName)}</div>
+            <div class="detail-person-meta">${escapeHtml(student.room)} · เลขที่ ${escapeHtml(student.number)} · ${escapeHtml(student.studentId)}</div>
+          </div>
+          <div class="detail-count">${asNumber(student.count)} ครั้ง</div>
+        </a>
+      `).join("") : `<div class="empty">ยังไม่มีรายชื่อนักเรียนในหมวดนี้</div>`;
+      $("detailModal").classList.remove("hidden");
+      tactileFeedback($("detailSheet"), "select");
+    }
+
+    function closeBehaviorDetails() {
+      $("detailModal").classList.add("hidden");
+    }
+
     function renderRooms() {
       $("roomStrip").innerHTML = ROOMS.map(room => {
         const label = room === "ALL" ? "ทุกห้อง" : room;
@@ -2833,6 +3543,34 @@
     function closeDateMenus() {
       $("dateMenu").classList.add("hidden");
       $("monthMenu").classList.add("hidden");
+    }
+
+    function updateFloatingPanelPosition() {
+      const top = document.querySelector(".top");
+      if (!top) return;
+      const bottom = Math.round(top.getBoundingClientRect().bottom + 10);
+      document.documentElement.style.setProperty("--float-panel-top", `${bottom}px`);
+    }
+
+    function syncFloatingBackdrop() {
+      const hasPanelOpen = !$("filterPanel").classList.contains("hidden") || !$("searchPanel").classList.contains("hidden");
+      $("floatingBackdrop").classList.toggle("hidden", !hasPanelOpen);
+      document.body.classList.toggle("floating-panel-open", hasPanelOpen);
+    }
+
+    function closeFloatingPanels(except = "") {
+      if (except !== "filter") {
+        $("filterPanel").classList.add("hidden");
+        $("filterBtn").classList.remove("is-active");
+        $("filterBtn").setAttribute("aria-expanded", "false");
+        closeDateMenus();
+      }
+      if (except !== "search") {
+        $("searchPanel").classList.add("hidden");
+        $("searchToggle").classList.remove("is-active");
+        $("searchToggle").setAttribute("aria-expanded", "false");
+      }
+      syncFloatingBackdrop();
     }
 
     function renderDateMenu() {
@@ -2913,7 +3651,11 @@
 
     function renderStatus() {
       $("liveBadge").textContent = "พร้อม";
-      $("status").textContent = "";
+      const updated = formatUpdatedAt(state.data.updatedAt);
+      const source = state.data.summaryMissing ? "ยังไม่มี Summary" : state.data.cacheHit ? "จาก Cache" : "จาก Summary";
+      $("status").textContent = updated
+        ? `ข้อมูลล่าสุดเมื่อ ${updated} · ${source} · ข้อมูลอัปเดตอัตโนมัติทุก 1 นาที`
+        : "ข้อมูลอัปเดตอัตโนมัติทุก 1 นาที";
     }
 
     let stackFrame = 0;
@@ -2922,6 +3664,26 @@
       stackFrame = requestAnimationFrame(() => {
         const panel = $("mainPanel");
         if (!panel) return;
+        const carousel = panel.querySelector(".behavior-carousel");
+        if (carousel) {
+          const centerX = carousel.getBoundingClientRect().left + carousel.clientWidth / 2;
+          let activeCard = null;
+          let activeDistance = Infinity;
+          const cards = [...carousel.querySelectorAll(".behavior-summary-card")];
+          cards.forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const distance = Math.abs((rect.left + rect.width / 2) - centerX);
+            if (distance < activeDistance) {
+              activeDistance = distance;
+              activeCard = card;
+            }
+          });
+          cards.forEach((card, index) => {
+            card.classList.toggle("is-focused", card === activeCard);
+            card.style.zIndex = card === activeCard ? "30" : String(20 - index);
+          });
+          return;
+        }
         const cards = [...panel.querySelectorAll(".stack-card")];
         const sticky = panel.querySelector(".panel-sticky");
         const stickyBottom = sticky ? sticky.getBoundingClientRect().bottom : panel.getBoundingClientRect().top;
@@ -2956,16 +3718,34 @@
             <h2>${escapeHtml(title)}</h2>
             <div class="status">${entries.length} ประเภท</div>
           </div>
-          <div class="unit-note">ตัวเลขด้านขวาเป็นจำนวนครั้ง</div>
         </div>
-        <div class="bars stack-list">
-          ${entries.map(([name, count]) => `
-            <div class="bar-row stack-card" style="${behaviorToneStyle(name)}">
-              <div class="bar-name">${escapeHtml(name)}</div>
-              <div class="bar-track"><span style="--w:${Math.round(asNumber(count) / max * 100)}%"></span></div>
-              <div class="bar-count">${asNumber(count)}</div>
-            </div>
-          `).join("")}
+        <div class="bars behavior-carousel" onscroll="updateStackCards()">
+          ${entries.map(([name, count]) => {
+            const stats = behaviorStats(name, count);
+            const icon = {"สายเช้า": "☀", "สายเที่ยง": "☼", "สายพัก 10": "⌁", "ขาดแถวเที่ยง": "⊘", "เครื่องแต่งกาย": "◈", "อื่น ๆ": "•••"}[name] || "•";
+            return `
+            <article class="behavior-summary-card" style="${behaviorToneStyle(name)}" aria-label="${escapeHtml(name)} ${asNumber(count)} ครั้ง">
+              <div class="behavior-summary-top">
+                <div class="behavior-summary-icon" aria-hidden="true">${icon}</div>
+                <div>
+                  <h3 class="behavior-summary-name">${escapeHtml(name)}</h3>
+                  <div class="behavior-summary-sub">${state.mode === "academic" ? "รวมทั้งปีการศึกษา" : "ช่วงที่เลือก"}</div>
+                </div>
+                <button class="behavior-detail-button" type="button" data-behavior-detail="${escapeHtml(name)}">รายละเอียด</button>
+              </div>
+              <div class="behavior-summary-stats">
+                <div class="behavior-summary-stat">
+                  <div class="behavior-summary-number">${asNumber(count)}</div>
+                  <div class="behavior-summary-label">ครั้ง</div>
+                </div>
+                <div class="behavior-summary-stat">
+                  <div class="behavior-summary-number">${stats.people}</div>
+                  <div class="behavior-summary-label">คน</div>
+                </div>
+              </div>
+            </article>
+          `;
+          }).join("")}
         </div>
       `;
     }
@@ -3002,53 +3782,6 @@
           ${students.length ? students.map(student => studentCard(student, {hideCount: mode === "recent", showDate: mode === "recent"})).join("") : `<div class="empty">${escapeHtml(emptyText)}</div>`}
         </div>
       `;
-    }
-
-    function reportPreviewHtml(title, content, filename) {
-      const returnUrl = escapeHtml(location.href);
-      return `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${escapeHtml(title)}</title><link href="https://cdn.jsdelivr.net/gh/lazywasabi/thai-web-fonts@7/fonts/LINESeedSansTH/LINESeedSansTH.css" rel="stylesheet"><style>*{box-sizing:border-box;font-family:'LINE Seed Sans TH','Noto Sans Thai',Arial,sans-serif}body{margin:0;background:#f6f8fb;color:#172033}.report-toolbar{position:sticky;top:0;z-index:10;display:flex;gap:8px;align-items:center;justify-content:space-between;padding:12px max(14px,env(safe-area-inset-left)) 12px;background:rgba(255,255,255,.92);border-bottom:1px solid #e2e8f0;backdrop-filter:blur(16px)}.toolbar-title{font-weight:620;color:#28364a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.toolbar-actions{display:flex;gap:8px}.tool-btn{min-height:42px;border:1px solid #d9e5f2;border-radius:999px;background:#fff;color:#225caa;padding:0 14px;font-weight:560;box-shadow:0 8px 18px rgba(31,45,70,.08)}.tool-btn.print{background:#e7f1ff}.tool-btn.back{color:#59687a}.page{width:min(100%,900px);margin:0 auto;padding:22px 16px 80px}.card{border:1px solid #d9e2ef;border-radius:16px;padding:18px;margin-bottom:18px;background:white}h1{font-size:26px;margin:0 0 8px;font-weight:620}h2{font-size:18px;margin:22px 0 10px;font-weight:620}.meta{font-weight:520;color:#58657a;line-height:1.65}.table-wrap{overflow:auto;background:white;border:1px solid #d9e2ef;border-radius:14px;margin-bottom:18px}table{width:100%;border-collapse:collapse;font-size:14px;min-width:620px}th,td{border:1px solid #d9e2ef;padding:10px;text-align:left;vertical-align:top}th{background:#eef6ff;font-weight:620}.summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.summary-box{border:1px solid #d9e2ef;border-radius:14px;background:#f8fbff;padding:12px}.summary-value{font-size:24px;font-weight:620}.summary-label{color:#697386;font-size:13px}.footer{margin-top:18px;color:#697386;font-size:12px}@media print{body{background:white}.report-toolbar{display:none}.page{width:auto;padding:18mm}.card,.table-wrap{break-inside:avoid}}</style></head><body><div class="report-toolbar"><button class="tool-btn back" type="button" onclick="goBack()">กลับ</button><div class="toolbar-title">${escapeHtml(title)}</div><div class="toolbar-actions"><button class="tool-btn" type="button" onclick="downloadHtml()">ดาวน์โหลดไฟล์</button><button class="tool-btn print" type="button" onclick="window.print()">พิมพ์ / บันทึก PDF</button></div></div><main class="page">${content}</main><script>const returnUrl='${returnUrl}';const filename='${escapeHtml(filename)}';function goBack(){if(history.length>1)history.back();else location.href=returnUrl}function downloadHtml(){const blob=new Blob([document.documentElement.outerHTML],{type:'text/html;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename.replace(/\\.pdf$/i,'.html');document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},800)}<\\/script></body></html>`;
-    }
-
-    function openReportPreview(title, content, filename) {
-      const blob = new Blob([reportPreviewHtml(title, content, filename)], {type: "text/html;charset=utf-8"});
-      location.href = URL.createObjectURL(blob);
-    }
-
-    function reportRows(entries) {
-      return entries.map(([name, count], index) => `<tr><td>${index + 1}</td><td>${escapeHtml(name)}</td><td>${asNumber(count)}</td></tr>`).join("");
-    }
-
-    function studentRows(students, includeCount = true) {
-      return students.map((student, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(student.fullName)}</td><td>${escapeHtml(student.room)}</td><td>${escapeHtml(student.number)}</td><td>${escapeHtml(student.studentId)}</td><td>${escapeHtml(student.behaviorType)}</td>${includeCount ? `<td>${asNumber(student.count)}</td>` : ""}<td>${escapeHtml(student.time || "-")}</td></tr>`).join("");
-    }
-
-    function exportDashboardPdf() {
-      const dateText = state.mode === "daily" ? formatDateDisplay($("date").value) : formatMonthDisplay($("month").value);
-      const modeText = state.mode === "daily" ? "รายวัน" : "รายเดือน";
-      const typeEntries = sortNamedEntries(Object.entries(state.data.byType || {}));
-      const roomEntries = sortNamedEntries(Object.entries(state.data.byRoom || {}));
-      const topStudents = mergedStudents("overview");
-      const recent = mergedStudents("recent");
-      const title = `ภาพรวม M1 DD ${modeText} ${dateText}`;
-      const content = `
-        <div class="card">
-          <h1>ภาพรวม M1 DD</h1>
-          <div class="meta">${escapeHtml(modeText)} · ${escapeHtml(dateText)}<br>ห้อง: ${escapeHtml(state.room === "ALL" ? "ทุกห้อง" : state.room)} · พฤติกรรม: ${escapeHtml(state.behavior === "ALL" ? "ทุกพฤติกรรม" : state.behavior)}</div>
-          <div class="summary-grid">
-            <div class="summary-box"><div class="summary-value">${asNumber(state.data.total)}</div><div class="summary-label">จำนวนครั้งทั้งหมด</div></div>
-            <div class="summary-box"><div class="summary-value">${topStudents.length}</div><div class="summary-label">รายชื่อนักเรียนในมุมมองนี้</div></div>
-          </div>
-        </div>
-        <h2>แยกตามประเภทพฤติกรรม</h2>
-        <div class="table-wrap"><table><thead><tr><th>#</th><th>พฤติกรรม</th><th>จำนวนครั้ง</th></tr></thead><tbody>${reportRows(typeEntries)}</tbody></table></div>
-        <h2>แยกตามห้อง</h2>
-        <div class="table-wrap"><table><thead><tr><th>#</th><th>ห้อง</th><th>จำนวนครั้ง</th></tr></thead><tbody>${reportRows(roomEntries)}</tbody></table></div>
-        <h2>รายชื่อนักเรียน</h2>
-        <div class="table-wrap"><table><thead><tr><th>#</th><th>ชื่อ</th><th>ห้อง</th><th>เลขที่</th><th>เลขประจำตัว</th><th>พฤติกรรม</th><th>ครั้ง</th><th>เวลา/วันที่</th></tr></thead><tbody>${studentRows(topStudents)}</tbody></table></div>
-        <h2>รายการล่าสุด</h2>
-        <div class="table-wrap"><table><thead><tr><th>#</th><th>ชื่อ</th><th>ห้อง</th><th>เลขที่</th><th>เลขประจำตัว</th><th>พฤติกรรม</th><th>เวลา/วันที่</th></tr></thead><tbody>${studentRows(recent, false)}</tbody></table></div>
-        <div class="footer">ส่งออกจาก ACTMOR 1</div>`;
-      openReportPreview(title, content, `dashboard-${state.mode}-${dateText.replace(/\//g, "-")}.pdf`);
     }
 
     function trackingCard(student) {
@@ -3102,13 +3835,15 @@
     function renderRoomsPage() {
       if (state.room !== "ALL") return renderRoomBehaviorPage();
 
-      const entries = sortNamedEntries(Object.entries(state.data.byRoom || {}));
+      const entries = sortNamedEntries(ROOMS.filter(room => room !== "ALL").map(room => [room, asNumber((state.data.byRoom || {})[room])]));
       const max = Math.max(1, ...entries.map(([, count]) => asNumber(count)));
       if (!entries.length) return `<div class="empty">ยังไม่มีข้อมูลแยกตามห้อง</div>`;
       return `
-        <div class="panel-head">
-          <h2>ภาพรวมห้องเรียน</h2>
-          <div class="status">แตะห้องเพื่อกรอง</div>
+        <div class="panel-sticky">
+          <div class="panel-head">
+            <h2>ภาพรวมห้องเรียน</h2>
+            <div class="status">แตะห้องเพื่อกรอง</div>
+          </div>
         </div>
         <div class="room-grid">
           ${entries.map(([room, count]) => `
@@ -3131,9 +3866,11 @@
       const activeLabel = state.behavior === "ALL" ? "ทุกพฤติกรรม" : state.behavior;
       const allStats = behaviorStats("ALL", state.data.total);
       return `
-        <div class="panel-head">
-          <h2>${escapeHtml(state.room)}</h2>
-          <button class="back-button" type="button" data-room="ALL">ดูทุกห้อง</button>
+        <div class="panel-sticky">
+          <div class="panel-head">
+            <h2>${escapeHtml(state.room)}</h2>
+            <button class="back-button" type="button" data-room="ALL">ดูทุกห้อง</button>
+          </div>
         </div>
         ${entries.length ? `
           <div class="behavior-grid">
@@ -3158,9 +3895,11 @@
             }).join("")}
           </div>
         ` : `<div class="empty">ยังไม่มีข้อมูลพฤติกรรมของห้องนี้ในช่วงเวลาที่เลือก</div>`}
-        <div class="panel-head">
-          <h2>${escapeHtml(activeLabel)}</h2>
-          <div class="status">${students.length} คน · ${students.reduce((sum, student) => sum + asNumber(student.count), 0)} ครั้ง</div>
+        <div class="panel-sticky">
+          <div class="panel-head">
+            <h2>${escapeHtml(activeLabel)}</h2>
+            <div class="status">${students.length} คน · ${students.reduce((sum, student) => sum + asNumber(student.count), 0)} ครั้ง</div>
+          </div>
         </div>
         <div class="student-list">
           ${students.length ? students.map(studentCard).join("") : `<div class="empty">ยังไม่มีรายชื่อนักเรียนในพฤติกรรมนี้</div>`}
@@ -3169,14 +3908,21 @@
     }
 
     function renderMainPanel() {
+      if (!state.query.trim() && state.page === "overview" && state.sort === "room-asc") state.sort = "count-desc";
       document.body.classList.toggle("untimed-page", isUntimedPage());
-      if (isUntimedPage()) $("filterPanel").classList.add("hidden");
+      document.body.classList.toggle("overview-page", !state.query.trim() && state.page === "overview");
+      if (isUntimedPage()) closeFloatingPanels("search");
+      $("mainPanel").classList.toggle("overview-panel", !state.query.trim() && state.page === "overview");
+      $("sortButton").textContent = SORT_LABELS[state.sort] || SORT_LABELS["count-desc"];
+      document.querySelectorAll("[data-sort]").forEach(button => button.classList.toggle("active", button.dataset.sort === state.sort));
       if (state.query.trim()) {
         const students = dashboardSearchStudents();
         $("mainPanel").innerHTML = `
-          <div class="panel-head">
+          <div class="panel-sticky">
+            <div class="panel-head">
             <h2>ผลการค้นหา</h2>
             <div class="status">${state.searchLoading ? "กำลังค้นหา..." : `${students.length} รายการ`}</div>
+            </div>
           </div>
           <div class="student-list">
             ${state.searchLoading ? `<div class="empty">กำลังค้นหาจากรายชื่อนักเรียน</div>` : students.length ? students.map(student => studentCard(student)).join("") : `<div class="empty">ไม่พบนักเรียนจากคำค้นนี้</div>`}
@@ -3208,13 +3954,17 @@
       $("liveBadge").innerHTML = `<span class="loading-dots" aria-label="กำลังโหลด"><span></span><span></span><span></span></span>`;
       $("status").textContent = "";
       try {
+        const period = dashboardPeriod();
         const params = {
-          action: "getDashboard",
-          mode: isUntimedPage() ? "all" : state.mode,
-          room: state.room
+          action: state.room === "ALL" ? "getDashboardOverview" : "getRoomDashboard",
+          period,
+          room: state.room,
+          academicYear: currentAcademicYear()
         };
-        if (!isUntimedPage()) {
+        if (period === "today") {
           params.date = $("date").value;
+        }
+        if (period === "month") {
           params.month = $("month").value;
         }
         const data = await jsonp(params);
@@ -3230,11 +3980,23 @@
     $("date").value = today();
     $("month").value = thisMonth();
     updateDateLabels();
+    $("dateWrap").classList.remove("hidden");
     $("monthWrap").classList.add("hidden");
     installSwalFeedback();
 
+    $("academicBtn").addEventListener("click", () => {
+      state.mode = "academic";
+      $("academicBtn").classList.add("active");
+      $("dailyBtn").classList.remove("active");
+      $("monthlyBtn").classList.remove("active");
+      $("dateWrap").classList.add("hidden");
+      $("monthWrap").classList.add("hidden");
+      loadDashboard();
+    });
+
     $("dailyBtn").addEventListener("click", () => {
       state.mode = "daily";
+      $("academicBtn").classList.remove("active");
       $("dailyBtn").classList.add("active");
       $("monthlyBtn").classList.remove("active");
       $("dateWrap").classList.remove("hidden");
@@ -3244,6 +4006,7 @@
 
     $("monthlyBtn").addEventListener("click", () => {
       state.mode = "monthly";
+      $("academicBtn").classList.remove("active");
       $("monthlyBtn").classList.add("active");
       $("dailyBtn").classList.remove("active");
       $("monthWrap").classList.remove("hidden");
@@ -3251,7 +4014,25 @@
       loadDashboard();
     });
 
-    $("filterBtn").addEventListener("click", () => $("filterPanel").classList.toggle("hidden"));
+    $("filterBtn").addEventListener("click", () => {
+      updateFloatingPanelPosition();
+      closeFloatingPanels("filter");
+      const hidden = $("filterPanel").classList.toggle("hidden");
+      $("filterBtn").classList.toggle("is-active", !hidden);
+      $("filterBtn").setAttribute("aria-expanded", String(!hidden));
+      syncFloatingBackdrop();
+    });
+    $("searchToggle").addEventListener("click", () => {
+      updateFloatingPanelPosition();
+      closeFloatingPanels("search");
+      const hidden = $("searchPanel").classList.toggle("hidden");
+      $("searchToggle").classList.toggle("is-active", !hidden);
+      $("searchToggle").setAttribute("aria-expanded", String(!hidden));
+      syncFloatingBackdrop();
+      if (!hidden) setTimeout(() => $("searchInput").focus(), 60);
+    });
+    $("refreshBtn").addEventListener("click", loadDashboard);
+    $("floatingBackdrop").addEventListener("click", () => closeFloatingPanels());
     $("dateButton").addEventListener("click", () => openDateMenu("date"));
     $("monthButton").addEventListener("click", () => openDateMenu("month"));
     $("dateMenu").addEventListener("click", event => {
@@ -3286,9 +4067,19 @@
     $("roomRight").addEventListener("click", () => scrollRooms(1));
     $("roomStrip").addEventListener("scroll", updateRoomArrows, {passive: true});
     $("mainPanel").addEventListener("scroll", updateStackCards, {passive: true});
+    $("mainPanel").addEventListener("scrollend", updateStackCards);
+    $("mainPanel").addEventListener("pointerup", updateStackCards);
+    $("detailClose").addEventListener("click", closeBehaviorDetails);
+    $("detailModal").addEventListener("click", event => {
+      if (event.target === $("detailModal")) closeBehaviorDetails();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") closeBehaviorDetails();
+    });
     window.addEventListener("resize", () => {
       updateRoomArrows();
       updateStackCards();
+      updateFloatingPanelPosition();
     });
     $("date").addEventListener("change", loadDashboard);
     $("month").addEventListener("change", loadDashboard);
@@ -3312,7 +4103,6 @@
     document.querySelectorAll("[data-sort]").forEach(button => {
       button.addEventListener("click", () => updateSort(button.dataset.sort));
     });
-    $("pdfBtn").addEventListener("click", exportDashboardPdf);
     document.querySelectorAll(".floating-bottom-nav a").forEach(link => {
       link.addEventListener("click", event => {
         if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -3330,13 +4120,19 @@
       const tab = event.target.closest("[data-page]");
       const room = event.target.closest("[data-room]");
       const behavior = event.target.closest("[data-behavior]");
+      const detail = event.target.closest("[data-behavior-detail]");
       if (!event.target.closest(".sort-control")) {
         $("sortMenu").classList.add("hidden");
         $("sortButton").setAttribute("aria-expanded", "false");
       }
       if (!event.target.closest(".date-control")) closeDateMenus();
+      if (detail) {
+        openBehaviorDetails(detail.dataset.behaviorDetail);
+        return;
+      }
       if (tab) {
         state.page = tab.dataset.page;
+        if (state.page === "overview") state.room = "ALL";
         if (state.page !== "rooms") state.behavior = "ALL";
         document.querySelectorAll("[data-page]").forEach(button => button.classList.toggle("active", button === tab));
         loadDashboard();
@@ -3350,6 +4146,11 @@
         state.behavior = behavior.dataset.behavior;
         renderMainPanel();
       }
+      const flipCard = event.target.closest("[data-flip-card]");
+      if (flipCard) {
+        flipCard.classList.toggle("is-flipped");
+        flipCard.scrollIntoView({behavior: "smooth", inline: "center", block: "nearest"});
+      }
     });
 
     if ("serviceWorker" in navigator) {
@@ -3361,6 +4162,10 @@
 
     renderMainPanel();
     loadDashboard();
+    setInterval(() => {
+      if (document.hidden) return;
+      loadDashboard();
+    }, 60000);
   </script>
 </body>
 </html>
