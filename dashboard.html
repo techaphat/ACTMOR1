@@ -1254,6 +1254,40 @@
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, .26);
     }
 
+    .room-strip .chip {
+      position: relative;
+      isolation: isolate;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .room-strip .chip.active {
+      color: var(--tone-text, #1f65c7) !important;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(242, 249, 255, .82)),
+        linear-gradient(135deg, var(--tone-card-top, rgba(229, 242, 255, .92)), var(--tone-card-bottom, rgba(232, 251, 255, .76))) !important;
+      border-color: color-mix(in srgb, var(--tone-accent, #3f7fd5), #1f65c7 22%) !important;
+      box-shadow:
+        inset 0 0 0 2px color-mix(in srgb, var(--tone-accent, #3f7fd5), white 34%),
+        inset 0 1px 0 rgba(255, 255, 255, .96) !important;
+      transform: none;
+    }
+
+    .room-strip .chip.active::after {
+      content: "";
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--tone-accent, #3f7fd5);
+      transform: translateY(-50%);
+    }
+
+    .room-strip .chip.active {
+      padding-right: 28px;
+    }
+
     .panel {
       padding: 12px;
       min-height: 220px;
@@ -4049,6 +4083,8 @@
       grid-auto-rows: max-content !important;
       align-items: stretch !important;
       align-content: start !important;
+      mask-image: linear-gradient(to bottom, black 0, black calc(100% - 98px), rgba(0, 0, 0, .42) calc(100% - 42px), transparent 100%) !important;
+      -webkit-mask-image: linear-gradient(to bottom, black 0, black calc(100% - 98px), rgba(0, 0, 0, .42) calc(100% - 42px), transparent 100%) !important;
     }
 
     body.overview-page #mainPanel .overview-list > .overview-chart-card,
@@ -4081,6 +4117,8 @@
       body.overview-page #mainPanel .overview-list {
         gap: 12px !important;
         padding-bottom: calc(178px + env(safe-area-inset-bottom)) !important;
+        mask-image: linear-gradient(to bottom, black 0, black calc(100% - 112px), rgba(0, 0, 0, .38) calc(100% - 48px), transparent 100%) !important;
+        -webkit-mask-image: linear-gradient(to bottom, black 0, black calc(100% - 112px), rgba(0, 0, 0, .38) calc(100% - 48px), transparent 100%) !important;
       }
 
       body.overview-page #mainPanel .overview-list > .overview-chart-card {
@@ -4089,6 +4127,34 @@
 
       body.overview-page #mainPanel .overview-list > .behavior-summary-card {
         min-height: 216px !important;
+      }
+    }
+
+    .room-strip .chip.active {
+      color: var(--tone-text, #1f65c7) !important;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .94), rgba(239, 247, 255, .84)),
+        linear-gradient(135deg, var(--tone-card-top, rgba(229, 242, 255, .92)), var(--tone-card-bottom, rgba(232, 251, 255, .76))) !important;
+      border-color: color-mix(in srgb, var(--tone-accent, #3f7fd5), #1f65c7 24%) !important;
+      box-shadow:
+        inset 0 0 0 2px color-mix(in srgb, var(--tone-accent, #3f7fd5), white 34%),
+        inset 0 1px 0 rgba(255, 255, 255, .96) !important;
+      transform: none !important;
+      padding-right: 28px !important;
+    }
+
+    @media (max-width: 430px) {
+      .room-strip .chip.active {
+        color: var(--tone-text, #1f65c7) !important;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, .94), rgba(239, 247, 255, .84)),
+          linear-gradient(135deg, var(--tone-card-top, rgba(229, 242, 255, .92)), var(--tone-card-bottom, rgba(232, 251, 255, .76))) !important;
+        border-color: color-mix(in srgb, var(--tone-accent, #3f7fd5), #1f65c7 24%) !important;
+        box-shadow:
+          inset 0 0 0 2px color-mix(in srgb, var(--tone-accent, #3f7fd5), white 34%),
+          inset 0 1px 0 rgba(255, 255, 255, .96) !important;
+        transform: none !important;
+        padding-right: 28px !important;
       }
     }
 
@@ -4815,9 +4881,15 @@
     function renderRooms() {
       $("roomStrip").innerHTML = ROOMS.map(room => {
         const label = room === "ALL" ? "ทุกห้อง" : room;
-        return `<button class="chip tone-pill ${state.room === room ? "active" : ""}" style="${roomToneStyle(room)}" type="button" data-room="${escapeHtml(room)}">${escapeHtml(label)}</button>`;
+        const active = state.room === room;
+        return `<button class="chip tone-pill ${active ? "active" : ""}" style="${roomToneStyle(room)}" type="button" data-room="${escapeHtml(room)}" ${active ? `aria-current="true" aria-label="กำลังดู ${escapeHtml(label)}"` : `aria-label="ดู ${escapeHtml(label)}"`}>${escapeHtml(label)}</button>`;
       }).join("");
       updateRoomArrows();
+      $("roomStrip").querySelector(".chip.active")?.scrollIntoView({inline: "center", block: "nearest"});
+    }
+
+    function roomFilterLabel() {
+      return state.room === "ALL" ? "ทุกห้อง" : state.room;
     }
 
     function closeDateMenus() {
@@ -5090,7 +5162,7 @@
       return `
         <div class="panel-sticky">
           <div class="panel-head">
-            <h2>${escapeHtml(title)}</h2>
+            <h2>${escapeHtml(title)} · ${escapeHtml(roomFilterLabel())}</h2>
             <div class="status">${students.length} รายการ</div>
           </div>
         </div>
@@ -5137,7 +5209,7 @@
       return `
         <div class="panel-sticky">
           <div class="panel-head">
-            <h2>ติดตามสายเที่ยง</h2>
+            <h2>ติดตามสายเที่ยง · ${escapeHtml(roomFilterLabel())}</h2>
             <div class="status">${reached} คนครบ 3 ครั้ง</div>
           </div>
           <div class="unit-note">เกณฑ์ติดตาม: สายเที่ยงครบ 3 ครั้งต่อ 1 รอบ</div>
