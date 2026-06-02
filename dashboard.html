@@ -430,6 +430,112 @@
       font-weight: 760;
     }
 
+    .dashboard-search-panel {
+      position: relative;
+      display: block;
+    }
+
+    .dashboard-search-field {
+      min-height: 56px;
+      padding: 5px 5px 5px 18px;
+      gap: 10px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .dashboard-search-button {
+      width: 46px;
+      height: 46px;
+      min-height: 46px;
+      border: 1px solid rgba(66, 126, 213, .18);
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: #1f65c7;
+      background: linear-gradient(180deg, rgba(226, 241, 255, .95), rgba(196, 225, 255, .9));
+      box-shadow: 0 12px 24px rgba(66, 126, 213, .16), inset 0 1px 0 rgba(255, 255, 255, .9);
+    }
+
+    .dashboard-search-button::before {
+      content: "";
+      width: 23px;
+      height: 23px;
+      background: currentColor;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z' fill='none' stroke='black' stroke-width='2.45' stroke-linecap='round'/%3E%3Cpath d='M16.1 16.1 21 21' fill='none' stroke='black' stroke-width='2.45' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z' fill='none' stroke='black' stroke-width='2.45' stroke-linecap='round'/%3E%3Cpath d='M16.1 16.1 21 21' fill='none' stroke='black' stroke-width='2.45' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+
+    .search-suggestions {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 8px);
+      z-index: 95;
+      display: grid;
+      gap: 7px;
+      padding: 8px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, .9);
+      border: 1px solid rgba(255, 255, 255, .86);
+      box-shadow: 0 18px 42px rgba(35, 61, 86, .16), inset 0 1px 0 rgba(255, 255, 255, .94);
+      backdrop-filter: blur(18px) saturate(1.15);
+      -webkit-backdrop-filter: blur(18px) saturate(1.15);
+    }
+
+    .search-suggestions.hidden {
+      display: none;
+    }
+
+    .search-suggestion {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid rgba(121, 151, 182, .14);
+      border-radius: 15px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 10px;
+      text-align: left;
+      color: #233348;
+      background: rgba(247, 251, 255, .84);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9);
+    }
+
+    .search-suggestion strong {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+      line-height: 1.2;
+      font-weight: 760;
+    }
+
+    .search-suggestion span {
+      color: #66758a;
+      font-size: 11px;
+      font-weight: 520;
+    }
+
+    .count-badge .count-label {
+      display: block;
+      margin-top: 2px;
+      color: #66758a;
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 520;
+    }
+
+    .count-badge:has(.count-label) {
+      min-width: 58px;
+      align-content: center;
+      gap: 2px;
+      color: #1f65c7;
+      background: rgba(255, 255, 255, .92);
+      box-shadow: 0 12px 20px rgba(33, 67, 86, .12);
+    }
+
     .actions {
       display: flex;
       gap: 7px;
@@ -3505,10 +3611,14 @@
     @media (max-width: 430px) {
       body {
         padding-bottom: calc(190px + env(safe-area-inset-bottom)) !important;
+        overflow-x: hidden !important;
       }
 
       .app {
+        width: 100% !important;
+        max-width: 100vw !important;
         gap: 5px !important;
+        overflow-x: hidden !important;
         padding-bottom: calc(154px + env(safe-area-inset-bottom)) !important;
       }
 
@@ -3519,26 +3629,28 @@
       }
 
       .brand-logo {
-        width: min(140px, 34vw) !important;
-        max-height: 48px !important;
+        width: min(122px, 31vw) !important;
+        max-height: 44px !important;
       }
 
       .top-actions {
-        gap: 5px !important;
+        gap: 4px !important;
+        min-width: 0 !important;
+        justify-content: flex-end !important;
       }
 
       .top-tool,
       .calendar-button {
-        width: 44px !important;
-        min-width: 44px !important;
-        height: 44px !important;
-        flex-basis: 44px !important;
+        width: 40px !important;
+        min-width: 40px !important;
+        height: 40px !important;
+        flex-basis: 40px !important;
       }
 
       .calendar-icon {
-        width: 42px !important;
-        height: 42px !important;
-        border-radius: 13px !important;
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 12px !important;
       }
 
       .calendar-icon::before {
@@ -3550,8 +3662,27 @@
 
       .calendar-icon::after {
         inset: 15px 0 0 !important;
-        font-size: 22px !important;
+        font-size: 21px !important;
         line-height: 1 !important;
+      }
+
+      .top-tool.refresh-tool .refresh-icon {
+        width: 27px !important;
+        height: 27px !important;
+      }
+
+      .top-tool.search-tool::before {
+        width: 24px !important;
+        height: 24px !important;
+      }
+
+      .live {
+        min-width: 52px !important;
+        max-width: 58px !important;
+        min-height: 28px !important;
+        padding: 4px 7px !important;
+        font-size: 11px !important;
+        overflow: hidden !important;
       }
 
       nav.tabs.card {
@@ -3568,20 +3699,46 @@
       }
 
       .panel.overview-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        margin-inline: 0 !important;
         padding-bottom: calc(148px + env(safe-area-inset-bottom)) !important;
       }
 
       .panel.overview-panel .bars.behavior-carousel {
+        width: 100% !important;
+        max-width: 100% !important;
         min-height: 236px !important;
         padding: 4px 0 calc(148px + env(safe-area-inset-bottom)) !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        scroll-padding-inline: 0 !important;
       }
 
       .panel.overview-panel .behavior-summary-card {
+        flex: 0 0 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
         min-height: 224px !important;
         grid-template-rows: auto auto auto !important;
         gap: 10px !important;
         padding: 14px !important;
         border-radius: 24px !important;
+        scroll-snap-align: start !important;
+        overflow: hidden !important;
+      }
+
+      .panel.overview-panel .behavior-summary-top {
+        grid-template-columns: auto minmax(0, 1fr) !important;
+        gap: 9px !important;
+      }
+
+      .panel.overview-panel .behavior-detail-button {
+        grid-column: 1 / -1 !important;
+        justify-self: end !important;
+        min-height: 34px !important;
+        padding-inline: 14px !important;
       }
 
       .behavior-summary-mid {
@@ -3677,10 +3834,13 @@
     <button id="floatingBackdrop" class="floating-backdrop hidden" type="button" aria-label="ปิดแถบลอย"></button>
 
     <section id="searchPanel" class="toolbar card hidden">
-      <label class="search">
-        <span>⌕</span>
-        <input id="searchInput" type="search" placeholder="ค้นหาแล้วแตะชื่อนักเรียนเพื่อดูประวัติ">
-      </label>
+      <div class="dashboard-search-panel">
+        <div class="search dashboard-search-field">
+          <input id="searchInput" type="search" placeholder="พิมพ์ชื่อ ห้อง เลขที่ หรือรหัสนักเรียน">
+          <button id="dashboardSearchBtn" class="dashboard-search-button" type="button" aria-label="ค้นหา"></button>
+        </div>
+        <div id="searchSuggestions" class="search-suggestions hidden"></div>
+      </div>
     </section>
 
     <section id="filterPanel" class="filter-panel card hidden">
@@ -3888,6 +4048,7 @@
     };
     let searchTimer = null;
     let latestSearchQuery = "";
+    let latestSuggestQuery = "";
     const SORT_LABELS = {
       "count-desc": "เรียงตามจำนวนมากสุด",
       "name-asc": "เรียงตามชื่อ",
@@ -4132,10 +4293,9 @@
     }
 
     function combinedStudentRecords() {
-      const records = [
-        ...(state.data.recentRecords || []),
-        ...(state.data.topStudents || [])
-      ];
+      const records = (state.data.recentRecords || []).length
+        ? state.data.recentRecords
+        : (state.data.topStudents || []);
       const seen = new Set();
       return records.filter(record => {
         const key = [
@@ -4192,10 +4352,7 @@
       if (state.searchResults.length) {
         return state.searchResults.map(student => normalizeStudent(student));
       }
-      const source = [
-        ...(state.data.recentRecords || []),
-        ...(state.data.topStudents || [])
-      ];
+      const source = combinedStudentRecords();
       return aggregateStudents(source, false)
         .filter(student => [student.fullName, student.room, student.number, student.studentId, student.behaviorType]
           .join(" ")
@@ -4206,6 +4363,64 @@
           if (state.sort === "room-asc") return a.room.localeCompare(b.room, "th");
           return b.count - a.count;
         });
+    }
+
+    function searchSuggestionStudents(query) {
+      const q = query.trim().toLowerCase();
+      if (q.length < 1) return [];
+      return aggregateStudents(combinedStudentRecords(), false)
+        .filter(student => [student.fullName, student.room, student.number, student.studentId, student.behaviorType]
+          .join(" ")
+          .toLowerCase()
+          .includes(q))
+        .sort((a, b) => b.count - a.count || a.fullName.localeCompare(b.fullName, "th"))
+        .slice(0, 6);
+    }
+
+    function renderSearchSuggestions(query, remoteStudents = []) {
+      const box = $("searchSuggestions");
+      if (!box) return;
+      const local = searchSuggestionStudents(query);
+      const seen = new Set();
+      const students = [...remoteStudents.map(item => normalizeStudent(item)), ...local]
+        .filter(student => {
+          const key = student.studentId || `${student.fullName}|${student.room}|${student.number}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        })
+        .slice(0, 6);
+      if (!query.trim() || !students.length) {
+        box.classList.add("hidden");
+        box.innerHTML = "";
+        return;
+      }
+      box.innerHTML = students.map(student => `
+        <button class="search-suggestion" type="button" data-search-suggestion="${escapeHtml(student.studentId || student.fullName)}">
+          <strong>${escapeHtml(student.fullName)}</strong>
+          <span>${escapeHtml(student.room)} · เลขที่ ${escapeHtml(student.number)} · ${escapeHtml(student.studentId)}</span>
+        </button>
+      `).join("");
+      box.classList.remove("hidden");
+    }
+
+    async function updateSearchSuggestions(query) {
+      const q = query.trim();
+      latestSuggestQuery = q;
+      renderSearchSuggestions(q);
+      if (q.length < 2) return;
+      try {
+        const res = await jsonp({action: "searchStudent", q}, 9000);
+        if (q !== latestSuggestQuery) return;
+        renderSearchSuggestions(q, res && res.success ? (res.students || []) : []);
+      } catch (error) {}
+    }
+
+    function submitDashboardSearch() {
+      const value = $("searchInput").value.trim();
+      $("searchSuggestions")?.classList.add("hidden");
+      clearTimeout(searchTimer);
+      runDashboardSearch(value);
     }
 
     async function runDashboardSearch(query) {
@@ -4303,8 +4518,9 @@
     }
 
     function syncFloatingBackdrop() {
-      const hasPanelOpen = !$("filterPanel").classList.contains("hidden") || !$("searchPanel").classList.contains("hidden");
-      $("floatingBackdrop").classList.toggle("hidden", !hasPanelOpen);
+      const hasBlurPanelOpen = !$("filterPanel").classList.contains("hidden");
+      const hasPanelOpen = hasBlurPanelOpen || !$("searchPanel").classList.contains("hidden");
+      $("floatingBackdrop").classList.toggle("hidden", !hasBlurPanelOpen);
       document.body.classList.toggle("floating-panel-open", hasPanelOpen);
     }
 
@@ -4319,6 +4535,7 @@
         $("searchPanel").classList.add("hidden");
         $("searchToggle").classList.remove("is-active");
         $("searchToggle").setAttribute("aria-expanded", "false");
+        $("searchSuggestions")?.classList.add("hidden");
       }
       syncFloatingBackdrop();
     }
@@ -4524,7 +4741,7 @@
               <span class="tag behavior">${escapeHtml(student.behaviorType)}</span>
             </div>
           </div>
-          ${options.hideCount ? "" : `<div class="count-badge">${student.count}</div>`}
+          ${options.hideCount ? "" : `<div class="count-badge">${student.count}${options.countLabel ? `<span class="count-label">${escapeHtml(options.countLabel)}</span>` : ""}</div>`}
         </a>
       `;
     }
@@ -4669,24 +4886,25 @@
 
     function renderMainPanel() {
       if (!state.query.trim() && state.page === "overview" && state.sort === "room-asc") state.sort = "count-desc";
+      const searchPanelOpen = !$("searchPanel").classList.contains("hidden");
       document.body.classList.toggle("untimed-page", isUntimedPage());
       document.body.classList.toggle("overview-page", !state.query.trim() && state.page === "overview");
       document.body.classList.toggle("fixed-panel-page", !state.query.trim() && (state.page === "follow" || state.page === "recent" || (state.page === "rooms" && state.room === "ALL")));
       if (isUntimedPage()) closeFloatingPanels("search");
-      $("mainPanel").classList.toggle("overview-panel", !state.query.trim() && state.page === "overview");
+      $("mainPanel").classList.toggle("overview-panel", !state.query.trim() && !searchPanelOpen && state.page === "overview");
       $("sortButton").textContent = SORT_LABELS[state.sort] || SORT_LABELS["count-desc"];
       document.querySelectorAll("[data-sort]").forEach(button => button.classList.toggle("active", button.dataset.sort === state.sort));
-      if (state.query.trim()) {
+      if (state.query.trim() || searchPanelOpen) {
         const students = dashboardSearchStudents();
         $("mainPanel").innerHTML = `
           <div class="panel-sticky">
             <div class="panel-head">
             <h2>ผลการค้นหา</h2>
-            <div class="status">${state.searchLoading ? "กำลังค้นหา..." : `${students.length} รายการ`}</div>
+            <div class="status">${state.query.trim() ? (state.searchLoading ? "กำลังค้นหา..." : `${students.length} รายการ`) : "พร้อมค้นหา"}</div>
             </div>
           </div>
           <div class="student-list">
-            ${state.searchLoading ? `<div class="empty">กำลังค้นหาจากรายชื่อนักเรียน</div>` : students.length ? students.map(student => studentCard(student)).join("") : `<div class="empty">ไม่พบนักเรียนจากคำค้นนี้</div>`}
+            ${!state.query.trim() ? `<div class="empty">พิมพ์คำค้นด้านบน แล้วกดปุ่มค้นหา</div>` : state.searchLoading ? `<div class="empty">กำลังค้นหาจากรายชื่อนักเรียน</div>` : students.length ? students.map(student => studentCard(student, {hideCount: true})).join("") : `<div class="empty">ไม่พบนักเรียนจากคำค้นนี้</div>`}
           </div>
         `;
       } else if (state.page === "rooms") {
@@ -4809,7 +5027,16 @@
       $("searchToggle").classList.toggle("is-active", !hidden);
       $("searchToggle").setAttribute("aria-expanded", String(!hidden));
       syncFloatingBackdrop();
+      renderMainPanel();
       if (!hidden) setTimeout(() => $("searchInput").focus(), 60);
+    });
+    $("dashboardSearchBtn").addEventListener("click", submitDashboardSearch);
+    $("searchSuggestions").addEventListener("click", event => {
+      const button = event.target.closest("[data-search-suggestion]");
+      if (!button) return;
+      const name = button.querySelector("strong")?.textContent || button.dataset.searchSuggestion || "";
+      $("searchInput").value = name;
+      submitDashboardSearch();
     });
     $("refreshBtn").addEventListener("click", loadDashboard);
     $("floatingBackdrop").addEventListener("click", () => closeFloatingPanels());
@@ -4865,8 +5092,21 @@
     $("month").addEventListener("change", loadDashboard);
     $("searchInput").addEventListener("input", event => {
       const value = event.target.value;
+      renderSearchSuggestions(value);
       clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => runDashboardSearch(value), 220);
+      searchTimer = setTimeout(() => updateSearchSuggestions(value), 180);
+      if (!value.trim() && state.query) {
+        state.query = "";
+        state.searchResults = [];
+        state.searchLoading = false;
+        renderMainPanel();
+      }
+    });
+    $("searchInput").addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        submitDashboardSearch();
+      }
     });
     function updateSort(value) {
       state.sort = value;
