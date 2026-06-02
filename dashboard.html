@@ -2622,7 +2622,7 @@
       }
 
       .app {
-        padding-bottom: calc(170px + env(safe-area-inset-bottom));
+        padding-bottom: calc(90px + env(safe-area-inset-bottom));
       }
     }
 
@@ -2891,15 +2891,15 @@
       }
 
       .panel {
-        margin-bottom: 124px;
-        max-height: min(58dvh, 520px);
-        padding-bottom: 128px;
+        margin-bottom: 10px;
+        max-height: none;
+        padding-bottom: 14px;
       }
 
       .panel.overview-panel {
         max-height: none;
         overflow-y: visible;
-        padding-bottom: calc(118px + env(safe-area-inset-bottom));
+        padding-bottom: 14px;
       }
 
       .panel.overview-panel .panel-sticky {
@@ -2931,33 +2931,36 @@
       }
 
       .brand-logo {
-        width: min(176px, 42vw);
-        max-height: 54px;
+        width: min(148px, 36vw);
+        max-height: 50px;
       }
 
       .top-actions {
-        gap: 6px;
+        gap: 5px;
       }
 
       .top-tool {
-        width: 46px;
-        height: 46px;
-        flex: 0 0 46px;
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
       }
 
       .calendar-button {
-        width: 46px;
-        min-width: 46px;
-        height: 46px;
+        width: 42px;
+        min-width: 42px;
+        height: 42px;
       }
 
       .calendar-icon {
-        width: 40px;
-        height: 40px;
+        width: 38px;
+        height: 38px;
       }
 
       .live {
-        display: none;
+        min-width: 48px;
+        min-height: 28px;
+        padding: 4px 8px;
+        font-size: 11px;
       }
 
       .tabs {
@@ -2972,7 +2975,7 @@
 
       .panel.overview-panel {
         margin-top: -2px;
-        padding-inline: 0;
+        padding: 0 0 14px;
       }
 
       .panel-sticky,
@@ -3000,6 +3003,18 @@
 
       .behavior-summary-name {
         font-size: clamp(18px, 5.5vw, 22px);
+      }
+
+      .panel .bars,
+      .panel .student-list,
+      .room-grid {
+        padding-bottom: 0;
+      }
+
+      .panel-sticky + .student-list,
+      .panel-sticky + .room-grid,
+      .panel-sticky + .bars {
+        margin-bottom: 0;
       }
     }
 
