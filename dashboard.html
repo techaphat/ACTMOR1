@@ -351,7 +351,8 @@
 
     body.untimed-page .segmented,
     body.untimed-page .actions,
-    body.untimed-page #filterPanel {
+    body.untimed-page #filterPanel,
+    body.untimed-page #filterBtn {
       display: none !important;
     }
 
@@ -2968,11 +2969,20 @@
         min-height: 50px;
         padding: 5px 7px;
         gap: 5px;
+        grid-template-columns: repeat(4, 1fr) !important;
+        place-items: stretch;
       }
 
       .tab {
         min-height: 38px;
         font-size: 11.5px;
+        width: 100% !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        border-radius: 999px;
       }
 
       .panel.overview-panel {
@@ -2993,7 +3003,11 @@
         padding: 6px 0 18px;
         gap: 8px !important;
         scroll-padding-inline: 0;
-        contain: layout paint;
+        contain: none;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: 0 !important;
+        overflow-y: visible;
       }
 
       .behavior-summary-card {
@@ -3023,6 +3037,12 @@
         min-height: 156px;
         padding: 16px;
         border-radius: 28px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .94) !important;
+      }
+
+      .behavior-summary-card.is-focused {
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .94) !important;
+        transform: none;
       }
 
       .behavior-summary-icon {
@@ -3095,6 +3115,361 @@
       }
     }
 
+    .tabs {
+      width: min(84vw, 292px) !important;
+      min-height: 50px !important;
+      padding: 5px 7px !important;
+      gap: 5px !important;
+      grid-template-columns: repeat(4, 1fr) !important;
+      place-items: stretch !important;
+    }
+
+    .tab {
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 38px !important;
+      padding: 0 !important;
+      display: grid !important;
+      place-items: center !important;
+      text-align: center !important;
+      font-size: clamp(11px, 2.7vw, 12px) !important;
+      line-height: 1 !important;
+    }
+
+    .panel.overview-panel {
+      overflow: visible !important;
+      padding-bottom: 0 !important;
+    }
+
+    .panel.overview-panel .bars.behavior-carousel {
+      min-height: clamp(260px, 38dvh, 520px) !important;
+      padding: 6px 0 0 !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      contain: none !important;
+      overflow-y: visible !important;
+    }
+
+    .panel.overview-panel .behavior-summary-card {
+      min-height: clamp(248px, 36dvh, 500px) !important;
+      box-shadow: none !important;
+    }
+
+    .panel.overview-panel .behavior-summary-card.is-focused {
+      box-shadow: none !important;
+      transform: none !important;
+    }
+
+    #mainPanel.panel {
+      max-height: none !important;
+      overflow: visible !important;
+      padding-bottom: 0 !important;
+      margin-bottom: 0 !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    #mainPanel .student-list,
+    #mainPanel .room-grid,
+    #mainPanel .stack-list {
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      padding-bottom: 0 !important;
+      overflow: visible !important;
+    }
+
+    #mainPanel .stack-list .stack-card + .stack-card {
+      margin-top: 10px !important;
+    }
+
+    #mainPanel .stack-list .stack-card.is-focused,
+    #mainPanel .stack-list .stack-card:hover,
+    #mainPanel .stack-list .stack-card:focus-visible,
+    #mainPanel .room-card,
+    #mainPanel .student-card.stack-card,
+    #mainPanel .tracking-card.stack-card {
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9) !important;
+      transform: none !important;
+    }
+
+    #mainPanel .stack-list .stack-card.is-focused + .stack-card,
+    #mainPanel .stack-list .stack-card:has(+ .stack-card.is-focused) {
+      margin-top: 10px !important;
+      margin-bottom: 0 !important;
+    }
+
+    #mainPanel > .panel-sticky:first-child {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 72 !important;
+      margin-bottom: 8px !important;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .76), rgba(245, 251, 255, .58)) !important;
+      border: 1px solid rgba(255, 255, 255, .82) !important;
+      box-shadow: none !important;
+      backdrop-filter: blur(16px) saturate(1.12);
+      -webkit-backdrop-filter: blur(16px) saturate(1.12);
+    }
+
+    body.fixed-panel-page #mainPanel.panel {
+      display: grid !important;
+      grid-template-rows: auto minmax(0, 1fr);
+      height: max(310px, calc(100dvh - 330px - env(safe-area-inset-bottom))) !important;
+      max-height: none !important;
+      overflow: hidden !important;
+      padding-bottom: 0 !important;
+    }
+
+    body.fixed-panel-page #mainPanel > .panel-sticky:first-child {
+      align-self: start;
+      position: relative !important;
+      top: auto !important;
+      z-index: 80 !important;
+      margin-bottom: 0 !important;
+    }
+
+    body.fixed-panel-page #mainPanel > .student-list,
+    body.fixed-panel-page #mainPanel > .room-grid,
+    body.fixed-panel-page #mainPanel > .stack-list {
+      min-height: 0;
+      height: 100%;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      padding-top: 8px !important;
+      padding-bottom: calc(92px + env(safe-area-inset-bottom)) !important;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      mask-image: linear-gradient(to bottom, transparent 0, black 10px, black calc(100% - 18px), transparent 100%);
+    }
+
+    body.fixed-panel-page #mainPanel > .student-list::-webkit-scrollbar,
+    body.fixed-panel-page #mainPanel > .room-grid::-webkit-scrollbar,
+    body.fixed-panel-page #mainPanel > .stack-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    body.fixed-panel-page #mainPanel > .panel-sticky:first-child + .student-list,
+    body.fixed-panel-page #mainPanel > .panel-sticky:first-child + .room-grid,
+    body.fixed-panel-page #mainPanel > .panel-sticky:first-child + .stack-list {
+      margin-top: -1px !important;
+    }
+
+    nav.tabs.card {
+      width: min(568px, calc(100vw - 32px)) !important;
+      height: 58px !important;
+      min-height: 58px !important;
+      max-height: 58px !important;
+      padding: 6px !important;
+      gap: 8px !important;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      align-items: center !important;
+      justify-items: stretch !important;
+      overflow: hidden !important;
+      box-sizing: border-box !important;
+    }
+
+    nav.tabs.card .tab {
+      width: 100% !important;
+      min-width: 0 !important;
+      height: 44px !important;
+      min-height: 44px !important;
+      max-height: 44px !important;
+      padding: 0 !important;
+      display: grid !important;
+      place-items: center !important;
+      border-radius: 999px !important;
+      box-sizing: border-box !important;
+      transform: none !important;
+      line-height: 1 !important;
+      font-size: clamp(12px, 2.4vw, 14px) !important;
+    }
+
+    nav.tabs.card .tab.active {
+      transform: none !important;
+      outline: 0 !important;
+    }
+
+    body.fixed-panel-page #mainPanel > .stack-list {
+      display: grid !important;
+      grid-auto-rows: max-content !important;
+      align-content: start !important;
+      gap: 12px !important;
+    }
+
+    body.fixed-panel-page #mainPanel > .stack-list .stack-card,
+    body.fixed-panel-page #mainPanel > .stack-list .stack-card + .stack-card,
+    body.fixed-panel-page #mainPanel > .stack-list .stack-card.is-focused + .stack-card,
+    body.fixed-panel-page #mainPanel > .stack-list .stack-card:has(+ .stack-card.is-focused) {
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+    }
+
+    body.fixed-panel-page #mainPanel .student-card.stack-card,
+    body.fixed-panel-page #mainPanel .tracking-card.stack-card {
+      min-height: auto !important;
+      overflow: hidden !important;
+      align-items: stretch !important;
+      isolation: isolate !important;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .78), rgba(244, 250, 255, .68)),
+        linear-gradient(180deg, var(--tone-card-top, rgba(255, 255, 255, .76)), var(--tone-card-bottom, rgba(245, 252, 255, .66))) !important;
+    }
+
+    body.fixed-panel-page #mainPanel .tracking-card.stack-card {
+      grid-template-columns: minmax(0, 1fr) !important;
+      gap: 12px !important;
+      padding: 14px !important;
+    }
+
+    body.fixed-panel-page #mainPanel .tracking-top {
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      gap: 10px !important;
+      align-items: start !important;
+    }
+
+    body.fixed-panel-page #mainPanel .tracking-progress {
+      min-width: 0 !important;
+    }
+
+    body.fixed-panel-page #mainPanel .tracking-caption {
+      min-width: 0 !important;
+      flex-wrap: wrap !important;
+    }
+
+    body.fixed-panel-page #mainPanel .student-meta {
+      min-width: 0 !important;
+    }
+
+    @media (max-width: 430px) {
+      nav.tabs.card {
+        width: min(84vw, 292px) !important;
+        height: 50px !important;
+        min-height: 50px !important;
+        max-height: 50px !important;
+        padding: 5px 7px !important;
+        gap: 5px !important;
+      }
+
+      nav.tabs.card .tab {
+        height: 38px !important;
+        min-height: 38px !important;
+        max-height: 38px !important;
+        font-size: clamp(11px, 2.7vw, 12px) !important;
+      }
+    }
+
+    .top-tool.refresh-tool {
+      color: #1f65c7 !important;
+      background:
+        radial-gradient(circle at 34% 28%, rgba(255, 255, 255, .90) 0 18%, transparent 19%),
+        linear-gradient(145deg, rgba(241, 249, 255, .98), rgba(215, 237, 255, .88)) !important;
+      border: 1.5px solid rgba(255, 255, 255, .92) !important;
+      box-shadow:
+        0 16px 30px rgba(52, 112, 176, .16),
+        0 0 0 5px rgba(255, 255, 255, .32),
+        inset 0 1px 0 rgba(255, 255, 255, .96) !important;
+    }
+
+    .top-tool.refresh-tool::after {
+      content: none !important;
+    }
+
+    .top-tool.refresh-tool::before {
+      content: none !important;
+    }
+
+    .top-tool.refresh-tool .refresh-icon {
+      width: 30px;
+      height: 30px;
+      position: relative;
+      z-index: 1;
+      overflow: visible;
+      filter: drop-shadow(0 3px 4px rgba(31, 101, 199, .16));
+    }
+
+    .top-tool.refresh-tool .refresh-icon path {
+      fill: currentColor;
+    }
+
+    body.is-loading .top-tool.refresh-tool .refresh-icon {
+      animation: refreshSpin 760ms linear infinite;
+    }
+
+    .panel.overview-panel .behavior-summary-card {
+      align-content: stretch !important;
+      grid-template-rows: auto minmax(74px, 1fr) auto !important;
+      gap: 14px !important;
+      background:
+        radial-gradient(circle at 82% 12%, color-mix(in srgb, var(--tone-accent, #72cfff), transparent 70%), transparent 32%),
+        radial-gradient(circle at 18% 78%, rgba(255, 255, 255, .72), transparent 36%),
+        linear-gradient(180deg, rgba(255, 255, 255, .84), var(--tone-card-bottom, rgba(236, 250, 255, .68))) !important;
+    }
+
+    .behavior-summary-mid {
+      min-height: 86px;
+      display: grid;
+      align-content: center;
+      gap: 9px;
+      padding: 12px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, .46), rgba(255, 255, 255, .24));
+      border: 1px solid rgba(255, 255, 255, .56);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .78);
+    }
+
+    .behavior-summary-rank {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: #607087;
+      font-size: 12px;
+      font-weight: 520;
+    }
+
+    .behavior-summary-rank span {
+      min-width: 0;
+      line-height: 1.2;
+    }
+
+    .behavior-summary-rank strong {
+      color: var(--tone-text, #1f65c7);
+      font-size: 18px;
+      line-height: 1;
+      font-weight: 680;
+    }
+
+    .behavior-summary-progress {
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, .66);
+      border: 1px solid rgba(255, 255, 255, .62);
+      box-shadow: inset 0 1px 2px rgba(45, 66, 91, .08);
+    }
+
+    .behavior-summary-progress span {
+      display: block;
+      width: var(--w, 0%);
+      height: 100%;
+      min-width: 10px;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--tone-accent, #72cfff), color-mix(in srgb, var(--tone-accent, #72cfff), white 30%));
+    }
+
+    .behavior-summary-caption {
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.25;
+      font-weight: 480;
+    }
+
+    @keyframes refreshSpin {
+      to { transform: rotate(360deg); }
+    }
+
     @media print {
       body {
         position: static;
@@ -3135,7 +3510,12 @@
         </div>
         <div class="top-actions">
           <button id="filterBtn" class="top-tool calendar-button" type="button" aria-label="ตัวกรองปฏิทิน"><span class="calendar-icon" aria-hidden="true"></span></button>
-          <button id="refreshBtn" class="top-tool refresh-tool" type="button" aria-label="อัปเดตข้อมูล"></button>
+          <button id="refreshBtn" class="top-tool refresh-tool" type="button" aria-label="อัปเดตข้อมูล">
+            <svg class="refresh-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M3.67981 11.3333H2.92981H3.67981ZM3.67981 13L3.15157 13.5324C3.44398 13.8225 3.91565 13.8225 4.20805 13.5324L3.67981 13ZM5.88787 11.8657C6.18191 11.574 6.18377 11.0991 5.89203 10.8051C5.60029 10.511 5.12542 10.5092 4.83138 10.8009L5.88787 11.8657ZM2.52824 10.8009C2.2342 10.5092 1.75933 10.511 1.46759 10.8051C1.17585 11.0991 1.17772 11.574 1.47176 11.8657L2.52824 10.8009ZM18.6156 7.39279C18.8325 7.74565 19.2944 7.85585 19.6473 7.63892C20.0001 7.42199 20.1103 6.96007 19.8934 6.60721L18.6156 7.39279ZM16.8931 3.60787C16.5403 3.39077 16.0784 3.50074 15.8613 3.8535C15.6442 4.20626 15.7541 4.66822 16.1069 4.88532L16.8931 3.60787ZM12.4633 3.75939C12.877 3.77966 13.2288 3.46071 13.2491 3.047C13.2694 2.63328 12.9504 2.28146 12.5367 2.26119L12.4633 3.75939ZM12.0789 2.25C7.03155 2.25 2.92981 6.3112 2.92981 11.3333H4.42981C4.42981 7.15072 7.84884 3.75 12.0789 3.75V2.25ZM2.92981 11.3333L2.92981 13H4.42981L4.42981 11.3333H2.92981ZM4.20805 13.5324L5.88787 11.8657L4.83138 10.8009L3.15157 12.4676L4.20805 13.5324ZM4.20805 12.4676L2.52824 10.8009L1.47176 11.8657L3.15157 13.5324L4.20805 12.4676ZM19.8934 6.60721C19.1441 5.38846 18.1143 4.35941 16.8931 3.60787L16.1069 4.88532C17.1287 5.51419 17.9899 6.37506 18.6156 7.39279L19.8934 6.60721ZM12.5367 2.26119C12.385 2.25376 12.2323 2.25 12.0789 2.25V3.75C12.2078 3.75 12.336 3.75316 12.4633 3.75939L12.5367 2.26119Z"></path>
+              <path d="M11.8825 21V21.75V21ZM20.3137 12.6667H21.0637H20.3137ZM20.3137 11L20.8409 10.4666C20.5487 10.1778 20.0786 10.1778 19.7864 10.4666L20.3137 11ZM18.1002 12.1333C17.8056 12.4244 17.8028 12.8993 18.094 13.1939C18.3852 13.4885 18.86 13.4913 19.1546 13.2001L18.1002 12.1333ZM21.4727 13.2001C21.7673 13.4913 22.2421 13.4885 22.5333 13.1939C22.8245 12.8993 22.8217 12.4244 22.5271 12.1332L21.4727 13.2001ZM5.31769 16.6061C5.10016 16.2536 4.63806 16.1442 4.28557 16.3618C3.93307 16.5793 3.82366 17.0414 4.0412 17.3939L5.31769 16.6061ZM11.5331 20.2423C11.1193 20.224 10.769 20.5447 10.7507 20.9585C10.7325 21.3723 11.0531 21.7226 11.4669 21.7408L11.5331 20.2423ZM7.11292 20.4296C7.4677 20.6433 7.92861 20.529 8.14239 20.1742C8.35617 19.8195 8.24186 19.3586 7.88708 19.1448L7.11292 20.4296ZM11.8825 21.75C16.9448 21.75 21.0637 17.6915 21.0637 12.6667H19.5637C19.5637 16.8466 16.133 20.25 11.8825 20.25V21.75ZM21.0637 12.6667V11H19.5637V12.6667H21.0637ZM19.7864 10.4666L18.1002 12.1333L19.1546 13.2001L20.8409 11.5334L19.7864 10.4666ZM19.7864 11.5334L21.4727 13.2001L22.5271 12.1332L20.8409 10.4666L19.7864 11.5334ZM11.4669 21.7408C11.6047 21.7469 11.7433 21.75 11.8825 21.75V20.25C11.7653 20.25 11.6488 20.2474 11.5331 20.2423L11.4669 21.7408ZM4.0412 17.3939C4.80569 18.6327 5.86106 19.6752 7.11292 20.4296L7.88708 19.1448C6.83872 18.5131 5.95602 17.6405 5.31769 16.6061L4.0412 17.3939Z"></path>
+            </svg>
+          </button>
           <button id="searchToggle" class="top-tool search-tool" type="button" aria-label="ค้นหานักเรียน"></button>
           <div class="live" id="liveBadge">พร้อม</div>
         </div>
@@ -3480,13 +3860,13 @@
     function normalizeStudent(record, fallbackType = "") {
       const rawDate = record.date || record.recordDate || record.day || record.createdDate || record.recordedAt || "";
       return {
-        fullName: record.fullName || record.name || record.studentName || "ชื่อ - สกุล",
-        room: record.room || record.classroom || record.class || "ห้องเรียน",
-        number: record.number || record.no || record.studentNo || "เลขที่",
-        studentId: record.studentId || record.student_id || record.id || "เลขประจำตัว",
+        fullName: record.fullName || record.name || record.studentName || record["ชื่อ"] || record["ชื่อ - สกุล"] || record["ชื่อ-สกุล"] || "ชื่อ - สกุล",
+        room: record.room || record.classroom || record.class || record["ห้อง"] || record["ห้องเรียน"] || "ห้องเรียน",
+        number: record.number || record.no || record.studentNo || record["เลขที่"] || "เลขที่",
+        studentId: record.studentId || record.student_id || record.id || record["เลขประจำตัว"] || record["รหัสนักเรียน"] || "เลขประจำตัว",
         count: asNumber(record.count || record.total || 1),
-        behaviorType: record.behaviorType || record.type || fallbackType || "รายการ",
-        time: record.time || record.recordedAt || record.date || "",
+        behaviorType: normalizeBehaviorName(record.behaviorType || record.type || record.behavior || record["พฤติกรรม"] || record["ประเภท"] || fallbackType || "รายการ"),
+        time: record.time || record.recordedAt || record.createdAt || record["เวลา"] || record.date || "",
         date: rawDate ? formatRecordDate(rawDate) : ""
       };
     }
@@ -3504,8 +3884,10 @@
       const data = raw && raw.success ? raw : FALLBACK;
       const byType = data.byType || {};
       const byRoom = data.byRoom || {};
-      const topStudents = (data.topStudents || []).map(item => normalizeStudent(item));
-      const recentRecords = (data.recentRecords || []).map(item => normalizeStudent(item));
+      const topStudents = collectStudentRecords(data, ["topStudents", "topStudent", "top", "students", "studentSummary", "byStudent"])
+        .map(item => normalizeStudent(item));
+      const recentRecords = collectStudentRecords(data, ["recentRecords", "recentRecord", "recent", "latest", "latestRecords", "records", "items", "logs", "history"])
+        .map(item => normalizeStudent(item));
       return {
         ...data,
         total: asNumber(data.total || Object.values(byType).reduce((sum, value) => sum + asNumber(value), 0)),
@@ -3516,8 +3898,18 @@
       };
     }
 
+    function collectStudentRecords(data, keys) {
+      for (const key of keys) {
+        const value = data?.[key];
+        if (Array.isArray(value) && value.length) return value;
+      }
+      return [];
+    }
+
     function mergedStudents(mode = state.page) {
-      const source = mode === "recent" ? state.data.recentRecords : (state.data.topStudents.length ? state.data.topStudents : state.data.recentRecords);
+      const source = mode === "recent"
+        ? (state.data.recentRecords.length ? state.data.recentRecords : state.data.topStudents)
+        : combinedStudentRecords();
       const query = state.query.trim().toLowerCase();
       return [...source]
         .filter(student => state.room === "ALL" || student.room === state.room)
@@ -3537,7 +3929,7 @@
     }
 
     function roomBehaviorStudents() {
-      const source = state.data.recentRecords.length ? state.data.recentRecords : state.data.topStudents;
+      const source = combinedStudentRecords();
       const query = state.query.trim().toLowerCase();
       return aggregateStudents(source, state.behavior !== "ALL")
         .filter(student => state.room === "ALL" || student.room === state.room)
@@ -3558,9 +3950,9 @@
     }
 
     function lunchLateStudents() {
-      const source = state.data.recentRecords.length ? state.data.recentRecords : state.data.topStudents;
+      const source = combinedStudentRecords();
       const query = state.query.trim().toLowerCase();
-      return aggregateStudents(source.filter(student => student.behaviorType === "สายเที่ยง"), false)
+      return aggregateStudents(source.filter(student => normalizeBehaviorName(student.behaviorType) === "สายเที่ยง"), false)
         .filter(student => state.room === "ALL" || student.room === state.room)
         .filter(student => {
           if (!query) return true;
@@ -3582,6 +3974,31 @@
         const [nameB, countB] = b;
         if (state.sort === "name-asc" || state.sort === "room-asc") return nameA.localeCompare(nameB, "th");
         return asNumber(countB) - asNumber(countA);
+      });
+    }
+
+    function normalizeBehaviorName(value) {
+      return String(value || "").replace(/\s+/g, " ").trim();
+    }
+
+    function combinedStudentRecords() {
+      const records = [
+        ...(state.data.recentRecords || []),
+        ...(state.data.topStudents || [])
+      ];
+      const seen = new Set();
+      return records.filter(record => {
+        const key = [
+          record.studentId || "",
+          record.fullName || "",
+          record.room || "",
+          normalizeBehaviorName(record.behaviorType),
+          record.time || "",
+          record.date || ""
+        ].join("|");
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
       });
     }
 
@@ -3666,7 +4083,7 @@
     }
 
     function roomSourceRecords() {
-      const source = state.data.recentRecords.length ? state.data.recentRecords : state.data.topStudents;
+      const source = combinedStudentRecords();
       return source.filter(student => state.room === "ALL" || student.room === state.room);
     }
 
@@ -3685,9 +4102,9 @@
     }
 
     function behaviorDetailStudents(behavior) {
-      const records = roomSourceRecords().filter(student => student.behaviorType === behavior);
+      const records = roomSourceRecords().filter(student => normalizeBehaviorName(student.behaviorType) === normalizeBehaviorName(behavior));
       const fallback = (state.data.topStudents || [])
-        .filter(student => (state.room === "ALL" || student.room === state.room) && student.behaviorType === behavior);
+        .filter(student => (state.room === "ALL" || student.room === state.room) && normalizeBehaviorName(student.behaviorType) === normalizeBehaviorName(behavior));
       return aggregateStudents(records.length ? records : fallback, false)
         .sort((a, b) => b.count - a.count || a.fullName.localeCompare(b.fullName, "th"));
     }
@@ -3893,7 +4310,8 @@
 
     function renderBars(title, object) {
       const entries = sortNamedEntries(Object.entries(object || {}));
-      const max = Math.max(1, ...entries.map(([, count]) => asNumber(count)));
+      const total = Math.max(1, entries.reduce((sum, [, count]) => sum + asNumber(count), 0));
+      const shareLabel = state.mode === "academic" ? "จากทั้งหมดในปีการศึกษา" : state.mode === "monthly" ? "จากทั้งหมดในเดือนนี้" : "จากทั้งหมดวันนี้";
       if (!entries.length) return `<div class="empty">ยังไม่มีข้อมูล</div>`;
       return `
         <div class="panel-sticky">
@@ -3905,6 +4323,7 @@
         <div class="bars behavior-carousel" onscroll="updateStackCards()">
           ${entries.map(([name, count]) => {
             const stats = behaviorStats(name, count);
+            const percent = Math.round(asNumber(count) / total * 100);
             const icon = {"สายเช้า": "☀", "สายเที่ยง": "☼", "สายพัก 10": "⌁", "ขาดแถวเที่ยง": "⊘", "เครื่องแต่งกาย": "◈", "อื่น ๆ": "•••"}[name] || "•";
             return `
             <article class="behavior-summary-card" style="${behaviorToneStyle(name)}" aria-label="${escapeHtml(name)} ${asNumber(count)} ครั้ง">
@@ -3915,6 +4334,14 @@
                   <div class="behavior-summary-sub">${state.mode === "academic" ? "รวมทั้งปีการศึกษา" : "ช่วงที่เลือก"}</div>
                 </div>
                 <button class="behavior-detail-button" type="button" data-behavior-detail="${escapeHtml(name)}">รายละเอียด</button>
+              </div>
+              <div class="behavior-summary-mid">
+                <div class="behavior-summary-rank">
+                  <span>${shareLabel}</span>
+                  <strong>${percent}%</strong>
+                </div>
+                <div class="behavior-summary-progress" aria-hidden="true"><span style="--w:${percent}%"></span></div>
+                <div class="behavior-summary-caption">${asNumber(count) ? `เฉลี่ย ${stats.people ? Math.max(1, Math.round(asNumber(count) / Math.max(1, stats.people))) : asNumber(count)} ครั้งต่อคน` : "ยังไม่มีรายการในช่วงนี้"}</div>
               </div>
               <div class="behavior-summary-stats">
                 <div class="behavior-summary-stat">
@@ -4094,6 +4521,7 @@
       if (!state.query.trim() && state.page === "overview" && state.sort === "room-asc") state.sort = "count-desc";
       document.body.classList.toggle("untimed-page", isUntimedPage());
       document.body.classList.toggle("overview-page", !state.query.trim() && state.page === "overview");
+      document.body.classList.toggle("fixed-panel-page", !state.query.trim() && (state.page === "follow" || state.page === "recent" || (state.page === "rooms" && state.room === "ALL")));
       if (isUntimedPage()) closeFloatingPanels("search");
       $("mainPanel").classList.toggle("overview-panel", !state.query.trim() && state.page === "overview");
       $("sortButton").textContent = SORT_LABELS[state.sort] || SORT_LABELS["count-desc"];
@@ -4137,10 +4565,11 @@
       $("liveBadge").innerHTML = `<span class="loading-dots" aria-label="กำลังโหลด"><span></span><span></span><span></span></span>`;
       $("status").textContent = "";
       try {
-        const period = dashboardPeriod();
+        const requestMode = isUntimedPage() ? "academic" : state.mode;
+        const period = requestMode === "academic" ? "year" : requestMode === "monthly" ? "month" : "today";
         const params = {
-          action: state.room === "ALL" ? "getDashboardOverview" : "getRoomDashboard",
-          period,
+          action: "getDashboard",
+          mode: requestMode,
           room: state.room,
           academicYear: currentAcademicYear()
         };
@@ -4156,8 +4585,26 @@
       } catch (error) {
         state.data = normalizeData({...FALLBACK, mode: state.mode});
       }
+      await ensureLatestRecordsForUntimedPages();
       document.body.classList.remove("is-loading");
       renderMainPanel();
+    }
+
+    async function ensureLatestRecordsForUntimedPages() {
+      if (!isUntimedPage()) return;
+      if (state.page === "recent" && mergedStudents("recent").length) return;
+      if (state.page === "follow" && lunchLateStudents().length) return;
+      try {
+        const latest = await jsonp({action: "getLatestLogs", limit: 100}, 12000);
+        const logs = collectStudentRecords(latest, ["logs", "recentRecords", "records", "items", "latest", "history"]);
+        if (latest && latest.success && logs.length) {
+          state.data = normalizeData({
+            ...state.data,
+            recentRecords: logs,
+            updatedAt: latest.updatedAt || state.data.updatedAt
+          });
+        }
+      } catch (error) {}
     }
 
     $("date").value = today();
