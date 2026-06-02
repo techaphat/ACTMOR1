@@ -3777,6 +3777,174 @@
       background: color-mix(in srgb, var(--tone-accent, #72cfff), white 86%) !important;
     }
 
+    body.overview-page #mainPanel {
+      display: grid !important;
+      grid-template-rows: auto minmax(0, 1fr) !important;
+      height: max(340px, calc(100dvh - 330px - env(safe-area-inset-bottom))) !important;
+      overflow: hidden !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      padding-bottom: 0 !important;
+    }
+
+    body.overview-page #mainPanel > .panel-sticky:first-child {
+      position: relative !important;
+      top: auto !important;
+      z-index: 80 !important;
+      margin-bottom: 0 !important;
+    }
+
+    body.overview-page #mainPanel .overview-list {
+      width: 100% !important;
+      max-width: 100% !important;
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      grid-auto-rows: max-content !important;
+      align-content: start !important;
+      gap: 12px !important;
+      min-height: 0 !important;
+      height: 100% !important;
+      padding: 8px 0 calc(160px + env(safe-area-inset-bottom)) !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      box-sizing: border-box !important;
+      scrollbar-width: none !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+
+    body.overview-page #mainPanel .overview-list::-webkit-scrollbar {
+      display: none !important;
+    }
+
+    body.overview-page #mainPanel .overview-chart-card,
+    body.overview-page #mainPanel .behavior-summary-card {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      max-height: none !important;
+      display: grid !important;
+      align-content: start !important;
+      gap: 12px !important;
+      padding: 15px !important;
+      border-radius: 26px !important;
+      box-sizing: border-box !important;
+      transform: none !important;
+      border: 1px solid rgba(255, 255, 255, .82) !important;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .78), rgba(245, 251, 255, .60)) !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .94) !important;
+      overflow: visible !important;
+    }
+
+    body.overview-page #mainPanel .overview-chart-card {
+      min-height: 228px !important;
+    }
+
+    body.overview-page #mainPanel .behavior-summary-card {
+      grid-template-rows: auto auto auto !important;
+      min-height: 220px !important;
+    }
+
+    .overview-chart-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .overview-chart-head h3 {
+      margin: 0;
+      color: #233348;
+      font-size: 20px;
+      line-height: 1.1;
+      font-weight: 760;
+    }
+
+    .overview-chart-head p {
+      margin: 4px 0 0;
+      color: #66758a;
+      font-size: 12px;
+      font-weight: 520;
+    }
+
+    .overview-bar-chart {
+      display: grid;
+      gap: 9px;
+    }
+
+    .overview-bar-row {
+      display: grid;
+      grid-template-columns: minmax(78px, 108px) minmax(0, 1fr) 34px;
+      gap: 9px;
+      align-items: center;
+    }
+
+    .overview-bar-label {
+      min-width: 0;
+      color: var(--tone-text, #34475a);
+      font-size: 13px;
+      line-height: 1.15;
+      font-weight: 620;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .overview-bar-track {
+      height: 13px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: color-mix(in srgb, var(--tone-accent, #72cfff), white 86%);
+      border: 1px solid color-mix(in srgb, var(--tone-accent, #72cfff), white 68%);
+      box-shadow: inset 0 1px 2px rgba(45, 66, 91, .08);
+    }
+
+    .overview-bar-track span {
+      display: block;
+      width: var(--w, 0%);
+      min-width: 8px;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--tone-accent, #72cfff), white 18%), var(--tone-accent, #72cfff));
+    }
+
+    .overview-bar-value {
+      color: #233348;
+      text-align: right;
+      font-size: 14px;
+      font-weight: 760;
+    }
+
+    body.overview-page #mainPanel .behavior-summary-top {
+      grid-template-columns: auto minmax(0, 1fr) auto !important;
+      gap: 10px !important;
+    }
+
+    body.overview-page #mainPanel .behavior-summary-mid {
+      min-height: 64px !important;
+      padding: 10px 12px !important;
+      border-radius: 20px !important;
+    }
+
+    body.overview-page #mainPanel .behavior-summary-stats {
+      gap: 9px !important;
+    }
+
+    body.overview-page #mainPanel .behavior-summary-stat {
+      min-height: 64px !important;
+    }
+
+    @media (max-width: 430px) {
+      body.overview-page #mainPanel .behavior-summary-top {
+        grid-template-columns: auto minmax(0, 1fr) !important;
+      }
+
+      body.overview-page #mainPanel .behavior-detail-button {
+        grid-column: 1 / -1 !important;
+        justify-self: end !important;
+      }
+    }
+
     body.overview-page {
       overflow-x: hidden !important;
     }
@@ -3872,6 +4040,55 @@
         flex-basis: 100% !important;
         width: 100% !important;
         max-width: 100% !important;
+      }
+    }
+
+    body.overview-page #mainPanel .overview-list {
+      grid-template-columns: minmax(0, 1fr) !important;
+      grid-auto-flow: row !important;
+      grid-auto-rows: max-content !important;
+      align-items: stretch !important;
+      align-content: start !important;
+    }
+
+    body.overview-page #mainPanel .overview-list > .overview-chart-card,
+    body.overview-page #mainPanel .overview-list > .behavior-summary-card,
+    body.overview-page #mainPanel .overview-list > .stack-card {
+      flex: none !important;
+      flex-basis: auto !important;
+      min-width: 0 !important;
+      width: 100% !important;
+      height: auto !important;
+      max-height: none !important;
+      overflow: visible !important;
+      scroll-snap-align: none !important;
+      margin-top: 0 !important;
+    }
+
+    body.overview-page #mainPanel .overview-list > .overview-chart-card {
+      min-height: 232px !important;
+    }
+
+    body.overview-page #mainPanel .overview-list > .behavior-summary-card {
+      min-height: 224px !important;
+    }
+
+    @media (max-width: 430px) {
+      body.overview-page #mainPanel {
+        height: max(430px, calc(100dvh - 314px - env(safe-area-inset-bottom))) !important;
+      }
+
+      body.overview-page #mainPanel .overview-list {
+        gap: 12px !important;
+        padding-bottom: calc(178px + env(safe-area-inset-bottom)) !important;
+      }
+
+      body.overview-page #mainPanel .overview-list > .overview-chart-card {
+        min-height: 224px !important;
+      }
+
+      body.overview-page #mainPanel .overview-list > .behavior-summary-card {
+        min-height: 216px !important;
       }
     }
 
@@ -4774,8 +4991,10 @@
     }
 
     function renderBars(title, object) {
-      const entries = sortNamedEntries(Object.entries(object || {}));
+      const behaviorNames = Object.keys(BEHAVIOR_TONES);
+      const entries = sortNamedEntries(behaviorNames.map(name => [name, asNumber((object || {})[name])]));
       const total = Math.max(1, entries.reduce((sum, [, count]) => sum + asNumber(count), 0));
+      const maxCount = Math.max(1, ...entries.map(([, count]) => asNumber(count)));
       const shareLabel = state.mode === "academic" ? "จากทั้งหมดในปีการศึกษา" : state.mode === "monthly" ? "จากทั้งหมดในเดือนนี้" : "จากทั้งหมดวันนี้";
       if (!entries.length) return `<div class="empty">ยังไม่มีข้อมูล</div>`;
       return `
@@ -4785,7 +5004,29 @@
             <div class="status">${entries.length} ประเภท</div>
           </div>
         </div>
-        <div class="bars behavior-carousel" onscroll="updateStackCards()">
+        <div class="student-list overview-list">
+          <article class="overview-chart-card" aria-label="แผนภูมิแท่งรวม 6 พฤติกรรม">
+            <div class="overview-chart-head">
+              <div>
+                <h3>แผนภูมิรวม</h3>
+                <p>${shareLabel}</p>
+              </div>
+              <div class="status">${entries.reduce((sum, [, count]) => sum + asNumber(count), 0)} ครั้ง</div>
+            </div>
+            <div class="overview-bar-chart">
+              ${entries.map(([name, count]) => {
+                const value = asNumber(count);
+                const percent = Math.round(value / maxCount * 100);
+                return `
+                  <div class="overview-bar-row" style="${behaviorToneStyle(name)}">
+                    <div class="overview-bar-label">${escapeHtml(name)}</div>
+                    <div class="overview-bar-track"><span style="--w:${percent}%"></span></div>
+                    <div class="overview-bar-value">${value}</div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </article>
           ${entries.map(([name, count]) => {
             const stats = behaviorStats(name, count);
             const percent = Math.round(asNumber(count) / total * 100);
@@ -4989,7 +5230,7 @@
       document.body.classList.toggle("overview-page", !state.query.trim() && state.page === "overview");
       document.body.classList.toggle("fixed-panel-page", !state.query.trim() && (state.page === "follow" || state.page === "recent" || (state.page === "rooms" && state.room === "ALL")));
       if (isUntimedPage()) closeFloatingPanels("search");
-      $("mainPanel").classList.toggle("overview-panel", !state.query.trim() && !searchPanelOpen && state.page === "overview");
+      $("mainPanel").classList.remove("overview-panel");
       $("sortButton").textContent = SORT_LABELS[state.sort] || SORT_LABELS["count-desc"];
       document.querySelectorAll("[data-sort]").forEach(button => button.classList.toggle("active", button.dataset.sort === state.sort));
       if (state.query.trim() || searchPanelOpen) {
