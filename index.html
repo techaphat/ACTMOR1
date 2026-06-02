@@ -8,7 +8,7 @@
   <link href="https://cdn.jsdelivr.net/gh/lazywasabi/thai-web-fonts@7/fonts/LINESeedSansTH/LINESeedSansTH.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Favicon / Home Screen Icon -->
-  <link rel="icon" href="app-icon.png" type="image/png">
+  <link rel="icon" href="app-icon.webp" type="image/webp">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="application-name" content="ACTMOR 1">
@@ -30,8 +30,8 @@
     }
     *{box-sizing:border-box;font-family:'LINE Seed Sans TH','Noto Sans Thai','Helvetica Neue',Arial,sans-serif;-webkit-tap-highlight-color:transparent}
     html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;color:var(--ink)}
-    body{--page-bg:url("m1indexbg.png");--page-bg-position:center;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.32)),var(--page-bg) var(--page-bg-position) / cover no-repeat fixed}
-    body.record-bg{--page-bg:url("m1-record-bg.png");--page-bg-position:center}
+    body{--page-bg:url("m1indexbg.webp");--page-bg-position:center;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.32)),var(--page-bg) var(--page-bg-position) / cover no-repeat fixed}
+    body.record-bg{--page-bg:url("m1-record-bg.webp");--page-bg-position:center}
     body:before{
       content:"";position:fixed;inset:0;pointer-events:none;opacity:.32;
       background:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,.04) 35%,rgba(255,255,255,.3));
@@ -131,7 +131,7 @@
   <div class="app-shell"><main class="app">
     <section id="searchScreen" class="screen active">
       <div class="panel">
-        <img class="brand-logo" src="m1goodlogo.png" alt="M1 Good Good ระบบบันทึกพฤติกรรมนักเรียน">
+        <img class="brand-logo" src="m1goodlogo.webp" alt="M1 Good Good ระบบบันทึกพฤติกรรมนักเรียน">
         <div class="search-wrap">
           <div class="search-row">
             <input id="studentIdInput" class="search-input" type="search" placeholder="เลขประจำตัว หรือชื่อ" autocomplete="off">
@@ -228,13 +228,13 @@
   </main></div>
   <nav class="bottom-nav" data-active="home" aria-label="เมนูหลัก">
     <button class="bottom-nav-item is-active" type="button" data-nav="home" data-index="0" onclick="goToSearch()" aria-label="หน้าแรก">
-      <img src="ggicon.png" alt="">
+      <img src="ggicon.webp" alt="">
     </button>
     <a class="bottom-nav-item" data-nav="dd" data-index="1" href="dashboard.html" aria-label="m1 DD dashboard">
-      <img src="m1ddicon.png" alt="">
+      <img src="m1ddicon.webp" alt="">
     </a>
     <a class="bottom-nav-item" data-nav="act" data-index="2" href="dashboard.html" aria-label="ACT ม.1">
-      <img src="m1-logo.png" alt="">
+      <img src="m1-logo.webp" alt="">
     </a>
   </nav>
   <div id="loading" class="loading-overlay"><div class="loader-card"><div class="spinner"></div><div class="mt-2">กำลังทำงาน...</div></div></div>
