@@ -3470,6 +3470,156 @@
       to { transform: rotate(360deg); }
     }
 
+    body {
+      padding-bottom: calc(178px + env(safe-area-inset-bottom)) !important;
+    }
+
+    .app {
+      padding-bottom: calc(142px + env(safe-area-inset-bottom)) !important;
+    }
+
+    #mainPanel .room-grid,
+    #mainPanel .student-list,
+    #mainPanel .stack-list,
+    #mainPanel .bars {
+      padding-bottom: calc(152px + env(safe-area-inset-bottom)) !important;
+    }
+
+    body.fixed-panel-page #mainPanel > .student-list,
+    body.fixed-panel-page #mainPanel > .room-grid,
+    body.fixed-panel-page #mainPanel > .stack-list {
+      padding-bottom: calc(172px + env(safe-area-inset-bottom)) !important;
+    }
+
+    .calendar-button {
+      aspect-ratio: 1 / 1 !important;
+      flex: 0 0 auto !important;
+    }
+
+    .calendar-icon {
+      aspect-ratio: 1 / 1 !important;
+      flex: 0 0 auto !important;
+      transform: none !important;
+    }
+
+    @media (max-width: 430px) {
+      body {
+        padding-bottom: calc(190px + env(safe-area-inset-bottom)) !important;
+      }
+
+      .app {
+        gap: 5px !important;
+        padding-bottom: calc(154px + env(safe-area-inset-bottom)) !important;
+      }
+
+      .top {
+        top: 4px !important;
+        padding: 9px !important;
+        gap: 5px !important;
+      }
+
+      .brand-logo {
+        width: min(140px, 34vw) !important;
+        max-height: 48px !important;
+      }
+
+      .top-actions {
+        gap: 5px !important;
+      }
+
+      .top-tool,
+      .calendar-button {
+        width: 44px !important;
+        min-width: 44px !important;
+        height: 44px !important;
+        flex-basis: 44px !important;
+      }
+
+      .calendar-icon {
+        width: 42px !important;
+        height: 42px !important;
+        border-radius: 13px !important;
+      }
+
+      .calendar-icon::before {
+        height: 15px !important;
+        border-radius: 13px 13px 0 0 !important;
+        font-size: 8px !important;
+        line-height: 1 !important;
+      }
+
+      .calendar-icon::after {
+        inset: 15px 0 0 !important;
+        font-size: 22px !important;
+        line-height: 1 !important;
+      }
+
+      nav.tabs.card {
+        margin-top: 0 !important;
+        height: 48px !important;
+        min-height: 48px !important;
+        max-height: 48px !important;
+      }
+
+      nav.tabs.card .tab {
+        height: 36px !important;
+        min-height: 36px !important;
+        max-height: 36px !important;
+      }
+
+      .panel.overview-panel {
+        padding-bottom: calc(148px + env(safe-area-inset-bottom)) !important;
+      }
+
+      .panel.overview-panel .bars.behavior-carousel {
+        min-height: 236px !important;
+        padding: 4px 0 calc(148px + env(safe-area-inset-bottom)) !important;
+      }
+
+      .panel.overview-panel .behavior-summary-card {
+        min-height: 224px !important;
+        grid-template-rows: auto auto auto !important;
+        gap: 10px !important;
+        padding: 14px !important;
+        border-radius: 24px !important;
+      }
+
+      .behavior-summary-mid {
+        min-height: 62px !important;
+        padding: 9px 10px !important;
+        gap: 7px !important;
+        border-radius: 18px !important;
+      }
+
+      .behavior-summary-stats {
+        gap: 8px !important;
+      }
+
+      .behavior-summary-stat {
+        min-height: 62px !important;
+      }
+
+      .room-grid {
+        padding-bottom: calc(172px + env(safe-area-inset-bottom)) !important;
+      }
+    }
+
+    #mainPanel .room-card .bar-track span,
+    #mainPanel .tracking-card .tracking-bar span {
+      background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--tone-accent, #72cfff), white 18%),
+        var(--tone-accent, #72cfff),
+        color-mix(in srgb, var(--tone-accent, #72cfff), #7b8cff 18%)
+      ) !important;
+    }
+
+    #mainPanel .room-card .bar-track,
+    #mainPanel .tracking-card .tracking-bar {
+      border-color: color-mix(in srgb, var(--tone-accent, #72cfff), white 68%) !important;
+      background: color-mix(in srgb, var(--tone-accent, #72cfff), white 86%) !important;
+    }
+
     @media print {
       body {
         position: static;
@@ -4415,7 +4565,7 @@
             <div class="round-badge">${completedRounds}<br>รอบ</div>
           </div>
           <div class="tracking-progress">
-            <div class="tracking-bar"><span style="--w:${percent}%"></span></div>
+            <div class="tracking-bar" style="${roomToneStyle(student.room)}"><span style="--w:${percent}%;${roomToneStyle(student.room)}"></span></div>
             <div class="tracking-caption">
               <span>สายเที่ยง ${count} ครั้ง</span>
               <span>${escapeHtml(nextText)}</span>
