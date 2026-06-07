@@ -506,6 +506,155 @@
       line-height: 1.55;
     }
 
+    .date-native {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .date-value-button {
+      width: 100%;
+      min-height: 50px;
+      border: 1px solid rgba(126,151,184,.16);
+      border-radius: 17px;
+      padding: 10px 13px;
+      background: rgba(255,255,255,.9);
+      color: #172033;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font: inherit;
+      font-weight: 800;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.92);
+    }
+
+    .date-value-button::after {
+      content: "⌄";
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: #356ec7;
+      background: rgba(231,242,255,.92);
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .date-picker-card {
+      display: none;
+      border-radius: 24px;
+      padding: 12px;
+      background: rgba(255,255,255,.82);
+      border: 1px solid rgba(221,232,246,.86);
+      box-shadow: 0 16px 34px rgba(31,45,70,.10), inset 0 1px 0 rgba(255,255,255,.94);
+    }
+
+    .date-picker-card.show {
+      display: grid;
+      gap: 10px;
+    }
+
+    .picker-head {
+      display: grid;
+      grid-template-columns: 36px 1fr 36px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .picker-title {
+      color: #223049;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .picker-nav {
+      width: 36px;
+      height: 36px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(235,244,254,.96);
+      color: #356ec7;
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .calendar-weekdays,
+    .calendar-days,
+    .month-grid-picker {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 5px;
+    }
+
+    .calendar-weekdays {
+      color: #7a8596;
+      font-size: 11px;
+      font-weight: 800;
+      text-align: center;
+      padding: 0 2px;
+    }
+
+    .calendar-day,
+    .month-choice {
+      border: 0;
+      border-radius: 14px;
+      background: transparent;
+      color: #223049;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 800;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      min-width: 0;
+      font-size: 13px;
+    }
+
+    .calendar-day.muted {
+      color: #a9b1bd;
+    }
+
+    .calendar-day.active,
+    .month-choice.active {
+      background: linear-gradient(135deg, #356ec7, #2d8bd9);
+      color: white;
+      box-shadow: 0 8px 16px rgba(45,110,199,.24);
+    }
+
+    .month-grid-picker {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px 7px;
+    }
+
+    .month-choice {
+      min-height: 46px;
+      padding: 8px 6px;
+      background: rgba(235,244,254,.72);
+      font-size: 12px;
+      line-height: 1.12;
+      overflow-wrap: anywhere;
+    }
+
+    .picker-today {
+      border: 0;
+      border-radius: 999px;
+      padding: 9px 12px;
+      background: rgba(232,250,238,.88);
+      color: #23804d;
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
     .room-list {
       display: none;
       max-height: 260px;
@@ -1742,8 +1891,15 @@
         <button class="modal-close" type="button" id="closeDayModal" aria-label="ปิด">×</button>
       </div>
       <div class="date-fields">
-        <label>ตั้งแต่วันที่ <input id="dateFrom" type="date"></label>
-        <label>ถึงวันที่ <input id="dateTo" type="date"></label>
+        <label>ตั้งแต่วันที่
+          <input class="date-native" id="dateFrom" type="hidden">
+          <button class="date-value-button" type="button" id="dateFromButton"></button>
+        </label>
+        <label>ถึงวันที่
+          <input class="date-native" id="dateTo" type="hidden">
+          <button class="date-value-button" type="button" id="dateToButton"></button>
+        </label>
+        <div class="date-picker-card" id="dayPickerCard"></div>
       </div>
       <div class="modal-actions">
         <button class="modal-cancel" type="button" id="cancelDay">ยกเลิก</button>
@@ -1759,7 +1915,11 @@
         <button class="modal-close" type="button" id="closeMonthModal" aria-label="ปิด">×</button>
       </div>
       <div class="date-fields">
-        <label>เดือน <input id="monthInput" type="month"></label>
+        <label>เดือน
+          <input class="date-native" id="monthInput" type="hidden">
+          <button class="date-value-button" type="button" id="monthInputButton"></button>
+        </label>
+        <div class="date-picker-card" id="monthPickerCard"></div>
       </div>
       <div class="modal-actions">
         <button class="modal-cancel" type="button" id="cancelMonth">ยกเลิก</button>
@@ -1868,8 +2028,15 @@
     let selectedReportRoom = "";
     let searchTimer = null;
     let allStudents = [];
+    let activeDayField = "from";
+    let dayPickerView = new Date();
+    let monthPickerYear = new Date().getFullYear();
     let feedbackAudioCtx = null;
     let lastFeedbackAt = 0;
+    const thaiMonths = [
+      "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+      "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+    ];
 
     function canCreateDocument() {
       if (selectedMode === "room") return Boolean(selectedReportRoom);
@@ -2264,9 +2431,99 @@
       return localIsoDate(date).slice(0, 7);
     }
 
+    function dateFromIso(value) {
+      const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!match) return new Date();
+      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    }
+
+    function formatThaiDateShort(value) {
+      const date = dateFromIso(value);
+      return `${String(date.getDate()).padStart(2, "0")} ${thaiMonths[date.getMonth()]} ${date.getFullYear() + 543}`;
+    }
+
+    function formatThaiMonth(value) {
+      const [yearText, monthText] = String(value || localMonth()).split("-");
+      const year = Number(yearText) || new Date().getFullYear();
+      const monthIndex = Math.max(0, Math.min(11, (Number(monthText) || 1) - 1));
+      return `${thaiMonths[monthIndex]} ${year + 543}`;
+    }
+
+    function updateDateButtons() {
+      const dateFromButton = document.getElementById("dateFromButton");
+      const dateToButton = document.getElementById("dateToButton");
+      const monthInputButton = document.getElementById("monthInputButton");
+      if (dateFromButton) dateFromButton.textContent = formatThaiDateShort(selectedDateFrom);
+      if (dateToButton) dateToButton.textContent = formatThaiDateShort(selectedDateTo);
+      if (monthInputButton) monthInputButton.textContent = formatThaiMonth(selectedMonth);
+    }
+
+    function renderDayPicker() {
+      const card = document.getElementById("dayPickerCard");
+      if (!card) return;
+      const selectedValue = activeDayField === "to" ? selectedDateTo : selectedDateFrom;
+      const year = dayPickerView.getFullYear();
+      const month = dayPickerView.getMonth();
+      const first = new Date(year, month, 1);
+      const start = new Date(year, month, 1 - first.getDay());
+      const cells = [];
+      for (let i = 0; i < 42; i += 1) {
+        const date = new Date(start);
+        date.setDate(start.getDate() + i);
+        const value = localIsoDate(date);
+        cells.push(`
+          <button class="calendar-day${date.getMonth() !== month ? " muted" : ""}${value === selectedValue ? " active" : ""}" type="button" data-day-value="${value}">
+            ${date.getDate()}
+          </button>
+        `);
+      }
+      card.innerHTML = `
+        <div class="picker-head">
+          <button class="picker-nav" type="button" data-day-move="-1" aria-label="เดือนก่อนหน้า">‹</button>
+          <div class="picker-title">${escapeHtml(formatThaiMonth(`${year}-${String(month + 1).padStart(2, "0")}`))}</div>
+          <button class="picker-nav" type="button" data-day-move="1" aria-label="เดือนถัดไป">›</button>
+        </div>
+        <div class="calendar-weekdays"><span>อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span></div>
+        <div class="calendar-days">${cells.join("")}</div>
+        <button class="picker-today" type="button" data-day-today="1">วันนี้</button>
+      `;
+    }
+
+    function openDayPicker(field) {
+      activeDayField = field;
+      dayPickerView = dateFromIso(field === "to" ? selectedDateTo : selectedDateFrom);
+      document.getElementById("dayPickerCard")?.classList.add("show");
+      renderDayPicker();
+    }
+
+    function renderMonthPicker() {
+      const card = document.getElementById("monthPickerCard");
+      if (!card) return;
+      const months = thaiMonths.map((name, index) => {
+        const value = `${monthPickerYear}-${String(index + 1).padStart(2, "0")}`;
+        return `<button class="month-choice${value === selectedMonth ? " active" : ""}" type="button" data-month-value="${value}">${escapeHtml(name)}</button>`;
+      }).join("");
+      card.innerHTML = `
+        <div class="picker-head">
+          <button class="picker-nav" type="button" data-month-move="-1" aria-label="ปีก่อนหน้า">‹</button>
+          <div class="picker-title">${monthPickerYear + 543}</div>
+          <button class="picker-nav" type="button" data-month-move="1" aria-label="ปีถัดไป">›</button>
+        </div>
+        <div class="month-grid-picker">${months}</div>
+        <button class="picker-today" type="button" data-month-today="1">เดือนนี้</button>
+      `;
+    }
+
+    function openMonthPicker() {
+      monthPickerYear = Number(String(selectedMonth || localMonth()).slice(0, 4)) || new Date().getFullYear();
+      document.getElementById("monthPickerCard")?.classList.add("show");
+      renderMonthPicker();
+    }
+
     selectedDateFrom = localIsoDate();
     selectedDateTo = localIsoDate();
     selectedMonth = localMonth();
+    updateDateButtons();
 
     periodButtons.forEach((button) => {
       button.addEventListener("click", () => {
@@ -2374,6 +2631,8 @@
     function openDayModal() {
       document.getElementById("dateFrom").value = selectedDateFrom;
       document.getElementById("dateTo").value = selectedDateTo;
+      updateDateButtons();
+      openDayPicker("from");
       dayModal.classList.add("show");
       dayModal.setAttribute("aria-hidden", "false");
     }
@@ -2381,10 +2640,13 @@
     function closeDayModal() {
       dayModal.classList.remove("show");
       dayModal.setAttribute("aria-hidden", "true");
+      document.getElementById("dayPickerCard")?.classList.remove("show");
     }
 
     function openMonthModal() {
       document.getElementById("monthInput").value = selectedMonth;
+      updateDateButtons();
+      openMonthPicker();
       monthModal.classList.add("show");
       monthModal.setAttribute("aria-hidden", "false");
     }
@@ -2392,6 +2654,7 @@
     function closeMonthModal() {
       monthModal.classList.remove("show");
       monthModal.setAttribute("aria-hidden", "true");
+      document.getElementById("monthPickerCard")?.classList.remove("show");
     }
 
     function openNoteModal() {
@@ -2430,11 +2693,49 @@
 
     document.getElementById("closeDayModal").addEventListener("click", closeDayModal);
     document.getElementById("cancelDay").addEventListener("click", closeDayModal);
+    document.getElementById("dateFromButton").addEventListener("click", () => openDayPicker("from"));
+    document.getElementById("dateToButton").addEventListener("click", () => openDayPicker("to"));
+    document.getElementById("dayPickerCard").addEventListener("click", (event) => {
+      const move = event.target.closest("[data-day-move]");
+      const value = event.target.closest("[data-day-value]");
+      const todayButton = event.target.closest("[data-day-today]");
+      if (move) {
+        dayPickerView = new Date(dayPickerView.getFullYear(), dayPickerView.getMonth() + Number(move.dataset.dayMove), 1);
+        renderDayPicker();
+        return;
+      }
+      if (todayButton) {
+        const today = localIsoDate();
+        if (activeDayField === "to") {
+          selectedDateTo = today;
+          document.getElementById("dateTo").value = selectedDateTo;
+        } else {
+          selectedDateFrom = today;
+          document.getElementById("dateFrom").value = selectedDateFrom;
+        }
+        dayPickerView = dateFromIso(today);
+        updateDateButtons();
+        renderDayPicker();
+        return;
+      }
+      if (value) {
+        if (activeDayField === "to") {
+          selectedDateTo = value.dataset.dayValue;
+          document.getElementById("dateTo").value = selectedDateTo;
+        } else {
+          selectedDateFrom = value.dataset.dayValue;
+          document.getElementById("dateFrom").value = selectedDateFrom;
+        }
+        updateDateButtons();
+        renderDayPicker();
+      }
+    });
     document.getElementById("confirmDay").addEventListener("click", () => {
       const from = document.getElementById("dateFrom").value || localIsoDate();
       const to = document.getElementById("dateTo").value || from;
       selectedDateFrom = from <= to ? from : to;
       selectedDateTo = from <= to ? to : from;
+      updateDateButtons();
       closeDayModal();
     });
     dayModal.addEventListener("click", (event) => {
@@ -2443,8 +2744,34 @@
 
     document.getElementById("closeMonthModal").addEventListener("click", closeMonthModal);
     document.getElementById("cancelMonth").addEventListener("click", closeMonthModal);
+    document.getElementById("monthInputButton").addEventListener("click", openMonthPicker);
+    document.getElementById("monthPickerCard").addEventListener("click", (event) => {
+      const move = event.target.closest("[data-month-move]");
+      const value = event.target.closest("[data-month-value]");
+      const todayButton = event.target.closest("[data-month-today]");
+      if (move) {
+        monthPickerYear += Number(move.dataset.monthMove);
+        renderMonthPicker();
+        return;
+      }
+      if (todayButton) {
+        selectedMonth = localMonth();
+        monthPickerYear = Number(selectedMonth.slice(0, 4));
+        document.getElementById("monthInput").value = selectedMonth;
+        updateDateButtons();
+        renderMonthPicker();
+        return;
+      }
+      if (value) {
+        selectedMonth = value.dataset.monthValue;
+        document.getElementById("monthInput").value = selectedMonth;
+        updateDateButtons();
+        renderMonthPicker();
+      }
+    });
     document.getElementById("confirmMonth").addEventListener("click", () => {
       selectedMonth = document.getElementById("monthInput").value || localMonth();
+      updateDateButtons();
       closeMonthModal();
     });
     monthModal.addEventListener("click", (event) => {
@@ -2648,11 +2975,6 @@
     updateFinderVisibility();
     updateCreateButtonState();
 
-    const thaiMonths = [
-      "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-      "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
-    ];
-
     function parseIsoLocal(value) {
       const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
       if (!match) return null;
@@ -2677,6 +2999,25 @@
       const slash = raw.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
       if (slash) {
         return `${normalizeYear(slash[3])}-${String(slash[2]).padStart(2, "0")}-${String(slash[1]).padStart(2, "0")}`;
+      }
+
+      const thaiMonthNames = {
+        "มกราคม": 1, "ม.ค.": 1, "ม.ค": 1,
+        "กุมภาพันธ์": 2, "ก.พ.": 2, "ก.พ": 2,
+        "มีนาคม": 3, "มี.ค.": 3, "มี.ค": 3,
+        "เมษายน": 4, "เม.ย.": 4, "เม.ย": 4,
+        "พฤษภาคม": 5, "พ.ค.": 5, "พ.ค": 5,
+        "มิถุนายน": 6, "มิ.ย.": 6, "มิ.ย": 6,
+        "กรกฎาคม": 7, "ก.ค.": 7, "ก.ค": 7,
+        "สิงหาคม": 8, "ส.ค.": 8, "ส.ค": 8,
+        "กันยายน": 9, "ก.ย.": 9, "ก.ย": 9,
+        "ตุลาคม": 10, "ต.ค.": 10, "ต.ค": 10,
+        "พฤศจิกายน": 11, "พ.ย.": 11, "พ.ย": 11,
+        "ธันวาคม": 12, "ธ.ค.": 12, "ธ.ค": 12
+      };
+      const thaiDate = raw.match(/(\d{1,2})\s*([ก-ฮ.]+)\s*(\d{4})/);
+      if (thaiDate && thaiMonthNames[thaiDate[2]]) {
+        return `${normalizeYear(thaiDate[3])}-${String(thaiMonthNames[thaiDate[2]]).padStart(2, "0")}-${String(thaiDate[1]).padStart(2, "0")}`;
       }
 
       const parsed = new Date(raw);
@@ -2783,7 +3124,12 @@
     }
 
     function normalizeRoomValue(value) {
-      return String(value || "").trim().replace(/\s+/g, "");
+      return String(value || "")
+        .trim()
+        .replace(/\s+/g, "")
+        .replace(/^ม\.?/, "")
+        .replace(/^มัธยมศึกษาปีที่/, "")
+        .replace(/^ชั้น/, "");
     }
 
     function firstFilled(...values) {
