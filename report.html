@@ -1695,7 +1695,8 @@
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzcGLXGlsvtjfNXn-qw9R-LJSEVHXjm7dLIoUG5yY_7CA4QvO0BhGNvY7uF_ruOi55Qxw/exec";
     const periodButtons = document.querySelectorAll(".period button[data-period]");
@@ -1785,7 +1786,8 @@
       const sheets = document.getElementById("printSheets");
       if (!sheets || !sheets.children.length) return;
 
-      if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) {
+      const jsPDFCtor = window.jspdf && window.jspdf.jsPDF;
+      if (!window.html2canvas || !jsPDFCtor) {
         alert("ยังโหลดเครื่องมือดาวน์โหลด PDF ไม่สำเร็จ กรุณาต่ออินเทอร์เน็ตแล้วลองใหม่อีกครั้ง");
         return;
       }
@@ -1794,72 +1796,86 @@
       button.disabled = true;
       button.textContent = "กำลังทำไฟล์ PDF...";
 
-      // html2pdf/html2canvas มักจับภาพว่างเมื่อ element ถูกวางนอกจอหรืออยู่ใน modal ที่มี transform/zoom
-      // จึงสร้างพื้นที่ export ใหม่ให้มองเห็นจริงที่มุมซ้ายบนชั่วคราว แล้วจับทีละหน้าเป็นภาพใส่ jsPDF
-      const exportRoot = document.createElement("div");
-      exportRoot.id = "pdfExportRoot";
-      exportRoot.style.cssText = [
-        "position:fixed",
-        "left:0",
-        "top:0",
-        "width:210mm",
-        "min-height:297mm",
-        "background:#ffffff",
-        "z-index:2147483647",
-        "opacity:1",
-        "pointer-events:none",
-        "overflow:visible",
-        "transform:none",
-        "zoom:1"
-      ].join(";");
-
-      const clone = sheets.cloneNode(true);
-      clone.style.cssText = "display:block;width:210mm;background:#fff;overflow:visible;transform:none;zoom:1;";
-
-      const cloneSheets = Array.from(clone.querySelectorAll(".print-sheet"));
-      cloneSheets.forEach((sheet) => {
-        sheet.style.cssText += [
-          "display:block",
-          "width:210mm",
-          "height:297mm",
-          "margin:0",
-          "padding:16mm 18mm 12mm",
-          "box-shadow:none",
-          "background:#ffffff",
-          "color:#000000",
-          "overflow:hidden",
-          "transform:none",
-          "zoom:1"
-        ].join(";");
-      });
-
-      exportRoot.appendChild(clone);
-      document.body.appendChild(exportRoot);
+      let exportLayer = null;
 
       try {
         if (document.fonts?.ready) await document.fonts.ready;
-        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
-        const pages = Array.from(exportRoot.querySelectorAll(".print-sheet"));
+        // สำคัญ: ไม่ใช้ window.print() และไม่จับภาพ element ที่ซ่อน/อยู่นอกจอ
+        // เพราะบาง browser จะได้ PDF ขาวล้วน จึงสร้างชั้น export ที่มองเห็นจริงชั่วคราว
+        exportLayer = document.createElement("div");
+        exportLayer.id = "pdfExportLayer";
+        exportLayer.setAttribute("aria-hidden", "true");
+        exportLayer.style.cssText = [
+          "position:fixed",
+          "left:0",
+          "top:0",
+          "width:210mm",
+          "min-height:297mm",
+          "background:#ffffff",
+          "z-index:2147483647",
+          "overflow:visible",
+          "pointer-events:none"
+        ].join(";");
 
-        for (let i = 0; i < pages.length; i++) {
-          const page = pages[i];
+        const clone = sheets.cloneNode(true);
+        clone.id = "pdfExportSheets";
+        clone.style.cssText = "display:block;width:210mm;background:#ffffff;overflow:visible;";
+
+        const exportSheets = Array.from(clone.querySelectorAll(".print-sheet"));
+        exportSheets.forEach((sheet, index) => {
+          sheet.style.cssText += [
+            "display:block",
+            "width:210mm",
+            "height:297mm",
+            "margin:0",
+            "padding:16mm 18mm 18mm",
+            "box-shadow:none",
+            "background:#ffffff",
+            "color:#000000",
+            "zoom:1",
+            "transform:none",
+            "page-break-after:always",
+            "break-after:page",
+            "overflow:hidden"
+          ].join(";");
+          if (index > 0) sheet.style.marginTop = "0";
+        });
+
+        exportLayer.appendChild(clone);
+        document.body.appendChild(exportLayer);
+
+        // ให้ browser layout หน้า export ให้เสร็จก่อนจับภาพ
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        await new Promise(resolve => setTimeout(resolve, 180));
+
+        const pdf = new jsPDFCtor({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+        const pageElements = Array.from(exportLayer.querySelectorAll(".print-sheet"));
+        const scale = Math.min(2.2, Math.max(1.5, window.devicePixelRatio || 2));
+
+        for (let i = 0; i < pageElements.length; i += 1) {
+          const page = pageElements[i];
           const canvas = await window.html2canvas(page, {
-            scale: Math.min(2, window.devicePixelRatio || 2),
+            scale,
             useCORS: true,
-            allowTaint: true,
+            allowTaint: false,
             backgroundColor: "#ffffff",
+            logging: false,
             scrollX: 0,
             scrollY: 0,
             windowWidth: page.scrollWidth,
-            windowHeight: page.scrollHeight
+            windowHeight: page.scrollHeight,
+            width: page.offsetWidth,
+            height: page.offsetHeight
           });
 
-          const imgData = canvas.toDataURL("image/jpeg", 0.98);
+          if (!canvas.width || !canvas.height) {
+            throw new Error("จับภาพหน้าเอกสารไม่สำเร็จ");
+          }
+
+          const imageData = canvas.toDataURL("image/jpeg", 0.98);
           if (i > 0) pdf.addPage("a4", "portrait");
-          pdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
+          pdf.addImage(imageData, "JPEG", 0, 0, 210, 297, undefined, "FAST");
         }
 
         pdf.save(pdfFileName());
@@ -1870,7 +1886,7 @@
         vibrateFor("error");
         alert("ดาวน์โหลด PDF ไม่สำเร็จ: " + (error.message || String(error)));
       } finally {
-        exportRoot.remove();
+        if (exportLayer) exportLayer.remove();
         button.disabled = false;
         button.textContent = originalText;
       }
