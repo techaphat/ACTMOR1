@@ -2191,7 +2191,7 @@
     }
 
     function syncBehaviorButtons() {
-      document.querySelectorAll(".behavior-option").forEach((button) => {
+      document.querySelectorAll(".behavior-option[data-behavior]").forEach((button) => {
         const active = button.dataset.behavior === "ทั้งหมด"
           ? selectedBehaviors.length === 0
           : selectedBehaviors.includes(button.dataset.behavior);
@@ -2207,7 +2207,7 @@
     document.getElementById("openBehaviorModal").addEventListener("click", openBehaviorModal);
     document.getElementById("closeBehaviorModal").addEventListener("click", closeBehaviorModal);
     document.getElementById("cancelBehavior").addEventListener("click", closeBehaviorModal);
-    document.querySelectorAll(".behavior-option").forEach((button) => {
+    document.querySelectorAll(".behavior-option[data-behavior]").forEach((button) => {
       button.addEventListener("click", () => {
         const behavior = button.dataset.behavior;
         if (behavior === "ทั้งหมด") {
@@ -2513,8 +2513,59 @@
       "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
     ];
 
+    function parseIsoLocal(value) {
+      const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!match) return null;
+      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    }
+
+    function normalizeYear(yearText) {
+      const year = Number(yearText);
+      if (!Number.isFinite(year)) return "";
+      return String(year > 2400 ? year - 543 : year).padStart(4, "0");
+    }
+
+    function normalizeRecordDate(value) {
+      const raw = String(value || "").trim();
+      if (!raw) return "";
+
+      const iso = raw.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (iso) {
+        return `${normalizeYear(iso[1])}-${String(iso[2]).padStart(2, "0")}-${String(iso[3]).padStart(2, "0")}`;
+      }
+
+      const slash = raw.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+      if (slash) {
+        return `${normalizeYear(slash[3])}-${String(slash[2]).padStart(2, "0")}-${String(slash[1]).padStart(2, "0")}`;
+      }
+
+      const parsed = new Date(raw);
+      if (!Number.isNaN(parsed.getTime())) return localIsoDate(parsed);
+      return "";
+    }
+
+    function getRecordDate(record = {}) {
+      return normalizeRecordDate(firstFilled(
+        record.date,
+        record.recordDate,
+        record.day,
+        record.createdDate,
+        record.recordedAt,
+        record.createdAt,
+        record.timestamp,
+        record["วันที่"],
+        record["วัน"]
+      ));
+    }
+
+    function normalizeReportRecord(record = {}) {
+      const date = getRecordDate(record);
+      return date ? {...record, date} : {...record};
+    }
+
     function formatThaiDate(value) {
-      const date = new Date(value);
+      const normalized = normalizeRecordDate(value) || value;
+      const date = parseIsoLocal(normalized) || new Date(normalized);
       if (Number.isNaN(date.getTime())) return value || "-";
       return `${date.getDate()} ${thaiMonths[date.getMonth()]} ${date.getFullYear() + 543}`;
     }
@@ -2522,6 +2573,12 @@
     function lastDayOfMonth(monthValue) {
       const [year, month] = String(monthValue || localMonth()).split("-").map(Number);
       return localIsoDate(new Date(year, month, 0));
+    }
+
+    function currentAcademicYearStart() {
+      const now = new Date();
+      const year = now.getMonth() + 1 >= 5 ? now.getFullYear() : now.getFullYear() - 1;
+      return `${year}-05-01`;
     }
 
     function selectedDateBounds(records = []) {
@@ -2538,8 +2595,10 @@
         const to = month === localMonth() && today < monthEnd ? today : monthEnd;
         return {from, to};
       }
-      const dates = (records || []).map((record) => record.date).filter(Boolean).sort();
-      return {from: dates[0] || today, to: today};
+      const from = currentAcademicYearStart();
+      const yearEnd = lastDayOfMonth(`${Number(from.slice(0, 4)) + 1}-04`);
+      const to = today < yearEnd ? today : yearEnd;
+      return {from, to};
     }
 
     function dateRange(records) {
@@ -2550,12 +2609,11 @@
 
     function filterRecordsBySelectedPeriod(records) {
       const items = records || [];
-      if (selectedPeriod === "ปีการศึกษา") {
-        const today = localIsoDate();
-        return items.filter((record) => !record.date || record.date <= today);
-      }
       const {from, to} = selectedDateBounds(items);
-      return items.filter((record) => record.date && record.date >= from && record.date <= to);
+      return items.filter((record) => {
+        const date = getRecordDate(record);
+        return date && date >= from && date <= to;
+      });
     }
 
     function buildReportPeriodParams() {
@@ -2948,10 +3006,18 @@
 
       reports.forEach((report) => {
         (report.records || []).forEach((record) => {
-          const key = [record.timestamp, record.studentId, record.date, record.behaviorType, getActionText(record), record.note].join("|");
+          const normalizedRecord = normalizeReportRecord(record);
+          const key = [
+            normalizedRecord.timestamp,
+            normalizedRecord.studentId,
+            normalizedRecord.date,
+            normalizedRecord.behaviorType,
+            getActionText(normalizedRecord),
+            normalizedRecord.note
+          ].join("|");
           if (seen.has(key)) return;
           seen.add(key);
-          records.push(record);
+          records.push(normalizedRecord);
         });
       });
 
@@ -3034,6 +3100,10 @@
           }));
         }
         report = mergeReports(reports, behaviorTypes);
+        if (selectedMode === "room" && roomRaw) {
+          const roomRecords = (report.records || []).filter((record) => normalizeRoomValue(record.room) === normalizeRoomValue(roomRaw));
+          report = mergeReports([{...report, records: roomRecords}], behaviorTypes);
+        }
 
         // รายห้อง: ถ้าหลังบ้านกรองห้องแล้วไม่เจอ ให้ดึงกว้างทั้งระบบแล้วกรองห้องในหน้าเว็บอีกครั้ง
         // ช่วยแก้กรณีชื่อห้อง/ช่วงเวลา/ข้อมูลเก่า-ใหม่ไม่ตรงกันระหว่าง Behavior กับ BehaviorLogs
