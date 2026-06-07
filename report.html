@@ -77,7 +77,7 @@
     }
 
     body.document-ready .bottom-nav {
-      display: none;
+      display: grid;
     }
 
     .logo {
@@ -1113,6 +1113,11 @@
         place-items: stretch;
       }
 
+      body.document-ready {
+        padding: 0 0 calc(132px + env(safe-area-inset-bottom));
+        overflow-x: hidden;
+      }
+
       .phone {
         width: 100%;
         min-height: 100vh;
@@ -1143,6 +1148,27 @@
       .bottom-nav {
         width: min(78vw, 328px);
         bottom: calc(26px + env(safe-area-inset-bottom));
+      }
+
+      body.document-ready .print-sheets {
+        width: 100%;
+        overflow: visible;
+      }
+
+      body.document-ready .print-sheet {
+        width: 210mm;
+        height: 297mm;
+        zoom: var(--mobile-sheet-scale, .48);
+        margin: 0 14px 28px;
+        box-shadow: 0 14px 34px rgba(31,45,70,.16);
+      }
+
+      @supports not (zoom: 1) {
+        body.document-ready .print-sheet {
+          transform: scale(var(--mobile-sheet-scale, .48));
+          transform-origin: top left;
+          margin-bottom: 28px;
+        }
       }
     }
 
@@ -1614,6 +1640,12 @@
       const ready = canCreateDocument();
       button.disabled = !ready;
       button.textContent = "สร้างเอกสาร";
+    }
+
+    function updateMobileSheetScale() {
+      const viewport = Math.max(320, window.innerWidth || document.documentElement.clientWidth || 390);
+      const scale = Math.min(1, Math.max(.38, (viewport - 28) / 794));
+      document.documentElement.style.setProperty("--mobile-sheet-scale", scale.toFixed(4));
     }
 
     function playTapTone(kind = "tap") {
@@ -2714,6 +2746,7 @@
       renderDocument(report, {nameRaw, roomRaw, noRaw, name, room, no, behavior, selectedStudent});
       playTapTone("success");
       vibrateFor("success");
+      updateMobileSheetScale();
       document.body.classList.add("document-ready");
       document.getElementById("printSheets").scrollIntoView({behavior: "smooth", block: "start"});
 
@@ -2723,6 +2756,12 @@
     document.getElementById("printAgain").addEventListener("click", () => {
       window.print();
     });
+
+    window.addEventListener("resize", updateMobileSheetScale);
+    window.addEventListener("orientationchange", () => {
+      window.setTimeout(updateMobileSheetScale, 180);
+    });
+    updateMobileSheetScale();
   </script>
 </body>
 </html>
