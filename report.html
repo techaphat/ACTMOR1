@@ -1,0 +1,2714 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ม.1 Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/lazywasabi/thai-web-fonts@7/fonts/LINESeedSansTH/LINESeedSansTH.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "LINE Seed Sans TH", "IBM Plex Sans Thai", Arial, sans-serif;
+      color: #223049;
+      background:
+        radial-gradient(circle at 24% 7%, rgba(255,255,255,.72) 0 12%, transparent 27%),
+        radial-gradient(circle at 82% 0%, rgba(184,224,255,.58), transparent 32%),
+        linear-gradient(180deg, rgba(233,244,255,.18), rgba(255,255,255,.72) 78%, #eef7ff),
+        url("m1-dashboard-bg.webp");
+      background-size: cover;
+      background-position: center;
+      display: grid;
+      place-items: center;
+      padding: 18px 18px 150px;
+    }
+
+    body.page-leaving .phone {
+      opacity: .18;
+      filter: blur(7px);
+      transform: translateY(12px) scale(.985);
+      transition: opacity .32s ease, filter .32s ease, transform .32s ease;
+    }
+
+    body.page-leaving .bottom-nav {
+      opacity: .24;
+      transform: translateX(-50%) translateY(16px) scale(.96);
+      transition: opacity .32s ease, transform .32s ease;
+    }
+
+    body.document-ready {
+      display: block;
+      background-attachment: fixed;
+    }
+
+    .phone {
+      width: min(430px, 100%);
+      min-height: min(892px, calc(100vh - 28px));
+      border: 1.5px solid rgba(255,255,255,.48);
+      border-radius: 34px;
+      padding: 28px 14px 24px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.56) 82%, rgba(239,249,255,.72)),
+        rgba(255,255,255,.08);
+      box-shadow: 0 30px 90px rgba(62,86,122,.18), inset 0 1px 0 rgba(255,255,255,.58);
+      backdrop-filter: blur(5px) saturate(1.08);
+      position: relative;
+      overflow: visible;
+    }
+
+    .phone::before {
+      content: "";
+      position: absolute;
+      inset: 9px;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,.34);
+      pointer-events: none;
+    }
+
+    body.document-ready .phone {
+      margin: 0 auto 26px;
+    }
+
+    body.document-ready .bottom-nav {
+      display: none;
+    }
+
+    .logo {
+      width: 100%;
+      min-height: 112px;
+      border-radius: 27px;
+      background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.56));
+      border: 1px solid rgba(255,255,255,.78);
+      box-shadow: 0 16px 36px rgba(50,74,111,.12), inset 0 1px 0 rgba(255,255,255,.94);
+      backdrop-filter: blur(18px) saturate(1.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo img {
+      width: min(248px, 76%);
+      max-height: 78px;
+      object-fit: contain;
+      filter: drop-shadow(0 12px 18px rgba(31,45,70,.16));
+    }
+
+    .bottom-nav {
+      --active-index: 2;
+      position: fixed;
+      z-index: 60;
+      left: 50%;
+      bottom: calc(28px + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      width: min(80vw, 330px);
+      height: 78px;
+      padding: 10px 18px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      align-items: center;
+      border-radius: 999px;
+      background: rgba(255,255,255,.84);
+      border: 1px solid rgba(255,255,255,.94);
+      box-shadow: 0 18px 42px rgba(42,57,82,.14), 0 0 44px rgba(255,255,255,.48), inset 0 1px 0 rgba(255,255,255,.96);
+      backdrop-filter: blur(24px) saturate(1.18);
+      transition: opacity .24s ease, transform .24s ease, box-shadow .24s ease;
+    }
+
+    .bottom-nav::before {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      top: 10px;
+      bottom: 10px;
+      left: 18px;
+      width: calc((100% - 36px - 16px) / 3);
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,247,248,.96), rgba(255,236,236,.78));
+      box-shadow: 0 10px 24px rgba(255,124,85,.14), 0 0 34px rgba(255,131,118,.14), inset 0 1px 0 rgba(255,255,255,.9);
+      transform: translateX(calc(var(--active-index) * (100% + 8px)));
+      transition: transform .28s cubic-bezier(.2,.9,.2,1), background .22s ease, box-shadow .22s ease;
+    }
+
+    .bottom-nav-item {
+      position: relative;
+      z-index: 1;
+      height: 58px;
+      min-width: 0;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      display: grid;
+      place-items: center;
+      text-decoration: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .2s cubic-bezier(.2,.9,.2,1), filter .2s ease;
+    }
+
+    .bottom-nav-item img {
+      max-width: 66px;
+      max-height: 42px;
+      object-fit: contain;
+      filter: grayscale(1) saturate(0) opacity(.48) drop-shadow(0 5px 8px rgba(0,0,0,.08));
+      transform: scale(.86);
+      transition: transform .2s cubic-bezier(.2,.9,.2,1), filter .2s ease, opacity .2s ease;
+    }
+
+    .bottom-nav-item.is-active {
+      transform: translateY(-2px);
+    }
+
+    .bottom-nav-item.is-active img {
+      filter: grayscale(0) saturate(1.08) opacity(1) drop-shadow(0 9px 12px rgba(255,124,85,.22));
+      transform: scale(1.02);
+    }
+
+    .report-launcher {
+      position: fixed;
+      inset: 0;
+      z-index: 78;
+      display: none;
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(2px) saturate(1.02);
+    }
+
+    body.report-launcher-open .phone {
+      filter: blur(2px);
+      transform: scale(.992);
+      transition: filter .22s ease, transform .22s ease;
+    }
+
+    .report-launcher.show {
+      display: block;
+    }
+
+    .report-launch-card {
+      position: fixed;
+      left: 50%;
+      bottom: calc(112px + env(safe-area-inset-bottom));
+      width: min(80vw, 330px);
+      transform: translateX(-50%);
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      padding: 0;
+      pointer-events: none;
+    }
+
+    .report-launch-button,
+    .report-update-button {
+      grid-column: 3;
+      width: 122px;
+      height: 58px;
+      justify-self: center;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,.94);
+      box-shadow: 0 18px 34px rgba(31,45,70,.2), inset 0 1px 0 rgba(255,255,255,.96);
+      display: grid;
+      place-items: center;
+      padding: 9px 13px;
+      text-decoration: none;
+      pointer-events: auto;
+    }
+
+    .report-update-button {
+      grid-row: 1;
+      color: #1f65c7;
+      font: inherit;
+      font-weight: 800;
+      letter-spacing: 0;
+      cursor: pointer;
+      background: rgba(255,255,255,.94);
+    }
+
+    .report-launch-button {
+      grid-row: 2;
+    }
+
+    .report-update-button:disabled {
+      color: #7a8798;
+      cursor: wait;
+      background: rgba(244,247,251,.94);
+    }
+
+    .report-update-button img {
+      width: 100%;
+      max-height: 30px;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 12px rgba(255,97,103,.2));
+    }
+
+    .report-update-button.is-updating img {
+      opacity: .55;
+    }
+
+    .report-launch-button img {
+      width: 100%;
+      max-height: 40px;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 14px rgba(31,45,70,.16));
+    }
+
+    .form-card {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 11px;
+    }
+
+    .tabs,
+    .search,
+    .section-title,
+    .period,
+    .note-strip,
+    .room-buttons-panel,
+    .actions {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .tabs,
+    .search,
+    .period,
+    .note-strip {
+      display: flex;
+      gap: 8px;
+      border-radius: 28px;
+      background: rgba(255,255,255,.68);
+      padding: 7px;
+      box-shadow: 0 10px 24px rgba(38,55,82,.09), inset 0 1px 0 rgba(255,255,255,.96);
+      border: 1px solid rgba(255,255,255,.72);
+      backdrop-filter: blur(18px) saturate(1.1);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    button {
+      transition: transform .18s cubic-bezier(.2,.9,.2,1), box-shadow .18s ease, background .18s ease, opacity .18s ease;
+    }
+
+    button:active,
+    a:active {
+      transform: scale(.97);
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: .72;
+      transform: none;
+    }
+
+    #createPdf:disabled {
+      background: linear-gradient(180deg, rgba(213,220,231,.95), rgba(189,199,213,.9));
+      color: rgba(82,96,119,.82);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.46);
+      cursor: not-allowed;
+    }
+
+    .feedback-pop {
+      animation: feedbackPop .34s cubic-bezier(.2,.9,.2,1);
+    }
+
+    .feedback-wiggle {
+      animation: feedbackWiggle .38s cubic-bezier(.2,.9,.2,1);
+    }
+
+    @keyframes feedbackPop {
+      0% { transform: scale(1); }
+      38% { transform: scale(.92); }
+      72% { transform: scale(1.055); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes feedbackWiggle {
+      0%, 100% { transform: translateY(-2px) rotate(0) scale(1.02); }
+      25% { transform: translateY(-3px) rotate(-4deg) scale(1.08); }
+      55% { transform: translateY(-2px) rotate(3deg) scale(1.04); }
+    }
+
+    .tab,
+    .period button,
+    .note-strip button {
+      flex: 1;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      padding: 11px 10px;
+      cursor: pointer;
+      font-size: 17px;
+      font-weight: 700;
+      color: #5e738f;
+    }
+
+    .tab.active,
+    .period button.active {
+      background: rgba(232,243,255,.9);
+      color: #3169c7;
+      box-shadow: 0 8px 20px rgba(61,116,202,.12), inset 0 0 0 2px rgba(98,154,225,.16), inset 0 1px 0 rgba(255,255,255,.72);
+    }
+
+    .note-strip button {
+      background: rgba(255,255,255,.58);
+      color: #34425b;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
+    }
+
+    .student-finder.hide {
+      display: none;
+    }
+
+    .room-buttons-panel {
+      display: none;
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(255,255,255,.74), rgba(255,255,255,.52));
+      padding: 10px;
+      box-shadow: 0 12px 24px rgba(38,55,82,.07), inset 0 1px 0 rgba(255,255,255,.96);
+      border: 1px solid rgba(255,255,255,.82);
+      backdrop-filter: blur(22px) saturate(1.08);
+      overflow: hidden;
+    }
+
+    .room-buttons-panel.show {
+      display: grid;
+      gap: 7px;
+    }
+
+    .room-buttons-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #566984;
+      text-align: left;
+      padding: 2px 10px 0;
+    }
+
+    .room-buttons {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x proximity;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      padding: 2px 2px 7px;
+    }
+
+    .room-buttons::-webkit-scrollbar {
+      display: none;
+    }
+
+    .room-button {
+      flex: 0 0 auto;
+      min-width: 74px;
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      background: rgba(255,255,255,.9);
+      color: #60738f;
+      cursor: pointer;
+      font-weight: 700;
+      scroll-snap-align: start;
+      box-shadow: 0 9px 18px rgba(38,55,82,.055), inset 0 1px 0 rgba(255,255,255,.92);
+    }
+
+    .room-button.active {
+      background: rgba(232,243,255,.94);
+      color: #3169c7;
+      box-shadow: 0 9px 20px rgba(61,116,202,.12), inset 0 0 0 2px rgba(98,154,225,.16), inset 0 1px 0 rgba(255,255,255,.72);
+    }
+
+    .room-picker {
+      display: grid;
+      gap: 10px;
+    }
+
+    .room-select {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .room-modal-buttons {
+      border-radius: 24px;
+      padding: 8px;
+      background: rgba(255,255,255,.46);
+      border: 1px solid rgba(255,255,255,.72);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.84);
+    }
+
+    .room-modal-buttons .room-button {
+      min-width: 82px;
+      text-align: center;
+    }
+
+    .date-fields {
+      display: grid;
+      gap: 10px;
+    }
+
+    .date-fields label {
+      display: grid;
+      gap: 6px;
+      min-height: auto;
+      border-radius: 22px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.66);
+      border: 1px solid rgba(255,255,255,.72);
+      font-weight: 700;
+    }
+
+    .date-fields input,
+    .date-fields textarea {
+      width: 100%;
+      border: 1px solid rgba(126,151,184,.16);
+      border-radius: 17px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.88);
+      color: #172033;
+      font-weight: 600;
+      outline: none;
+    }
+
+    .date-fields textarea {
+      min-height: 128px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .room-list {
+      display: none;
+      max-height: 260px;
+      overflow: auto;
+      gap: 7px;
+      border-radius: 24px;
+      padding: 8px;
+      background: rgba(255,255,255,.74);
+      border: 1px solid rgba(255,255,255,.74);
+      box-shadow: 0 14px 28px rgba(38,55,82,.08);
+    }
+
+    .room-list.show {
+      display: grid;
+    }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(49,67,96,.22);
+      padding: 24px;
+      place-items: center;
+      backdrop-filter: blur(12px) saturate(1.08);
+    }
+
+    .modal-backdrop.show {
+      display: grid;
+    }
+
+    .room-modal {
+      width: min(430px, 100%);
+      max-height: min(760px, 88vh);
+      overflow: hidden;
+      border-radius: 30px;
+      background: rgba(255,255,255,.88);
+      border: 1px solid rgba(255,255,255,.82);
+      box-shadow: 0 24px 70px rgba(31,45,70,.18), inset 0 1px 0 rgba(255,255,255,.9);
+      backdrop-filter: blur(22px) saturate(1.1);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .modal-title {
+      font-size: 19px;
+      font-weight: 700;
+      color: #223049;
+    }
+
+    .modal-close {
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(235,244,254,.86);
+      color: #697386;
+      cursor: pointer;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .search input {
+      min-width: 0;
+      flex: 1;
+      border: 0;
+      background: transparent;
+      padding: 15px 14px;
+      outline: none;
+      font-weight: 600;
+      color: #223049;
+      font-size: 16px;
+    }
+
+    .folder-btn {
+      width: 54px;
+      min-height: 54px;
+      border: 0;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(230,245,255,.98), rgba(214,235,255,.88));
+      color: #356ec7;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 10px 20px rgba(52,112,176,.12), inset 0 1px 0 rgba(255,255,255,.92);
+      position: relative;
+    }
+
+    .folder-btn svg {
+      width: 29px;
+      height: 29px;
+      display: block;
+      filter: drop-shadow(0 5px 8px rgba(28,39,76,.12));
+    }
+
+    .search input::placeholder {
+      color: rgba(105,115,134,.7);
+    }
+
+    .search-panel {
+      position: relative;
+    }
+
+    .suggestions {
+      display: none;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 8px);
+      z-index: 20;
+      max-height: 230px;
+      overflow: auto;
+      border-radius: 24px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 20px 44px rgba(29,45,74,.16);
+      padding: 8px;
+      border: 1px solid rgba(255,255,255,.82);
+      backdrop-filter: blur(14px);
+    }
+
+    .suggestions.show {
+      display: grid;
+      gap: 6px;
+    }
+
+    .suggestion {
+      width: 100%;
+      border: 1px solid rgba(126,151,184,.12);
+      border-radius: 18px;
+      background: rgba(255,255,255,.76);
+      padding: 10px 12px;
+      text-align: left;
+      cursor: pointer;
+      color: #172033;
+    }
+
+    .suggestion strong,
+    .suggestion small {
+      display: block;
+    }
+
+    .suggestion small {
+      margin-top: 2px;
+      color: #666;
+    }
+
+    .section-title {
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,199,91,.95), rgba(255,173,88,.92));
+      color: white;
+      padding: 13px 16px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      box-shadow: 0 12px 24px rgba(255,143,112,.20), inset 0 1px 0 rgba(255,255,255,.42);
+      cursor: pointer;
+    }
+
+    button.section-title {
+      font: inherit;
+      width: 100%;
+    }
+
+    .panel {
+      margin-top: 10px;
+      border-radius: 28px;
+      background: rgba(255,255,255,.72);
+      padding: 16px;
+      box-shadow: 0 18px 44px rgba(38,55,82,.10), inset 0 1px 0 rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.76);
+      backdrop-filter: blur(16px);
+    }
+
+    .student-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .student-fields input,
+    .student-fields select {
+      width: 100%;
+      border: 1px solid rgba(126,151,184,.16);
+      border-radius: 18px;
+      padding: 11px 12px;
+      background: rgba(255,255,255,.84);
+      font-weight: 600;
+      outline: none;
+      color: #172033;
+    }
+
+    .checks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px 10px;
+      font-size: 16px;
+    }
+
+    .selection-hint {
+      text-align: center;
+      color: #697386;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .behavior-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      max-height: min(520px, 58vh);
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .behavior-option {
+      --pill-bg: rgba(236,247,255,.9);
+      --pill-border: rgba(87,154,226,.28);
+      --pill-ink: #1f65c7;
+      min-height: 54px;
+      border: 1.5px solid var(--pill-border);
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--pill-bg) 42%, white);
+      color: var(--pill-ink);
+      box-shadow: 0 8px 18px rgba(31,45,70,.045), inset 0 1px 0 rgba(255,255,255,.88);
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 13px;
+      cursor: pointer;
+      font-weight: 700;
+      text-align: center;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .behavior-option:nth-child(1) {
+      --pill-bg: rgba(255,247,218,.9);
+      --pill-border: rgba(223,161,45,.32);
+      --pill-ink: #b87a0d;
+    }
+
+    .behavior-option:nth-child(2) {
+      --pill-bg: rgba(235,249,255,.92);
+      --pill-border: rgba(60,154,210,.3);
+      --pill-ink: #1575a8;
+    }
+
+    .behavior-option:nth-child(3) {
+      --pill-bg: rgba(237,231,255,.9);
+      --pill-border: rgba(115,85,218,.28);
+      --pill-ink: #6742c2;
+    }
+
+    .behavior-option:nth-child(4) {
+      --pill-bg: rgba(255,235,237,.92);
+      --pill-border: rgba(219,80,89,.28);
+      --pill-ink: #b8323c;
+    }
+
+    .behavior-option:nth-child(5) {
+      --pill-bg: rgba(232,250,238,.92);
+      --pill-border: rgba(54,164,97,.28);
+      --pill-ink: #23804d;
+    }
+
+    .behavior-option:nth-child(6) {
+      --pill-bg: rgba(244,244,246,.95);
+      --pill-border: rgba(118,125,135,.24);
+      --pill-ink: #5e6670;
+    }
+
+    .behavior-option .emoji {
+      width: 28px;
+      height: 28px;
+      border: 1.5px solid currentColor;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      background: rgba(255,255,255,.66);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.82);
+    }
+
+    .behavior-option small {
+      display: none;
+    }
+
+    .behavior-option.active,
+    .behavior-option[aria-pressed="true"] {
+      border-color: var(--pill-ink);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--pill-bg) 78%, white), color-mix(in srgb, var(--pill-ink) 16%, var(--pill-bg)));
+      color: var(--pill-ink);
+      box-shadow: 0 7px 14px rgba(31,45,70,.055), inset 0 1px 0 rgba(255,255,255,.96);
+      transform: translateY(-1px);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-actions button {
+      flex: 1;
+      border: 0;
+      border-radius: 999px;
+      padding: 13px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .modal-cancel {
+      background: rgba(234,243,253,.94);
+      color: #697386;
+    }
+
+    .modal-confirm {
+      background: linear-gradient(135deg, #ff6d78, #ff9568);
+      color: white;
+      box-shadow: 0 12px 24px rgba(215,25,47,.20);
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      border-radius: 18px;
+      padding: 7px 9px;
+      background: rgba(255,255,255,.62);
+      border: 1px solid rgba(255,255,255,.72);
+      font-weight: 600;
+    }
+
+    input[type="radio"],
+    input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      accent-color: #f47e73;
+    }
+
+    .actions button {
+      width: 100%;
+      border: 0;
+      border-radius: 999px;
+      padding: 16px;
+      background: linear-gradient(135deg, #ff4a57, #ff8b61);
+      color: #fff;
+      cursor: pointer;
+      font-size: 19px;
+      font-weight: 700;
+      box-shadow: 0 16px 30px rgba(215,25,47,.22), inset 0 1px 0 rgba(255,255,255,.36);
+    }
+
+    .selected-student {
+      display: none;
+      margin-top: -2px;
+      border-radius: 22px;
+      background: rgba(232,250,238,.76);
+      border: 1px solid rgba(54,164,97,.14);
+      color: #23804d;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 10px 20px rgba(35,128,77,.08), inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .selected-student.show {
+      display: block;
+    }
+
+    .print-sheets {
+      display: none;
+    }
+
+    .tab {
+      color: #111;
+    }
+
+    .print-sheet {
+      width: min(100%, 210mm);
+      height: 297mm;
+      margin: 0 auto 24px;
+      padding: 16mm 18mm 18mm;
+      position: relative;
+      color: #000;
+      font-size: 18px;
+      font-family: "TH Sarabun New", "Sarabun", "Noto Sans Thai", Arial, sans-serif;
+      background: white;
+      box-shadow: 0 16px 50px rgba(0,0,0,.22);
+      overflow: hidden;
+    }
+
+    body.document-ready .print-sheets {
+      display: block;
+    }
+
+    .doc-header {
+      display: grid;
+      grid-template-columns: 58px 1fr 44mm;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .doc-logo {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+    }
+
+    .doc-title {
+      border-left: 2px solid #1c2a66;
+      padding-left: 12px;
+    }
+
+    .doc-title .small {
+      font-family: "IBM Plex Sans Thai", "Noto Sans Thai", Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .doc-title h1 {
+      font-family: "IBM Plex Sans Thai", "Noto Sans Thai", Arial, sans-serif;
+      font-size: 23px;
+      line-height: 1.05;
+      margin: 2px 0 0;
+    }
+
+    .doc-meta {
+      justify-self: end;
+      min-width: 36mm;
+      text-align: right;
+      line-height: 1.35;
+      font-size: 12px;
+    }
+
+    .doc-meta strong {
+      display: block;
+    }
+
+    .doc-fields {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 22px;
+    }
+
+    .doc-field {
+      display: flex;
+      gap: 4px;
+      align-items: end;
+      min-height: 20px;
+    }
+
+    .doc-field.wide {
+      grid-column: 1 / -1;
+    }
+
+    .line {
+      flex: 1;
+      border-bottom: 1px solid #777;
+      min-height: 17px;
+      padding: 0 6px 1px;
+      text-align: center;
+    }
+
+    .doc-divider {
+      margin: 28px 0 24px;
+      border: 0;
+      border-top: 2px dashed #333;
+    }
+
+    .doc-section {
+      margin: 0 0 26px;
+    }
+
+    .doc-content {
+      padding-bottom: 25mm;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .section-head strong {
+      font-weight: 800;
+    }
+
+    .doc-table {
+      width: 78%;
+      margin-left: 24mm;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .doc-table.room-table {
+      width: 82%;
+    }
+
+    .doc-table th {
+      border-bottom: 1.5px solid #222;
+      padding: 4px 6px;
+      text-align: left;
+      font-weight: 800;
+    }
+
+    .doc-table td {
+      border-bottom: 1px solid #d0d0d0;
+      padding: 4px 6px;
+      vertical-align: top;
+    }
+
+    .doc-table .center {
+      text-align: center;
+    }
+
+    .doc-empty {
+      margin: 16px 0 0 24mm;
+      color: #555;
+    }
+
+    .doc-footer {
+      position: absolute;
+      left: 18mm;
+      right: 18mm;
+      bottom: 8mm;
+    }
+
+    .doc-total {
+      text-align: right;
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+
+    .doc-page-number {
+      text-align: right;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .doc-footer .doc-divider {
+      margin: 0 0 10px;
+    }
+
+    .doc-range {
+      font-size: 13px;
+    }
+
+    .doc-notes {
+      margin-top: 6px;
+      font-size: 14px;
+    }
+
+    .note-line {
+      display: block;
+      height: 18px;
+      border-bottom: 1px dashed #777;
+      line-height: 18px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .preview-actions {
+      display: none;
+      width: min(100%, 210mm);
+      margin: 0 auto 30px;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    body.document-ready .preview-actions {
+      display: flex;
+    }
+
+    .preview-actions button {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      background: #111;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    @media screen and (max-width: 460px) {
+      body {
+        padding: 0 0 132px;
+        place-items: stretch;
+      }
+
+      .phone {
+        width: 100%;
+        min-height: 100vh;
+        border-radius: 0;
+        border: 0;
+        padding: 28px 18px 24px;
+      }
+
+      .phone::before {
+        inset: 10px;
+        border-radius: 30px;
+      }
+
+      .logo {
+        min-height: 104px;
+      }
+
+      .tab,
+      .period button,
+      .note-strip button {
+        font-size: 16px;
+      }
+
+      .behavior-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bottom-nav {
+        width: min(78vw, 328px);
+        bottom: calc(26px + env(safe-area-inset-bottom));
+      }
+    }
+
+    @media print {
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      body {
+        display: block;
+        padding: 0;
+        background: white;
+      }
+
+      .phone {
+        display: none;
+      }
+
+      .bottom-nav {
+        display: none !important;
+      }
+
+      .preview-actions {
+        display: none !important;
+      }
+
+      .print-sheets {
+        display: block !important;
+      }
+
+      .print-sheet {
+        display: block;
+        width: 210mm;
+        height: 297mm;
+        margin: 0 auto;
+        padding: 16mm 18mm 12mm;
+        position: relative;
+        color: #000;
+        font-size: 18px;
+        font-family: "TH Sarabun New", "Sarabun", "Noto Sans Thai", Arial, sans-serif;
+        page-break-after: always;
+        break-after: page;
+        overflow: hidden;
+      }
+
+      .print-sheet:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+
+      .doc-header {
+        display: grid;
+        grid-template-columns: 58px 1fr 44mm;
+        gap: 12px;
+        align-items: start;
+      }
+
+      .doc-logo {
+        width: 44px;
+        height: 44px;
+        object-fit: contain;
+      }
+
+      .doc-title {
+        border-left: 2px solid #1c2a66;
+        padding-left: 12px;
+      }
+
+      .doc-title .small {
+        font-family: "IBM Plex Sans Thai", "Noto Sans Thai", Arial, sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .doc-title h1 {
+        font-family: "IBM Plex Sans Thai", "Noto Sans Thai", Arial, sans-serif;
+        font-size: 23px;
+        line-height: 1.05;
+        margin: 2px 0 0;
+      }
+
+      .doc-meta {
+        justify-self: end;
+        min-width: 36mm;
+        text-align: right;
+        line-height: 1.35;
+        font-size: 12px;
+      }
+
+      .doc-meta strong {
+        display: block;
+      }
+
+      .doc-fields {
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 22px;
+      }
+
+      .doc-field {
+        display: flex;
+        gap: 4px;
+        align-items: end;
+        min-height: 20px;
+      }
+
+      .doc-field.wide {
+        grid-column: 1 / -1;
+      }
+
+      .line {
+        flex: 1;
+        border-bottom: 1px solid #777;
+        min-height: 17px;
+        padding: 0 6px 1px;
+        text-align: center;
+      }
+
+      .doc-divider {
+        margin: 28px 0 24px;
+        border: 0;
+        border-top: 2px dashed #333;
+      }
+
+      .doc-section {
+        margin: 0 0 26px;
+      }
+
+      .doc-content {
+        padding-bottom: 25mm;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 8px;
+        font-size: 16px;
+      }
+
+      .section-head strong {
+        font-weight: 800;
+      }
+
+      .doc-table {
+        width: 78%;
+        margin-left: 24mm;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+
+      .doc-table.room-table {
+        width: 82%;
+      }
+
+      .doc-table th {
+        border-bottom: 1.5px solid #222;
+        padding: 4px 6px;
+        text-align: left;
+        font-weight: 800;
+      }
+
+      .doc-table td {
+        border-bottom: 1px solid #d0d0d0;
+        padding: 4px 6px;
+        vertical-align: top;
+      }
+
+      .doc-table .center {
+        text-align: center;
+      }
+
+      .doc-empty {
+        margin: 16px 0 0 24mm;
+        color: #555;
+      }
+
+      .doc-footer {
+        position: absolute;
+        left: 18mm;
+        right: 18mm;
+        bottom: 8mm;
+        margin-top: 0;
+      }
+
+      .doc-total {
+        text-align: right;
+        font-size: 16px;
+        font-weight: 800;
+        margin-bottom: 2px;
+      }
+
+      .doc-page-number {
+        text-align: right;
+        font-size: 13px;
+        margin-bottom: 8px;
+      }
+
+      .doc-footer .doc-divider {
+        margin: 0 0 10px;
+      }
+
+      .doc-range {
+        font-size: 13px;
+      }
+
+      .doc-notes {
+        margin-top: 6px;
+        font-size: 14px;
+      }
+
+      .note-line {
+        display: block;
+        height: 18px;
+        border-bottom: 1px dashed #777;
+        line-height: 18px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="phone">
+    <div class="logo"><img src="m1rplg.png" alt="ACT REPORT"></div>
+
+    <section class="form-card">
+      <div class="tabs" aria-label="เลือกรูปแบบรายงาน">
+        <button class="tab active" type="button" data-mode="person">รายบุคคล</button>
+        <button class="tab" type="button" data-mode="room">รายห้อง</button>
+      </div>
+
+      <section class="student-finder" id="studentFinder">
+        <div class="search search-panel" id="searchFinder">
+          <input id="studentName" type="text" placeholder="ค้นหาชื่อ เลขประจำตัว หรือเลขที่" autocomplete="off">
+          <button class="folder-btn" type="button" id="openRoomModal" aria-label="เลือกนักเรียนจากห้อง">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M3.35791 12.7787C2.74772 13.7201 2.99956 15.0291 3.50323 17.647C3.8658 19.5316 4.04709 20.4738 4.67523 21.0991C4.8382 21.2614 5.02054 21.4052 5.2186 21.5277C5.98195 21.9999 6.99539 21.9999 9.02227 21.9999H15.9777C18.0046 21.9999 19.0181 21.9999 19.7814 21.5277C19.9795 21.4052 20.1618 21.2614 20.3248 21.0991C20.9529 20.4738 21.1342 19.5316 21.4968 17.647C22.0004 15.0291 22.2523 13.7201 21.6421 12.7787C21.4864 12.5384 21.2943 12.321 21.0721 12.1332C20.2011 11.3975 18.7933 11.3975 15.9777 11.3975H9.02227C6.20667 11.3975 4.79888 11.3975 3.92792 12.1332C3.70566 12.321 3.51363 12.5384 3.35791 12.7787ZM9.69518 17.1806C9.69518 16.7814 10.0376 16.4577 10.4601 16.4577H14.5398C14.9622 16.4577 15.3047 16.7814 15.3047 17.1806C15.3047 17.5798 14.9622 17.9035 14.5398 17.9035H10.4601C10.0376 17.9035 9.69518 17.5798 9.69518 17.1806Z" fill="#1C274C"></path>
+              <path opacity="0.5" d="M3.5762 12.4846C3.68271 12.3586 3.80034 12.241 3.92792 12.1332C4.79888 11.3975 6.20667 11.3975 9.02227 11.3975H15.9777C18.7933 11.3975 20.2011 11.3975 21.0721 12.1332C21.2 12.2413 21.3179 12.3592 21.4247 12.4857V9.75579C21.4247 8.84687 21.4247 8.09279 21.3394 7.49156C21.2494 6.85704 21.0531 6.29458 20.5839 5.83245C20.5074 5.75707 20.4266 5.68552 20.342 5.61807C19.8302 5.21023 19.2167 5.04345 18.5222 4.96608C17.8531 4.89155 17.0102 4.89157 15.9769 4.89158L15.6242 4.89158C14.6421 4.89158 14.29 4.88587 13.9711 4.80533C13.7837 4.75802 13.604 4.69195 13.4352 4.60878C13.151 4.46867 12.9033 4.25762 12.2077 3.64132L11.7336 3.22128C11.5345 3.04489 11.3987 2.9245 11.2531 2.81755C10.6284 2.35879 9.86779 2.08132 9.07145 2.01534C8.88602 1.99998 8.6968 1.99999 8.41356 2.00002L8.29714 2.00001C7.65647 1.9999 7.23365 1.99983 6.86652 2.0612C5.26167 2.32947 3.96392 3.45143 3.64782 4.93575C3.57591 5.27344 3.57602 5.66035 3.57619 6.21853L3.5762 12.4846Z" fill="#1C274C"></path>
+            </svg>
+          </button>
+          <div class="suggestions" id="suggestions"></div>
+        </div>
+
+        <div class="selected-student" id="selectedStudentInfo"></div>
+      </section>
+
+      <section class="room-buttons-panel" id="roomButtonsPanel" aria-label="เลือกห้องสำหรับรายงานรายห้อง">
+        <div class="room-buttons-title">เลือกห้อง</div>
+        <div class="room-buttons" id="roomButtons"></div>
+      </section>
+
+      <button class="section-title" type="button" id="openBehaviorModal">ประเภทพฤติกรรม</button>
+
+      <div class="period">
+        <button class="active" type="button" data-period="ปีการศึกษา">ปีการศึกษา</button>
+        <button type="button" data-period="เดือน">เดือน</button>
+        <button type="button" data-period="วัน">วัน</button>
+      </div>
+
+      <div class="note-strip">
+        <button type="button" id="openNoteModal">หมายเหตุ</button>
+      </div>
+
+      <div class="note-strip display-strip">
+        <button type="button" id="openDisplayModal">การแสดงข้อมูล</button>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="createPdf">สร้างเอกสาร</button>
+      </div>
+    </section>
+  </main>
+
+  <section class="print-sheets" id="printSheets"></section>
+
+  <div class="modal-backdrop" id="roomModal" aria-hidden="true">
+    <section class="room-modal" role="dialog" aria-modal="true" aria-labelledby="roomModalTitle">
+      <div class="modal-head">
+        <div class="modal-title" id="roomModalTitle">เลือกนักเรียนจากห้อง</div>
+        <button class="modal-close" type="button" id="closeRoomModal" aria-label="ปิด">×</button>
+      </div>
+      <div class="room-picker">
+        <select class="room-select" id="roomSelect" aria-label="เลือกห้อง">
+          <option value="">เลือกห้อง</option>
+        </select>
+        <div class="room-buttons room-modal-buttons" id="roomModalButtons" aria-label="เลือกห้อง"></div>
+        <div class="room-list" id="roomStudentList"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="behaviorModal" aria-hidden="true">
+    <section class="room-modal" role="dialog" aria-modal="true" aria-labelledby="behaviorModalTitle">
+      <div class="modal-head">
+        <div class="modal-title" id="behaviorModalTitle">เลือกประเภทพฤติกรรม</div>
+        <button class="modal-close" type="button" id="closeBehaviorModal" aria-label="ปิด">×</button>
+      </div>
+      <div class="behavior-grid" id="behaviorChoices">
+        <button class="behavior-option" type="button" aria-pressed="true" data-behavior="ทั้งหมด"><span class="emoji">✓</span><span>ทั้งหมด</span><small>แสดงทุกพฤติกรรม</small></button>
+        <button class="behavior-option" type="button" aria-pressed="false" data-behavior="สายเช้า"><span class="emoji">☀️</span><span>สายเช้า</span><small>มาไม่ทันช่วงเช้า</small></button>
+        <button class="behavior-option" type="button" aria-pressed="false" data-behavior="สายเที่ยง"><span class="emoji">🔆</span><span>สายเที่ยง</span><small>เข้าแถวเที่ยงช้า</small></button>
+        <button class="behavior-option" type="button" aria-pressed="false" data-behavior="สายพัก 10"><span class="emoji">🏃</span><span>สายพัก 10</span><small>กลับจากพักช้า</small></button>
+        <button class="behavior-option" type="button" aria-pressed="false" data-behavior="ขาดแถวเที่ยง"><span class="emoji">🚫</span><span>ขาดแถวเที่ยง</span><small>ไม่มาเข้าแถว</small></button>
+        <button class="behavior-option" type="button" aria-pressed="false" data-behavior="เครื่องแต่งกาย"><span class="emoji">👕</span><span>เครื่องแต่งกาย</span><small>ตรวจระเบียบ</small></button>
+        <button class="behavior-option" type="button" aria-pressed="false" data-behavior="อื่น ๆ"><span class="emoji">•••</span><span>อื่น ๆ</span><small>ระบุหมายเหตุ</small></button>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" type="button" id="cancelBehavior">ยกเลิก</button>
+        <button class="modal-confirm" type="button" id="confirmBehavior">ตกลง</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="dayModal" aria-hidden="true">
+    <section class="room-modal" role="dialog" aria-modal="true" aria-labelledby="dayModalTitle">
+      <div class="modal-head">
+        <div class="modal-title" id="dayModalTitle">เลือกช่วงวันที่</div>
+        <button class="modal-close" type="button" id="closeDayModal" aria-label="ปิด">×</button>
+      </div>
+      <div class="date-fields">
+        <label>ตั้งแต่วันที่ <input id="dateFrom" type="date"></label>
+        <label>ถึงวันที่ <input id="dateTo" type="date"></label>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" type="button" id="cancelDay">ยกเลิก</button>
+        <button class="modal-confirm" type="button" id="confirmDay">ตกลง</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="monthModal" aria-hidden="true">
+    <section class="room-modal" role="dialog" aria-modal="true" aria-labelledby="monthModalTitle">
+      <div class="modal-head">
+        <div class="modal-title" id="monthModalTitle">เลือกเดือน</div>
+        <button class="modal-close" type="button" id="closeMonthModal" aria-label="ปิด">×</button>
+      </div>
+      <div class="date-fields">
+        <label>เดือน <input id="monthInput" type="month"></label>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" type="button" id="cancelMonth">ยกเลิก</button>
+        <button class="modal-confirm" type="button" id="confirmMonth">ตกลง</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="noteModal" aria-hidden="true">
+    <section class="room-modal" role="dialog" aria-modal="true" aria-labelledby="noteModalTitle">
+      <div class="modal-head">
+        <div class="modal-title" id="noteModalTitle">เขียนหมายเหตุ</div>
+        <button class="modal-close" type="button" id="closeNoteModal" aria-label="ปิด">×</button>
+      </div>
+      <div class="date-fields">
+        <label>หมายเหตุ <textarea id="noteInput" placeholder="พิมพ์หมายเหตุสำหรับท้ายเอกสาร"></textarea></label>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" type="button" id="cancelNote">ยกเลิก</button>
+        <button class="modal-confirm" type="button" id="confirmNote">ตกลง</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="displayModal" aria-hidden="true">
+    <section class="room-modal" role="dialog" aria-modal="true" aria-labelledby="displayModalTitle">
+      <div class="modal-head">
+        <div class="modal-title" id="displayModalTitle">การแสดงข้อมูล</div>
+        <button class="modal-close" type="button" id="closeDisplayModal" aria-label="ปิด">×</button>
+      </div>
+      <div class="selection-hint">เลือกเพื่อไม่แสดงข้อมูล</div>
+      <div class="behavior-grid" id="displayChoices">
+        <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="fullName"><span class="emoji">ก</span><span>ชื่อ - สกุล</span><small>ชื่อผู้เรียนในเอกสาร</small></button>
+        <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="room"><span class="emoji">ห</span><span>ห้อง</span><small>ห้องเรียนในช่องข้อมูล</small></button>
+        <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="studentNo"><span class="emoji">#</span><span>เลขที่</span><small>เลขที่นักเรียน</small></button>
+        <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="studentId"><span class="emoji">ID</span><span>เลขประจำตัว</span><small>รหัสประจำตัวนักเรียน</small></button>
+        <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="header"><span class="emoji">H</span><span>หัวกระดาษ</span><small>โลโก้และชื่อระบบ</small></button>
+        <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="sectionCount"><span class="emoji">1</span><span>จำนวนในแต่ละพฤติกรรม</span><small>ครั้งที่และจำนวนรายหัวข้อ</small></button>
+        <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="totalCount"><span class="emoji">Σ</span><span>รวมทั้งหมด</span><small>ยอดรวมท้ายเอกสาร</small></button>
+        <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="behaviorNote"><span class="emoji">N</span><span>หมายเหตุในรายการ</span><small>หมายเหตุของแต่ละพฤติกรรม</small></button>
+        <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="footerNote"><span class="emoji">✎</span><span>หมายเหตุท้ายกระดาษ</span><small>ช่องหมายเหตุด้านล่าง</small></button>
+        <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="pageNumber"><span class="emoji">P</span><span>เลขหน้า</span><small>หน้าที่ 1/2</small></button>
+        <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="recordDate"><span class="emoji">ว</span><span>วันที่ในรายการ</span><small>วันที่ของพฤติกรรม</small></button>
+        <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="dateRange"><span class="emoji">↔</span><span>ช่วงวันที่ท้ายกระดาษ</span><small>ข้อมูลตั้งแต่วันที่</small></button>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" type="button" id="cancelDisplay">ยกเลิก</button>
+        <button class="modal-confirm" type="button" id="confirmDisplay">ตกลง</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="preview-actions">
+    <button type="button" id="printAgain">พิมพ์ / บันทึก PDF</button>
+  </div>
+
+  <nav class="bottom-nav" aria-label="เมนูหลัก">
+    <a class="bottom-nav-item" href="index.html" aria-label="หน้าแรก">
+      <img src="ggicon.png" alt="">
+    </a>
+    <a class="bottom-nav-item" href="dashboard.html" aria-label="ม.1 ดีดี">
+      <img src="m1ddicon.png" alt="">
+    </a>
+    <a class="bottom-nav-item is-active" href="report.html" aria-current="page" aria-label="ACT ม.1">
+      <img src="m1-logo.png" alt="">
+    </a>
+  </nav>
+  <div id="reportLauncher" class="report-launcher" aria-hidden="true">
+    <div class="report-launch-card" role="dialog" aria-modal="true" aria-label="เปิด ACT REPORT">
+      <button class="report-update-button" type="button" aria-label="อัปเดตเป็นเวอร์ชันล่าสุด">
+        <img src="update.webp" alt="UPDATE">
+      </button>
+      <a class="report-launch-button" href="report.html" aria-label="เข้า ACT REPORT">
+        <img src="m1rplg.png" alt="ACT REPORT">
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzk_5fHu-a0mouf-rBiE33r3FBrCBtxMCT_Ui8zMa-ZjP9dOQ0vcxrU1O1JSRBk-yGF6g/exec";
+    const periodButtons = document.querySelectorAll(".period button[data-period]");
+    const modeButtons = document.querySelectorAll(".tab");
+    const studentFinder = document.getElementById("studentFinder");
+    const roomButtonsPanel = document.getElementById("roomButtonsPanel");
+    const roomButtons = document.getElementById("roomButtons");
+    const roomModal = document.getElementById("roomModal");
+    const roomSelect = document.getElementById("roomSelect");
+    const roomModalButtons = document.getElementById("roomModalButtons");
+    const roomStudentList = document.getElementById("roomStudentList");
+    const behaviorModal = document.getElementById("behaviorModal");
+    const dayModal = document.getElementById("dayModal");
+    const monthModal = document.getElementById("monthModal");
+    const noteModal = document.getElementById("noteModal");
+    const displayModal = document.getElementById("displayModal");
+    const suggestions = document.getElementById("suggestions");
+    const selectedStudentInfo = document.getElementById("selectedStudentInfo");
+    let selectedPeriod = "ปีการศึกษา";
+    let selectedDateFrom = "";
+    let selectedDateTo = "";
+    let selectedMonth = "";
+    let selectedNote = "";
+    let hiddenFields = [];
+    let selectedMode = "person";
+    let selectedBehaviors = [];
+    let selectedStudent = null;
+    let selectedReportRoom = "";
+    let searchTimer = null;
+    let allStudents = [];
+    let feedbackAudioCtx = null;
+    let lastFeedbackAt = 0;
+
+    function canCreateDocument() {
+      if (selectedMode === "room") return Boolean(selectedReportRoom);
+      return Boolean(selectedStudent);
+    }
+
+    function updateCreateButtonState() {
+      const button = document.getElementById("createPdf");
+      if (!button) return;
+      const ready = canCreateDocument();
+      button.disabled = !ready;
+      button.textContent = "สร้างเอกสาร";
+    }
+
+    function playTapTone(kind = "tap") {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        feedbackAudioCtx = feedbackAudioCtx || new AudioCtx();
+        if (feedbackAudioCtx.state === "suspended") feedbackAudioCtx.resume();
+
+        const now = feedbackAudioCtx.currentTime;
+        const tones = {
+          success: [660, 880, 1175],
+          error: [220, 165],
+          warning: [440, 620],
+          nav: [520, 760],
+          select: [680, 900],
+          tap: [600, 760]
+        };
+        const freqs = tones[kind] || tones.tap;
+
+        freqs.forEach((freq, index) => {
+          const start = now + index * .055;
+          const osc = feedbackAudioCtx.createOscillator();
+          const gain = feedbackAudioCtx.createGain();
+          osc.type = kind === "error" ? "triangle" : "sine";
+          osc.frequency.setValueAtTime(freq, start);
+          gain.gain.setValueAtTime(.0001, start);
+          gain.gain.exponentialRampToValueAtTime(kind === "success" ? .06 : kind === "error" ? .045 : .035, start + .01);
+          gain.gain.exponentialRampToValueAtTime(.0001, start + .105);
+          osc.connect(gain).connect(feedbackAudioCtx.destination);
+          osc.start(start);
+          osc.stop(start + .12);
+        });
+      } catch (error) {}
+    }
+
+    function vibrateFor(kind = "tap") {
+      if (!navigator.vibrate) return;
+      const patterns = {
+        success: [18, 24, 18],
+        error: [28, 36, 28],
+        nav: [12, 24, 12],
+        select: 18,
+        tap: 10
+      };
+      navigator.vibrate(patterns[kind] || patterns.tap);
+    }
+
+    function tactileFeedback(target, kind = "tap") {
+      const now = Date.now();
+      if (now - lastFeedbackAt < 45) return;
+      lastFeedbackAt = now;
+      vibrateFor(kind);
+      playTapTone(kind);
+
+      const el = target?.closest?.("button,a,.behavior-option,.bottom-nav-item,.suggestion,.room-button") || target;
+      if (!el || !el.classList) return;
+      const cls = kind === "nav" ? "feedback-wiggle" : "feedback-pop";
+      el.classList.remove(cls);
+      void el.offsetWidth;
+      el.classList.add(cls);
+      setTimeout(() => el.classList.remove(cls), 430);
+    }
+
+    document.addEventListener("pointerdown", (event) => {
+      const target = event.target.closest("button,a,.behavior-option,.suggestion,.room-button");
+      if (!target || target.disabled) return;
+      const kind = target.closest(".bottom-nav")
+        ? "nav"
+        : target.classList.contains("behavior-option") || target.classList.contains("room-button")
+          ? "select"
+          : "tap";
+      tactileFeedback(target, kind);
+    }, {passive: true});
+
+    function openReportLauncher() {
+      const launcher = document.getElementById("reportLauncher");
+      if (!launcher) return;
+      document.body.classList.add("report-launcher-open");
+      launcher.classList.add("show");
+      launcher.setAttribute("aria-hidden", "false");
+    }
+
+    function closeReportLauncher() {
+      const launcher = document.getElementById("reportLauncher");
+      if (!launcher) return;
+      document.body.classList.remove("report-launcher-open");
+      launcher.classList.remove("show");
+      launcher.setAttribute("aria-hidden", "true");
+    }
+
+    document.getElementById("reportLauncher")?.addEventListener("click", (event) => {
+      if (event.target.id === "reportLauncher") closeReportLauncher();
+    });
+
+    function showUpdatePopup(title = "กำลังอัปเดต", message = "กำลังโหลดเวอร์ชันล่าสุด...") {
+      if (document.getElementById("updateStatusPopup")) return;
+      const popup = document.createElement("div");
+      popup.id = "updateStatusPopup";
+      popup.setAttribute("role", "status");
+      popup.style.cssText = "position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:rgba(238,246,255,.58);backdrop-filter:blur(14px);";
+      popup.innerHTML = `<div style="min-width:230px;max-width:82vw;border-radius:28px;padding:22px 24px;text-align:center;background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.94);box-shadow:0 28px 70px rgba(31,45,70,.2),inset 0 1px 0 rgba(255,255,255,.96);color:#25364a;font-weight:800;"><div style="font-size:22px;margin-bottom:6px;">${title}</div><div style="font-size:14px;color:#526174;font-weight:500;">${message}</div></div>`;
+      document.body.appendChild(popup);
+    }
+
+    function showFinishedUpdatePopup() {
+      try {
+        if (localStorage.getItem("m1:update:done") !== "1") return;
+        localStorage.removeItem("m1:update:done");
+      } catch (error) {
+        return;
+      }
+      showUpdatePopup("อัปเดตเรียบร้อยแล้ว", "เปิดเวอร์ชันล่าสุดแล้ว");
+      setTimeout(() => document.getElementById("updateStatusPopup")?.remove(), 1900);
+    }
+    showFinishedUpdatePopup();
+
+    async function updateToLatestVersion(button) {
+      try {
+        if (button) {
+          button.disabled = true;
+          button.classList.add("is-updating");
+        }
+        showUpdatePopup();
+        try {
+          localStorage.setItem("m1:update:done", "1");
+        } catch (error) {}
+        if ("serviceWorker" in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map((reg) => reg.unregister()));
+        }
+        if ("caches" in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map((key) => caches.delete(key)));
+        }
+        try {
+          sessionStorage.clear();
+        } catch (error) {}
+        await new Promise((resolve) => setTimeout(resolve, 1300));
+        const freshUrl = new URL(window.location.href);
+        freshUrl.searchParams.set("v", Date.now().toString());
+        window.location.replace(freshUrl.toString());
+      } catch (error) {
+        window.location.reload();
+      }
+    }
+
+    document.querySelector(".report-update-button")?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      updateToLatestVersion(event.currentTarget);
+    });
+
+    document.querySelectorAll(".bottom-nav a").forEach((link) => {
+      link.addEventListener("click", (event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button) return;
+        if (link.getAttribute("aria-current") === "page") {
+          event.preventDefault();
+          if (link.getAttribute("href") === "report.html") openReportLauncher();
+          return;
+        }
+        event.preventDefault();
+        document.body.classList.add("page-leaving");
+        setTimeout(() => {
+          window.location.href = link.href;
+        }, 260);
+      });
+    });
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      }[char]));
+    }
+
+    function jsonp(action, params = {}) {
+      return new Promise((resolve, reject) => {
+        const cb = "m1_report_cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+        const script = document.createElement("script");
+        const timer = setTimeout(() => {
+          cleanup();
+          reject(new Error("เชื่อมต่อช้าเกินไป กรุณาลองใหม่"));
+        }, 15000);
+
+        function cleanup() {
+          clearTimeout(timer);
+          delete window[cb];
+          script.remove();
+        }
+
+        window[cb] = (data) => {
+          cleanup();
+          resolve(data);
+        };
+
+        const qs = new URLSearchParams({...params, action, callback: cb});
+        script.onerror = () => {
+          cleanup();
+          reject(new Error("เชื่อมต่อ Apps Script ไม่สำเร็จ"));
+        };
+        script.src = GAS_URL + "?" + qs.toString();
+        document.body.appendChild(script);
+      });
+    }
+
+    function localIsoDate(date = new Date()) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function localMonth(date = new Date()) {
+      return localIsoDate(date).slice(0, 7);
+    }
+
+    selectedDateFrom = localIsoDate();
+    selectedDateTo = localIsoDate();
+    selectedMonth = localMonth();
+
+    periodButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        periodButtons.forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        selectedPeriod = button.dataset.period;
+        if (selectedPeriod === "วัน") openDayModal();
+        if (selectedPeriod === "เดือน") openMonthModal();
+      });
+    });
+
+    modeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        modeButtons.forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        selectedMode = button.dataset.mode;
+        updateFinderVisibility();
+        updateCreateButtonState();
+      });
+    });
+
+    function updateFinderVisibility() {
+      const isPerson = selectedMode === "person";
+      studentFinder.classList.toggle("hide", !isPerson);
+      roomButtonsPanel.classList.toggle("show", !isPerson);
+      suggestions.classList.remove("show");
+      if (isPerson) {
+        selectedReportRoom = "";
+        updateCreateButtonState();
+      } else {
+        closeRoomModal();
+        loadReportRoomButtons();
+      }
+    }
+
+    function openRoomModal() {
+      roomModal.classList.add("show");
+      roomModal.setAttribute("aria-hidden", "false");
+      loadRoomOptions();
+    }
+
+    function closeRoomModal() {
+      roomModal.classList.remove("show");
+      roomModal.setAttribute("aria-hidden", "true");
+    }
+
+    document.getElementById("openRoomModal").addEventListener("click", openRoomModal);
+    document.getElementById("closeRoomModal").addEventListener("click", closeRoomModal);
+    roomModal.addEventListener("click", (event) => {
+      if (event.target === roomModal) closeRoomModal();
+    });
+
+    function openBehaviorModal() {
+      syncBehaviorButtons();
+      behaviorModal.classList.add("show");
+      behaviorModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeBehaviorModal() {
+      behaviorModal.classList.remove("show");
+      behaviorModal.setAttribute("aria-hidden", "true");
+    }
+
+    function syncBehaviorButtons() {
+      document.querySelectorAll(".behavior-option").forEach((button) => {
+        const active = button.dataset.behavior === "ทั้งหมด"
+          ? selectedBehaviors.length === 0
+          : selectedBehaviors.includes(button.dataset.behavior);
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+    }
+
+    function updateBehaviorLabel() {
+      syncBehaviorButtons();
+    }
+
+    document.getElementById("openBehaviorModal").addEventListener("click", openBehaviorModal);
+    document.getElementById("closeBehaviorModal").addEventListener("click", closeBehaviorModal);
+    document.getElementById("cancelBehavior").addEventListener("click", closeBehaviorModal);
+    document.querySelectorAll(".behavior-option").forEach((button) => {
+      button.addEventListener("click", () => {
+        const behavior = button.dataset.behavior;
+        if (behavior === "ทั้งหมด") {
+          selectedBehaviors = [];
+          syncBehaviorButtons();
+          return;
+        }
+        if (selectedBehaviors.includes(behavior)) {
+          selectedBehaviors = selectedBehaviors.filter((item) => item !== behavior);
+        } else {
+          selectedBehaviors.push(behavior);
+        }
+        syncBehaviorButtons();
+      });
+    });
+    document.getElementById("confirmBehavior").addEventListener("click", () => {
+      updateBehaviorLabel();
+      closeBehaviorModal();
+    });
+    behaviorModal.addEventListener("click", (event) => {
+      if (event.target === behaviorModal) closeBehaviorModal();
+    });
+
+    function openDayModal() {
+      document.getElementById("dateFrom").value = selectedDateFrom;
+      document.getElementById("dateTo").value = selectedDateTo;
+      dayModal.classList.add("show");
+      dayModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeDayModal() {
+      dayModal.classList.remove("show");
+      dayModal.setAttribute("aria-hidden", "true");
+    }
+
+    function openMonthModal() {
+      document.getElementById("monthInput").value = selectedMonth;
+      monthModal.classList.add("show");
+      monthModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeMonthModal() {
+      monthModal.classList.remove("show");
+      monthModal.setAttribute("aria-hidden", "true");
+    }
+
+    function openNoteModal() {
+      document.getElementById("noteInput").value = selectedNote;
+      noteModal.classList.add("show");
+      noteModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeNoteModal() {
+      noteModal.classList.remove("show");
+      noteModal.setAttribute("aria-hidden", "true");
+    }
+
+    function isHidden(field) {
+      return hiddenFields.includes(field);
+    }
+
+    function syncDisplayButtons() {
+      document.querySelectorAll(".display-option").forEach((button) => {
+        const active = isHidden(button.dataset.hide);
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+    }
+
+    function openDisplayModal() {
+      syncDisplayButtons();
+      displayModal.classList.add("show");
+      displayModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeDisplayModal() {
+      displayModal.classList.remove("show");
+      displayModal.setAttribute("aria-hidden", "true");
+    }
+
+    document.getElementById("closeDayModal").addEventListener("click", closeDayModal);
+    document.getElementById("cancelDay").addEventListener("click", closeDayModal);
+    document.getElementById("confirmDay").addEventListener("click", () => {
+      const from = document.getElementById("dateFrom").value || localIsoDate();
+      const to = document.getElementById("dateTo").value || from;
+      selectedDateFrom = from <= to ? from : to;
+      selectedDateTo = from <= to ? to : from;
+      closeDayModal();
+    });
+    dayModal.addEventListener("click", (event) => {
+      if (event.target === dayModal) closeDayModal();
+    });
+
+    document.getElementById("closeMonthModal").addEventListener("click", closeMonthModal);
+    document.getElementById("cancelMonth").addEventListener("click", closeMonthModal);
+    document.getElementById("confirmMonth").addEventListener("click", () => {
+      selectedMonth = document.getElementById("monthInput").value || localMonth();
+      closeMonthModal();
+    });
+    monthModal.addEventListener("click", (event) => {
+      if (event.target === monthModal) closeMonthModal();
+    });
+
+    document.getElementById("openNoteModal").addEventListener("click", openNoteModal);
+    document.getElementById("closeNoteModal").addEventListener("click", closeNoteModal);
+    document.getElementById("cancelNote").addEventListener("click", closeNoteModal);
+    document.getElementById("confirmNote").addEventListener("click", () => {
+      selectedNote = document.getElementById("noteInput").value.trim();
+      closeNoteModal();
+    });
+    noteModal.addEventListener("click", (event) => {
+      if (event.target === noteModal) closeNoteModal();
+    });
+
+    document.getElementById("openDisplayModal").addEventListener("click", openDisplayModal);
+    document.getElementById("closeDisplayModal").addEventListener("click", closeDisplayModal);
+    document.getElementById("cancelDisplay").addEventListener("click", closeDisplayModal);
+    document.querySelectorAll(".display-option").forEach((button) => {
+      button.addEventListener("click", () => {
+        const field = button.dataset.hide;
+        hiddenFields = isHidden(field)
+          ? hiddenFields.filter((item) => item !== field)
+          : [...hiddenFields, field];
+        syncDisplayButtons();
+      });
+    });
+    document.getElementById("confirmDisplay").addEventListener("click", closeDisplayModal);
+    displayModal.addEventListener("click", (event) => {
+      if (event.target === displayModal) closeDisplayModal();
+    });
+
+    document.getElementById("studentName").addEventListener("input", (event) => {
+      selectedStudent = null;
+      selectedStudentInfo.classList.remove("show");
+      selectedStudentInfo.textContent = "";
+      updateCreateButtonState();
+      clearTimeout(searchTimer);
+      const q = event.target.value.trim();
+      if (q.length < 2) {
+        suggestions.classList.remove("show");
+        suggestions.innerHTML = "";
+        return;
+      }
+      searchTimer = setTimeout(() => loadStudentSuggestions(q), 220);
+    });
+
+    async function loadStudentSuggestions(q) {
+      suggestions.innerHTML = `<div class="suggestion">กำลังค้นหา...</div>`;
+      suggestions.classList.add("show");
+      try {
+        const res = await jsonp("searchStudent", {q});
+        const students = res && res.success ? (res.students || []) : [];
+        if (!students.length) {
+          suggestions.innerHTML = `<div class="suggestion">ไม่พบนักเรียน</div>`;
+          return;
+        }
+        suggestions.innerHTML = students.slice(0, 8).map((student, index) => `
+          <button class="suggestion" type="button" data-index="${index}">
+            <strong>${escapeHtml(student.fullName || "")}</strong>
+            <small>${escapeHtml(student.room || "")} · เลขที่ ${escapeHtml(student.number || "")} · ${escapeHtml(student.studentId || "")}</small>
+          </button>
+        `).join("");
+        suggestions.querySelectorAll("button").forEach((button) => {
+          button.addEventListener("click", () => chooseStudent(students[Number(button.dataset.index)]));
+        });
+      } catch (error) {
+        suggestions.innerHTML = `<div class="suggestion">ค้นหาไม่ได้: ${escapeHtml(error.message || String(error))}</div>`;
+      }
+    }
+
+    async function loadAllStudents() {
+      if (allStudents.length) return allStudents;
+      roomStudentList.innerHTML = `<div class="suggestion">กำลังโหลดรายชื่อ...</div>`;
+      roomStudentList.classList.add("show");
+      const res = await jsonp("getStudents");
+      allStudents = res && res.success ? (res.students || []) : [];
+      return allStudents;
+    }
+
+    async function loadRoomOptions() {
+      try {
+        const students = await loadAllStudents();
+        const rooms = getRoomNames(students);
+        roomSelect.innerHTML = `<option value="">เลือกห้อง</option>` + rooms.map((room) => (
+          `<option value="${escapeHtml(room)}">${escapeHtml(room)}</option>`
+        )).join("");
+        renderRoomModalButtons(rooms, roomSelect.value);
+        renderRoomStudents(roomSelect.value);
+      } catch (error) {
+        roomStudentList.innerHTML = `<div class="suggestion">โหลดรายชื่อไม่ได้: ${escapeHtml(error.message || String(error))}</div>`;
+        roomStudentList.classList.add("show");
+      }
+    }
+
+    function renderRoomModalButtons(rooms, activeRoom = "") {
+      if (!rooms.length) {
+        roomModalButtons.innerHTML = `<div class="suggestion">ไม่พบข้อมูลห้อง</div>`;
+        return;
+      }
+      roomModalButtons.innerHTML = rooms.map((room) => `
+        <button class="room-button${room === activeRoom ? " active" : ""}" type="button" data-room="${escapeHtml(room)}">${escapeHtml(room)}</button>
+      `).join("");
+      roomModalButtons.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", () => {
+          const room = button.dataset.room || "";
+          roomSelect.value = room;
+          roomModalButtons.querySelectorAll("button").forEach((item) => item.classList.remove("active"));
+          button.classList.add("active");
+          button.scrollIntoView({behavior: "smooth", inline: "center", block: "nearest"});
+          renderRoomStudents(room);
+        });
+      });
+    }
+
+    function getRoomNames(students = allStudents) {
+      return [...new Set((students || []).map((student) => student.room).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, "th", {numeric: true}));
+    }
+
+    async function loadReportRoomButtons() {
+      roomButtons.innerHTML = `<div class="suggestion">กำลังโหลดห้อง...</div>`;
+      try {
+        const students = await loadAllStudents();
+        const rooms = getRoomNames(students);
+        if (!rooms.length) {
+          roomButtons.innerHTML = `<div class="suggestion">ไม่พบข้อมูลห้อง</div>`;
+          selectedReportRoom = "";
+          updateCreateButtonState();
+          return;
+        }
+        if (selectedReportRoom && !rooms.includes(selectedReportRoom)) {
+          selectedReportRoom = "";
+        }
+        roomButtons.innerHTML = rooms.map((room) => `
+          <button class="room-button${room === selectedReportRoom ? " active" : ""}" type="button" data-room="${escapeHtml(room)}">${escapeHtml(room)}</button>
+        `).join("");
+        roomButtons.querySelectorAll("button").forEach((button) => {
+          button.addEventListener("click", () => {
+            selectedReportRoom = button.dataset.room || "";
+            roomButtons.querySelectorAll("button").forEach((item) => item.classList.remove("active"));
+            button.classList.add("active");
+            button.scrollIntoView({behavior: "smooth", inline: "center", block: "nearest"});
+            updateCreateButtonState();
+          });
+        });
+        updateCreateButtonState();
+      } catch (error) {
+        roomButtons.innerHTML = `<div class="suggestion">โหลดห้องไม่ได้: ${escapeHtml(error.message || String(error))}</div>`;
+        selectedReportRoom = "";
+        updateCreateButtonState();
+      }
+    }
+
+    function renderRoomStudents(room) {
+      if (!room) {
+        roomStudentList.innerHTML = `<div class="suggestion">เลือกห้องเพื่อดูรายชื่อนักเรียน</div>`;
+        roomStudentList.classList.add("show");
+        return;
+      }
+      const students = allStudents
+        .filter((student) => student.room === room)
+        .sort((a, b) => Number(a.number || 0) - Number(b.number || 0) || String(a.fullName || "").localeCompare(String(b.fullName || ""), "th"));
+      if (!students.length) {
+        roomStudentList.innerHTML = `<div class="suggestion">ไม่พบนักเรียนในห้องนี้</div>`;
+        roomStudentList.classList.add("show");
+        return;
+      }
+      roomStudentList.innerHTML = students.map((student, index) => `
+        <button class="suggestion" type="button" data-index="${index}">
+          <strong>${escapeHtml(student.number || "-")}. ${escapeHtml(student.fullName || "")}</strong>
+          <small>${escapeHtml(student.studentId || "")}</small>
+        </button>
+      `).join("");
+      roomStudentList.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", () => chooseStudent(students[Number(button.dataset.index)]));
+      });
+      roomStudentList.classList.add("show");
+    }
+
+    roomSelect.addEventListener("change", () => {
+      roomModalButtons.querySelectorAll("button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.room === roomSelect.value);
+      });
+      renderRoomStudents(roomSelect.value);
+    });
+
+    function chooseStudent(student) {
+      selectedStudent = student;
+      document.getElementById("studentName").value = student.fullName || "";
+      selectedStudentInfo.textContent = `${student.fullName || ""} · ${student.room || ""} · เลขที่ ${student.number || ""} · ${student.studentId || ""}`;
+      selectedStudentInfo.classList.add("show");
+      suggestions.classList.remove("show");
+      suggestions.innerHTML = "";
+      closeRoomModal();
+      updateCreateButtonState();
+    }
+
+    updateFinderVisibility();
+    updateCreateButtonState();
+
+    const thaiMonths = [
+      "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+      "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+    ];
+
+    function formatThaiDate(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value || "-";
+      return `${date.getDate()} ${thaiMonths[date.getMonth()]} ${date.getFullYear() + 543}`;
+    }
+
+    function lastDayOfMonth(monthValue) {
+      const [year, month] = String(monthValue || localMonth()).split("-").map(Number);
+      return localIsoDate(new Date(year, month, 0));
+    }
+
+    function selectedDateBounds(records = []) {
+      const today = localIsoDate();
+      if (selectedPeriod === "วัน") {
+        const from = selectedDateFrom || today;
+        const to = selectedDateTo || from;
+        return from <= to ? {from, to} : {from: to, to: from};
+      }
+      if (selectedPeriod === "เดือน") {
+        const month = selectedMonth || localMonth();
+        const from = `${month}-01`;
+        const monthEnd = lastDayOfMonth(month);
+        const to = month === localMonth() && today < monthEnd ? today : monthEnd;
+        return {from, to};
+      }
+      const dates = (records || []).map((record) => record.date).filter(Boolean).sort();
+      return {from: dates[0] || today, to: today};
+    }
+
+    function dateRange(records) {
+      const {from, to} = selectedDateBounds(records);
+      if (!from || !to) return "-";
+      return `${formatThaiDate(from)} - ${formatThaiDate(to)}`;
+    }
+
+    function filterRecordsBySelectedPeriod(records) {
+      const items = records || [];
+      if (selectedPeriod === "ปีการศึกษา") {
+        const today = localIsoDate();
+        return items.filter((record) => !record.date || record.date <= today);
+      }
+      const {from, to} = selectedDateBounds(items);
+      return items.filter((record) => record.date && record.date >= from && record.date <= to);
+    }
+
+    function totalText(report) {
+      const total = Number(report.total || 0);
+      if (selectedMode === "room") {
+        const people = Array.isArray(report.topStudents) ? report.topStudents.length : 0;
+        return `รวมทั้งหมด : ${people} คน ${total} ครั้ง`;
+      }
+      return `รวมทั้งหมด : ${total} ครั้ง`;
+    }
+
+    function groupBy(records, key) {
+      return (records || []).reduce((map, record) => {
+        const name = record[key] || "ไม่ระบุ";
+        if (!map[name]) map[name] = [];
+        map[name].push(record);
+        return map;
+      }, {});
+    }
+
+    function firstFilled(...values) {
+      const found = values.find((value) => value !== undefined && value !== null && String(value).trim() !== "");
+      return found === undefined ? "" : found;
+    }
+
+    function studentNumberFrom(value = {}) {
+      return firstFilled(
+        value.number,
+        value.studentNo,
+        value.studentNumber,
+        value.no,
+        value.classNo,
+        value.roomNo,
+        value.noInRoom,
+        value.student_no,
+        value["เลขที่"]
+      );
+    }
+
+    function getStudentNumber(record = {}) {
+      const direct = studentNumberFrom(record);
+      if (direct) return direct;
+      const match = allStudents.find((student) => (
+        (record.studentId && student.studentId && String(student.studentId) === String(record.studentId)) ||
+        (record.fullName && student.fullName && String(student.fullName) === String(record.fullName) && (!record.room || String(student.room || "") === String(record.room || "")))
+      ));
+      return match ? studentNumberFrom(match) : "";
+    }
+
+    function numberSortValue(value) {
+      const text = String(value ?? "").trim();
+      const match = text.match(/\d+/);
+      return match ? Number(match[0]) : Number.POSITIVE_INFINITY;
+    }
+
+    function looksLikeStudentId(value) {
+      return /^\d{3,}$/.test(String(value || "").trim());
+    }
+
+    function renderFields(mode, params, report) {
+      if (mode === "room") {
+        const room = params.roomRaw || report.room || "";
+        return isHidden("room") ? "" : `
+          <div class="doc-field"><strong>ห้อง</strong><span class="line">${escapeHtml(room)}</span></div>
+          <div></div>
+        `;
+      }
+
+      const first = (report.records || [])[0] || {};
+      const picked = params.selectedStudent || {};
+      const fullName = picked.fullName || first.fullName || (looksLikeStudentId(params.nameRaw) ? "" : params.nameRaw) || "";
+      const studentId = picked.studentId || first.studentId || (looksLikeStudentId(params.nameRaw) ? params.nameRaw : "") || "";
+      const room = params.roomRaw || picked.room || first.room || "";
+      const number = params.noRaw || picked.number || "";
+      const fields = [];
+      if (!isHidden("fullName")) {
+        fields.push(`<div class="doc-field wide"><strong>ชื่อ - สกุล</strong><span class="line">${escapeHtml(fullName)}</span></div>`);
+      }
+      if (!isHidden("studentId")) {
+        fields.push(`<div class="doc-field"><strong>เลขประจำตัว</strong><span class="line">${escapeHtml(studentId)}</span></div>`);
+      }
+      if (!isHidden("room") || !isHidden("studentNo")) {
+        fields.push(`
+          <div class="doc-field">
+            ${!isHidden("room") ? `<strong>ห้อง</strong><span class="line">${escapeHtml(room)}</span>` : ""}
+            ${!isHidden("studentNo") ? `<strong>เลขที่</strong><span class="line">${escapeHtml(number)}</span>` : ""}
+          </div>
+        `);
+      }
+      return fields.join("");
+    }
+
+    function renderHeader(modeLabel, printDate) {
+      if (isHidden("header")) return "";
+      return `
+        <header class="doc-header">
+          <img class="doc-logo" src="m1-logo.png" alt="">
+          <div class="doc-title">
+            <div class="small">ระบบข้อมูลนักเรียน</div>
+            <h1>ระดับชั้นมัธยมศึกษาปีที่ 1</h1>
+          </div>
+          <div class="doc-meta">
+            <strong>ประเภทข้อมูล</strong>
+            <div>${escapeHtml(modeLabel)}</div>
+            <strong>วันที่พิมพ์</strong>
+            <div>${escapeHtml(printDate)}</div>
+          </div>
+        </header>
+      `;
+    }
+
+    function renderNoteLines() {
+      const lines = selectedNote
+        ? selectedNote.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+        : [];
+      const slots = [lines[0] || "", lines[1] || "", lines.slice(2).join(" ") || ""];
+      return slots.map((line) => `<span class="note-line">${escapeHtml(line)}</span>`).join("");
+    }
+
+    function renderFooter(report, page, pageTotal, isLastPage) {
+      return `
+        <footer class="doc-footer">
+          ${isLastPage && !isHidden("totalCount") ? `<div class="doc-total">${escapeHtml(totalText(report))}</div>` : ""}
+          ${!isHidden("pageNumber") ? `<div class="doc-page-number">หน้าที่ ${page}/${pageTotal}</div>` : ""}
+          <hr class="doc-divider">
+          ${!isHidden("dateRange") ? `<div class="doc-range">ข้อมูลตั้งแต่ : วันที่ ${escapeHtml(dateRange(report.records || []))}</div>` : ""}
+          ${isLastPage && !isHidden("footerNote") ? `
+            <div class="doc-notes">
+              <strong>หมายเหตุ :</strong>
+              ${renderNoteLines()}
+            </div>
+          ` : ""}
+        </footer>
+      `;
+    }
+
+    function renderPage(content, page, pageTotal, report, params) {
+      const modeLabel = selectedMode === "room" ? "รายห้อง" : "รายบุคคล";
+      const printDate = formatThaiDate(localIsoDate());
+      const fields = renderFields(selectedMode, params, report);
+      return `
+        <article class="print-sheet">
+          ${renderHeader(modeLabel, printDate)}
+          ${fields ? `<section class="doc-fields">${fields}</section>` : ""}
+          <hr class="doc-divider">
+          <main class="doc-content">${content}</main>
+          ${renderFooter(report, page, pageTotal, page === pageTotal)}
+        </article>
+      `;
+    }
+
+    function chunkArray(items, size) {
+      const chunks = [];
+      for (let i = 0; i < items.length; i += size) chunks.push(items.slice(i, i + size));
+      return chunks.length ? chunks : [[]];
+    }
+
+    function packBlocks(blocks, maxUnits) {
+      const pages = [];
+      let current = [];
+      let used = 0;
+
+      blocks.forEach((block) => {
+        if (current.length && used + block.units > maxUnits) {
+          pages.push(current.join(""));
+          current = [];
+          used = 0;
+        }
+        current.push(block.html);
+        used += block.units;
+      });
+
+      if (current.length) pages.push(current.join(""));
+      return pages.length ? pages : [`<section class="doc-section"><div class="doc-empty">ไม่ปรากฏข้อมูล</div></section>`];
+    }
+
+    function renderPersonPages(report) {
+      const grouped = groupBy(report.records || [], "behaviorType");
+      const behaviorNames = Object.keys(grouped).sort((a, b) => a.localeCompare(b, "th"));
+      if (!behaviorNames.length) {
+        return [`<section class="doc-section"><div class="doc-empty">ไม่ปรากฏข้อมูล</div></section>`];
+      }
+
+      const blocks = [];
+      behaviorNames.forEach((behaviorName) => {
+        const rows = grouped[behaviorName];
+        chunkArray(rows, 18).forEach((chunk, chunkIndex) => {
+          const headers = [
+            !isHidden("sectionCount") ? "<th>ครั้งที่</th>" : "",
+            !isHidden("recordDate") ? "<th>วันที่</th>" : "",
+            !isHidden("behaviorNote") ? "<th>หมายเหตุ</th>" : ""
+          ].join("");
+          blocks.push({
+            units: 3 + chunk.length,
+            html: `
+          <section class="doc-section">
+            <div class="section-head">
+              <div><strong>ประเภทพฤติกรรม :</strong> ${escapeHtml(behaviorName)}${chunkIndex ? " (ต่อ)" : ""}</div>
+              ${!isHidden("sectionCount") ? `<div><strong>จำนวน :</strong> ${rows.length} ครั้ง</div>` : ""}
+            </div>
+            <table class="doc-table">
+              <thead><tr>${headers || "<th>รายการ</th>"}</tr></thead>
+              <tbody>
+                ${chunk.map((record, index) => `
+                  <tr>
+                    ${!isHidden("sectionCount") ? `<td>${chunkIndex * 18 + index + 1}</td>` : ""}
+                    ${!isHidden("recordDate") ? `<td>${escapeHtml(formatThaiDate(record.date))}</td>` : ""}
+                    ${!isHidden("behaviorNote") ? `<td>${escapeHtml(record.note || "")}</td>` : ""}
+                    ${headers ? "" : `<td>${escapeHtml(behaviorName)}</td>`}
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </section>
+          `
+          });
+        });
+      });
+      return packBlocks(blocks, 25);
+    }
+
+    function renderRoomPages(report) {
+      const records = report.records || [];
+      const byBehavior = groupBy(records, "behaviorType");
+      const behaviorNames = Object.keys(byBehavior).sort((a, b) => a.localeCompare(b, "th"));
+      const studentHeaders = [
+        "<th>ลำดับที่</th>",
+        !isHidden("fullName") ? "<th>ชื่อ - สกุล</th>" : "",
+        !isHidden("studentId") ? "<th>เลขประจำตัว</th>" : "",
+        !isHidden("studentNo") ? "<th>เลขที่</th>" : ""
+      ].join("");
+      const columnCount = 1
+        + (isHidden("fullName") ? 0 : 1)
+        + (isHidden("studentId") ? 0 : 1)
+        + (isHidden("studentNo") ? 0 : 1);
+
+      if (!behaviorNames.length) {
+        return [`
+          <section class="doc-section">
+            <div class="section-head">
+              <div><strong>ประเภทพฤติกรรม :</strong> ${escapeHtml(report.behaviorType || "ทั้งหมด")}</div>
+              ${!isHidden("sectionCount") ? `<div><strong>จำนวน :</strong> 0 คน 0 ครั้ง</div>` : ""}
+            </div>
+            <div class="doc-empty">ไม่ปรากฏข้อมูล</div>
+          </section>
+        `];
+      }
+
+      const blocks = [];
+      behaviorNames.forEach((behaviorName) => {
+        const behaviorRecords = byBehavior[behaviorName] || [];
+        const studentMap = {};
+        behaviorRecords.forEach((record) => {
+          const key = record.studentId || `${record.fullName || ""}|${record.room || ""}`;
+          if (!studentMap[key]) {
+            studentMap[key] = {
+              studentId: record.studentId || "",
+              fullName: record.fullName || "",
+              number: getStudentNumber(record),
+              logs: []
+            };
+          }
+          if (!studentMap[key].number && getStudentNumber(record)) {
+            studentMap[key].number = getStudentNumber(record);
+          }
+          studentMap[key].logs.push(record);
+        });
+
+        const students = Object.values(studentMap)
+          .sort((a, b) => {
+            const noDiff = numberSortValue(a.number) - numberSortValue(b.number);
+            return noDiff || String(a.number || "").localeCompare(String(b.number || ""), "th", {numeric: true}) || String(a.fullName || "").localeCompare(String(b.fullName || ""), "th");
+          });
+        const totalText = `${students.length} คน ${behaviorRecords.length} ครั้ง`;
+        const tableRows = [];
+
+        students.forEach((student, studentIndex) => {
+          const logs = student.logs
+            .slice()
+            .sort((a, b) => String(a.timestamp || a.date).localeCompare(String(b.timestamp || b.date)));
+          tableRows.push(`
+            <tr>
+              <td>${studentIndex + 1}</td>
+              ${!isHidden("fullName") ? `<td>${escapeHtml(student.fullName || "")}</td>` : ""}
+              ${!isHidden("studentId") ? `<td>${escapeHtml(student.studentId || "")}</td>` : ""}
+              ${!isHidden("studentNo") ? `<td class="center">${escapeHtml(student.number || "")}</td>` : ""}
+            </tr>
+          `);
+          logs.forEach((record, index) => {
+            const details = [
+              !isHidden("sectionCount") ? `<strong>ครั้งที่</strong> ${index + 1}` : "",
+              !isHidden("recordDate") ? escapeHtml(formatThaiDate(record.date)) : "",
+              !isHidden("behaviorNote") && record.note ? escapeHtml(record.note) : ""
+            ].filter(Boolean).join(" - ");
+            if (!details) return;
+            tableRows.push(`
+              <tr>
+                <td></td>
+                <td colspan="${Math.max(columnCount - 1, 1)}">${details}</td>
+              </tr>
+            `);
+          });
+        });
+
+        chunkArray(tableRows, 24).forEach((chunk, pageIndex) => {
+          blocks.push({
+            units: 4 + chunk.length,
+            html: `
+              <section class="doc-section">
+                <div class="section-head">
+                  <div><strong>ประเภทพฤติกรรม :</strong> ${escapeHtml(behaviorName)}${pageIndex ? " (ต่อ)" : ""}</div>
+                  ${!isHidden("sectionCount") ? `<div><strong>จำนวน :</strong> ${escapeHtml(totalText)}</div>` : ""}
+                </div>
+                <table class="doc-table room-table">
+                  <thead><tr>${studentHeaders}</tr></thead>
+                  <tbody>
+                    ${chunk.join("")}
+                  </tbody>
+                </table>
+              </section>
+            `
+          });
+        });
+      });
+
+      return packBlocks(blocks, 25);
+    }
+
+    function renderDocument(report, params) {
+      const pageContents = selectedMode === "room"
+        ? renderRoomPages(report)
+        : renderPersonPages(report);
+      const pageTotal = pageContents.length || 1;
+      document.getElementById("printSheets").innerHTML = pageContents
+        .map((content, index) => renderPage(content, index + 1, pageTotal, report, params))
+        .join("");
+    }
+
+    function mergeReports(reports, behaviorTypes) {
+      const base = reports.find((item) => item && item.success) || {success: true, records: []};
+      const seen = new Set();
+      const records = [];
+
+      reports.forEach((report) => {
+        (report.records || []).forEach((record) => {
+          const key = [record.timestamp, record.studentId, record.date, record.behaviorType, record.note].join("|");
+          if (seen.has(key)) return;
+          seen.add(key);
+          records.push(record);
+        });
+      });
+
+      const filteredRecords = filterRecordsBySelectedPeriod(records);
+      const byType = {};
+      const byRoom = {};
+      const byStudent = {};
+      filteredRecords.forEach((record) => {
+        const type = record.behaviorType || "ไม่ระบุ";
+        const room = record.room || "ไม่ระบุห้อง";
+        const studentKey = [record.studentId, record.fullName, record.room].join("|");
+        byType[type] = (byType[type] || 0) + 1;
+        byRoom[room] = (byRoom[room] || 0) + 1;
+        if (!byStudent[studentKey]) {
+          byStudent[studentKey] = {
+            studentId: record.studentId,
+            fullName: record.fullName,
+            room: record.room,
+            number: getStudentNumber(record),
+            count: 0
+          };
+        }
+        if (!byStudent[studentKey].number && getStudentNumber(record)) {
+          byStudent[studentKey].number = getStudentNumber(record);
+        }
+        byStudent[studentKey].count += 1;
+      });
+
+      return {
+        ...base,
+        success: true,
+        total: filteredRecords.length,
+        behaviorType: behaviorTypes.length ? behaviorTypes.join(", ") : "ทั้งหมด",
+        byType,
+        byRoom,
+        topStudents: Object.values(byStudent)
+          .sort((a, b) => b.count - a.count || String(a.fullName || "").localeCompare(String(b.fullName || ""), "th"))
+          .slice(0, 50),
+        records: filteredRecords.sort((a, b) => String(b.timestamp || b.date).localeCompare(String(a.timestamp || a.date)))
+      };
+    }
+
+    document.getElementById("createPdf").addEventListener("click", async () => {
+      if (!canCreateDocument()) {
+        playTapTone("warning");
+        vibrateFor("warning");
+        updateCreateButtonState();
+        return;
+      }
+      const button = document.getElementById("createPdf");
+      const nameRaw = document.getElementById("studentName").value.trim();
+      const roomRaw = selectedMode === "room"
+        ? selectedReportRoom
+        : (selectedStudent ? (selectedStudent.room || "") : "");
+      const noRaw = selectedMode === "person" && selectedStudent ? (selectedStudent.number || "") : "";
+      const name = nameRaw || "............................................................";
+      const room = roomRaw || "....................";
+      const no = noRaw || "....................";
+      const behaviorTypes = selectedBehaviors.slice();
+      const behavior = behaviorTypes.length ? behaviorTypes.join(", ") : "ทั้งหมด";
+
+      button.disabled = true;
+      button.textContent = "กำลังสร้างเอกสาร...";
+
+      let report = null;
+      try {
+        const targets = behaviorTypes.length ? behaviorTypes : ["ทั้งหมด"];
+        const reports = [];
+        for (const behaviorType of targets) {
+          reports.push(await jsonp("getReportData", {
+            reportMode: selectedMode,
+            studentId: selectedMode === "person" && selectedStudent ? selectedStudent.studentId : "",
+            studentName: selectedMode === "person" ? nameRaw : "",
+            room: roomRaw,
+            studentNo: noRaw,
+            behaviorType,
+            period: "ทั้งหมด"
+          }));
+        }
+        report = mergeReports(reports, behaviorTypes);
+      } catch (error) {
+        playTapTone("error");
+        vibrateFor("error");
+        alert(error.message || String(error));
+        updateCreateButtonState();
+        return;
+      }
+
+      if (!report || !report.success) {
+        playTapTone("error");
+        vibrateFor("error");
+        alert((report && report.message) || "สร้างรายงานไม่สำเร็จ");
+        updateCreateButtonState();
+        return;
+      }
+
+      renderDocument(report, {nameRaw, roomRaw, noRaw, name, room, no, behavior, selectedStudent});
+      playTapTone("success");
+      vibrateFor("success");
+      document.body.classList.add("document-ready");
+      document.getElementById("printSheets").scrollIntoView({behavior: "smooth", block: "start"});
+
+      updateCreateButtonState();
+    });
+
+    document.getElementById("printAgain").addEventListener("click", () => {
+      window.print();
+    });
+  </script>
+</body>
+</html>

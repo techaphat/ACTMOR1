@@ -8,7 +8,7 @@
   <link href="https://cdn.jsdelivr.net/gh/lazywasabi/thai-web-fonts@7/fonts/LINESeedSansTH/LINESeedSansTH.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Favicon / Home Screen Icon -->
-  <link rel="icon" href="app-icon.webp" type="image/webp">
+  <link rel="icon" href="app-icon.png" type="image/png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="application-name" content="ACTMOR 1">
@@ -30,8 +30,8 @@
     }
     *{box-sizing:border-box;font-family:'LINE Seed Sans TH','Noto Sans Thai','Helvetica Neue',Arial,sans-serif;-webkit-tap-highlight-color:transparent}
     html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;color:var(--ink)}
-    body{--page-bg:url("m1indexbg.webp");--page-bg-position:center;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.32)),var(--page-bg) var(--page-bg-position) / cover no-repeat fixed}
-    body.record-bg{--page-bg:url("m1-record-bg.webp");--page-bg-position:center}
+    body{--page-bg:url("m1indexbg.png");--page-bg-position:center;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.32)),var(--page-bg) var(--page-bg-position) / cover no-repeat fixed}
+    body.record-bg{--page-bg:url("m1-record-bg.png");--page-bg-position:center}
     body:before{
       content:"";position:fixed;inset:0;pointer-events:none;opacity:.32;
       background:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,.04) 35%,rgba(255,255,255,.3));
@@ -90,6 +90,7 @@
     button.back-btn:after{content:"";display:block!important;position:absolute;inset:7px;border-radius:14px;border:1px solid rgba(84,164,255,.16);pointer-events:none}
     button.back-btn:active{transform:scale(.96);box-shadow:0 9px 18px rgba(31,45,70,.1),inset 0 1px 0 rgba(255,255,255,.9)!important}
     .bottom-nav{width:min(78vw,306px);height:68px;padding:8px 14px;gap:8px;bottom:calc(28px + env(safe-area-inset-bottom));box-shadow:0 16px 34px rgba(42,57,82,.15),inset 0 1px 0 rgba(255,255,255,.96)}.bottom-nav:before{top:8px;bottom:8px;left:14px;width:calc((100% - 28px - 16px) / 3);transform:translateX(calc(var(--active-index) * (100% + 8px)))}.bottom-nav-item{height:52px}.bottom-nav-item img{max-width:62px;max-height:38px}.bottom-nav-item.is-active img{transform:scale(1.02)}
+    .report-launcher{position:fixed;inset:0;z-index:28;display:none;background:rgba(255,255,255,.08);backdrop-filter:blur(2px) saturate(1.02)}body.report-launcher-open .app{filter:blur(2px);transform:scale(.992);transition:filter .22s ease,transform .22s ease}.report-launcher.show{display:block}.report-launch-card{position:fixed;left:50%;bottom:calc(104px + env(safe-area-inset-bottom));width:min(78vw,306px);transform:translateX(-50%);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;background:transparent;border:0;box-shadow:none;padding:0;pointer-events:none}.report-launch-button,.report-update-button{grid-column:3;width: 122px;height: 58px;justify-self:center;border:0;border-radius:999px;background:rgba(255,255,255,.94);box-shadow:0 18px 34px rgba(31,45,70,.2),inset 0 1px 0 rgba(255,255,255,.96);display:grid;place-items:center;padding: 9px 13px;text-decoration:none;pointer-events:auto}.report-update-button{grid-row:1;color:#1f65c7;font-weight:800;letter-spacing:0;cursor:pointer;background:rgba(255,255,255,.94)}.report-launch-button{grid-row:2}.report-update-button:disabled{color:#7a8798;cursor:wait;background:rgba(244,247,251,.94)}.report-update-button img{width:100%;max-height:30px;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(255,97,103,.2))}.report-update-button.is-updating img{opacity:.55}.report-launch-button img{width:100%;max-height: 40px;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(31,45,70,.16))}.report-launch-close{display:none}
     #groupScreen .main-layout{position:relative}
     #groupScreen .section-card:first-child{position:relative;z-index:3}
     #groupScreen .section-card:nth-child(2){position:relative;z-index:1}
@@ -119,24 +120,17 @@
     .panel{min-height:100%;padding-bottom:132px}
     .feedback-pop{animation:feedbackPop .34s cubic-bezier(.2,.9,.2,1)}
     .feedback-wiggle{animation:feedbackWiggle .38s cubic-bezier(.2,.9,.2,1)}
-    .queue-status{display:none;margin-top:10px;border-radius:18px;padding:10px 12px;font-size:13px;font-weight:520;line-height:1.35;text-align:center;border:1px solid rgba(84,164,255,.18);background:rgba(236,247,255,.78);color:#245f9e}
-    .queue-status.show{display:block}
     @keyframes feedbackPop{0%{transform:scale(1)}38%{transform:scale(.92)}72%{transform:scale(1.06)}100%{transform:scale(1)}}
     @keyframes feedbackWiggle{0%,100%{transform:translateY(-2px) rotate(0) scale(1.02)}25%{transform:translateY(-3px) rotate(-4deg) scale(1.08)}55%{transform:translateY(-2px) rotate(3deg) scale(1.04)}}
     @media (min-width:760px){.app{width:430px}.app-shell{padding-top:34px;padding-bottom:34px}}
     @media (max-width:460px){body{--page-bg-position:center top}.app-shell{padding:0;align-items:stretch}.app{width:100%;height:100dvh;min-height:0;border-radius:0;padding:calc(14px + env(safe-area-inset-top)) 10px 10px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.18)),var(--page-bg) var(--page-bg-position) / cover no-repeat;border-color:rgba(255,255,255,.18);box-shadow:none}.app:before{inset:7px;border-radius:24px}.screen.active{height:100%;min-height:0;padding-bottom:112px}.panel{padding:18px 14px 132px}.topbar{position:sticky;top:0;z-index:24;margin-top:0;margin-bottom:14px}.back-btn{background:rgba(239,247,255,.72);border:1px solid rgba(255,255,255,.86);border-radius:22px;box-shadow:0 10px 22px rgba(52,111,190,.12),inset 0 1px 0 rgba(255,255,255,.94)}.back-btn:before{border-left-color:#2f6fc7;border-bottom-color:#2f6fc7}.brand-logo{width:min(214px,58vw);margin-top:58px;margin-bottom:30px}.bottom-nav{width:min(78vw,306px);height:68px;padding:8px 14px;gap:8px;bottom:max(0px,env(safe-area-inset-bottom))}.bottom-nav:before{top:8px;bottom:8px;left:14px;width:calc((100% - 28px - 16px) / 3);transform:translateX(calc(var(--active-index) * (100% + 8px)))}.bottom-nav-item{height:52px}.bottom-nav-item img{max-width:62px;max-height:38px}.bottom-nav-item.is-active img{transform:scale(1.02)}.avatar{width:82px;height:82px;border-radius:28px}.suggestions{max-height:45dvh}.button-stack .btn{white-space:normal;min-height:48px}}
-    .screen.active{padding-bottom:calc(190px + env(safe-area-inset-bottom))!important;scroll-padding-bottom:calc(190px + env(safe-area-inset-bottom))!important}
-    .panel{padding-bottom:calc(214px + env(safe-area-inset-bottom))!important}
-    #saveBtn,#groupSaveBtn{margin-bottom:calc(104px + env(safe-area-inset-bottom))!important;scroll-margin-bottom:calc(180px + env(safe-area-inset-bottom))!important}
-    .bottom-nav{bottom:calc(18px + env(safe-area-inset-bottom))!important}
-    @media (max-width:460px){.screen.active{padding-bottom:calc(205px + env(safe-area-inset-bottom))!important}.panel{padding-bottom:calc(228px + env(safe-area-inset-bottom))!important}#saveBtn,#groupSaveBtn{margin-bottom:calc(116px + env(safe-area-inset-bottom))!important}}
   </style>
 </head>
 <body>
   <div class="app-shell"><main class="app">
     <section id="searchScreen" class="screen active">
       <div class="panel">
-        <img class="brand-logo" src="m1goodlogo.webp" alt="M1 Good Good ระบบบันทึกพฤติกรรมนักเรียน">
+        <img class="brand-logo" src="m1goodlogo.png" alt="M1 Good Good ระบบบันทึกพฤติกรรมนักเรียน">
         <div class="search-wrap">
           <div class="search-row">
             <input id="studentIdInput" class="search-input" type="search" placeholder="เลขประจำตัว หรือชื่อ" autocomplete="off">
@@ -181,7 +175,6 @@
             <button class="behavior-option group-behavior-option" type="button" aria-pressed="false" onclick="selectGroupBehavior(this,'เครื่องแต่งกาย')"><span class="emoji">👕</span><span>เครื่องแต่งกาย</span><small>ตรวจระเบียบ</small></button>
             <button class="behavior-option group-behavior-option" type="button" aria-pressed="false" onclick="selectGroupBehavior(this,'อื่น ๆ')"><span class="emoji">•••</span><span>อื่น ๆ</span><small>ระบุหมายเหตุ</small></button>
           </div>
-          <div id="groupQueueStatus" class="queue-status" aria-live="polite"></div>
           <label class="form-label fw-bold mt-3" for="groupNoteInput">หมายเหตุ</label>
           <textarea id="groupNoteInput" class="form-control" placeholder="หมายเหตุสำหรับนักเรียนทุกคนในกลุ่ม"></textarea>
           <button id="groupSaveBtn" class="btn btn-danger w-100 mt-3" onclick="submitGroupBehavior()" disabled>ส่งข้อมูลกลุ่ม</button>
@@ -213,7 +206,6 @@
             <button class="behavior-option" type="button" aria-pressed="false" onclick="selectBehavior(this,'เครื่องแต่งกาย')"><span class="emoji">👕</span><span>เครื่องแต่งกาย</span><small>ตรวจระเบียบ</small></button>
             <button class="behavior-option" type="button" aria-pressed="false" onclick="selectBehavior(this,'อื่น ๆ')"><span class="emoji">•••</span><span>อื่น ๆ</span><small>ระบุหมายเหตุ</small></button>
           </div>
-          <div id="queueStatus" class="queue-status" aria-live="polite"></div>
           <label class="form-label fw-bold mt-3" for="noteInput">หมายเหตุ</label>
           <textarea id="noteInput" class="form-control" placeholder="เช่น มาเข้าแถวช้า / แต่งกายไม่เรียบร้อย / อื่น ๆ"></textarea>
           <button id="saveBtn" class="btn btn-danger w-100 mt-3" onclick="submitBehavior()" disabled>ส่ง</button>
@@ -233,15 +225,25 @@
   </main></div>
   <nav class="bottom-nav" data-active="home" aria-label="เมนูหลัก">
     <button class="bottom-nav-item is-active" type="button" data-nav="home" data-index="0" onclick="goToSearch()" aria-label="หน้าแรก">
-      <img src="ggicon.webp" alt="">
+      <img src="ggicon.png" alt="">
     </button>
     <a class="bottom-nav-item" data-nav="dd" data-index="1" href="dashboard.html" aria-label="m1 DD dashboard">
-      <img src="m1ddicon.webp" alt="">
+      <img src="m1ddicon.png" alt="">
     </a>
-    <a class="bottom-nav-item" data-nav="act" data-index="2" href="dashboard.html" aria-label="ACT ม.1">
-      <img src="m1-logo.webp" alt="">
+    <a class="bottom-nav-item" data-nav="act" data-index="2" href="report.html" aria-label="ACT ม.1">
+      <img src="m1-logo.png" alt="">
     </a>
   </nav>
+  <div id="reportLauncher" class="report-launcher" aria-hidden="true">
+    <div class="report-launch-card" role="dialog" aria-modal="true" aria-label="เปิด ACT REPORT">
+      <button class="report-update-button" type="button" aria-label="อัปเดตเป็นเวอร์ชันล่าสุด">
+        <img src="update.webp" alt="UPDATE">
+      </button>
+      <a class="report-launch-button" href="report.html" aria-label="เข้า ACT REPORT">
+        <img src="m1rplg.png" alt="ACT REPORT">
+      </a>
+    </div>
+  </div>
   <div id="loading" class="loading-overlay"><div class="loader-card"><div class="spinner"></div><div class="mt-2">กำลังทำงาน...</div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -249,7 +251,7 @@
 const STUDENT_BOY_IMG='student-boy.webp';
 const STUDENT_GIRL_IMG='student-girl.webp';
 const GAS_URL='https://script.google.com/macros/s/AKfycbzQ8YCMoXcem6E64Eqfdbl-7ogx5mIfVor6kjV5xivy34xSjItMmU56rGVN6KhU-YAgiA/exec';
-let currentStudent=null, selectedBehaviors=[], typingTimer=null, groupTypingTimer=null, lastSuggestions=[], lastGroupSuggestions=[], groupStudents=[], selectedGroupBehaviors=[], currentHistory=[], isSaving=false, latestSearchQ='', latestGroupSearchQ='', latestHistoryStudentId='', saveQueue=Promise.resolve();
+let currentStudent=null, selectedBehaviors=[], typingTimer=null, groupTypingTimer=null, lastSuggestions=[], lastGroupSuggestions=[], groupStudents=[], selectedGroupBehaviors=[], currentHistory=[], isSaving=false, latestSearchQ='', latestGroupSearchQ='', latestHistoryStudentId='';
 const CACHE_TTL=10*60*1000;
 function cacheGet(key){try{const item=JSON.parse(sessionStorage.getItem(key)||'null');if(!item||Date.now()-item.time>CACHE_TTL)return null;return item.value}catch(e){return null}}
 function cacheSet(key,value){try{sessionStorage.setItem(key,JSON.stringify({time:Date.now(),value}))}catch(e){}}
@@ -320,12 +322,20 @@ document.addEventListener('pointerdown',e=>{
 function jsonp(action,params={}){return new Promise((resolve,reject)=>{const cb='m1gg_cb_'+Date.now()+'_'+Math.floor(Math.random()*100000);const script=document.createElement('script');const timeout=setTimeout(()=>{cleanup();reject(new Error('เชื่อมต่อช้าเกินไป กรุณาลองใหม่'));},12000);function cleanup(){clearTimeout(timeout);delete window[cb];script.remove();}window[cb]=data=>{cleanup();resolve(data)};const qs=new URLSearchParams(Object.assign({},params,{action,callback:cb}));script.onerror=()=>{cleanup();reject(new Error('เชื่อมต่อ Apps Script ไม่สำเร็จ'))};script.src=GAS_URL+'?'+qs.toString();document.body.appendChild(script);});}
 async function clearOldServiceWorker(){try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();for(const r of regs) await r.unregister();} if(window.caches){const keys=await caches.keys(); for(const k of keys) await caches.delete(k);}}catch(e){}}
 document.addEventListener('DOMContentLoaded',()=>{installSwalFeedback();clearOldServiceWorker();const input=document.getElementById('studentIdInput');input.addEventListener('input',handleTyping);input.addEventListener('keydown',e=>{if(e.key==='Enter') searchStudent()});const groupInput=document.getElementById('groupSearchInput');groupInput.addEventListener('input',handleGroupTyping);groupInput.addEventListener('keydown',e=>{if(e.key==='Enter') searchGroupStudent()});updateSaveButtonState();updateGroupSaveButtonState();input.focus();openInitialStudentFromUrl();});
+function openReportLauncher(){const launcher=document.getElementById('reportLauncher');if(!launcher)return;moveBottomNav('act');document.body.classList.add('report-launcher-open');launcher.classList.add('show');launcher.setAttribute('aria-hidden','false')}
+function closeReportLauncher(){const launcher=document.getElementById('reportLauncher');if(!launcher)return;document.body.classList.remove('report-launcher-open');launcher.classList.remove('show');launcher.setAttribute('aria-hidden','true');moveBottomNav('home')}
+document.getElementById('reportLauncher')?.addEventListener('click',event=>{if(event.target.id==='reportLauncher')closeReportLauncher()});
+function showUpdatePopup(title='กำลังอัปเดต',message='กำลังโหลดเวอร์ชันล่าสุด...'){if(document.getElementById('updateStatusPopup'))return;const popup=document.createElement('div');popup.id='updateStatusPopup';popup.setAttribute('role','status');popup.style.cssText='position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:rgba(238,246,255,.58);backdrop-filter:blur(14px);';popup.innerHTML=`<div style="min-width:230px;max-width:82vw;border-radius:28px;padding:22px 24px;text-align:center;background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.94);box-shadow:0 28px 70px rgba(31,45,70,.2),inset 0 1px 0 rgba(255,255,255,.96);color:#25364a;font-weight:800;"><div style="font-size:22px;margin-bottom:6px;">${title}</div><div style="font-size:14px;color:#526174;font-weight:500;">${message}</div></div>`;document.body.appendChild(popup)}
+function showFinishedUpdatePopup(){try{if(localStorage.getItem('m1:update:done')!=='1')return;localStorage.removeItem('m1:update:done')}catch(error){return}showUpdatePopup('อัปเดตเรียบร้อยแล้ว','เปิดเวอร์ชันล่าสุดแล้ว');setTimeout(()=>document.getElementById('updateStatusPopup')?.remove(),1900)}
+showFinishedUpdatePopup();
+async function updateToLatestVersion(button){try{if(button){button.disabled=true;button.classList.add('is-updating')}showUpdatePopup();try{localStorage.setItem('m1:update:done','1')}catch(error){}if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(reg=>reg.unregister()))}if('caches' in window){const keys=await caches.keys();await Promise.all(keys.map(key=>caches.delete(key)))}try{sessionStorage.clear()}catch(error){}await new Promise(resolve=>setTimeout(resolve,1300));const freshUrl=new URL(window.location.href);freshUrl.searchParams.set('v',Date.now().toString());window.location.replace(freshUrl.toString())}catch(error){window.location.reload()}}
+document.querySelector('.report-update-button')?.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();updateToLatestVersion(event.currentTarget)});
 function moveBottomNav(active){const nav=document.querySelector('.bottom-nav');const item=document.querySelector(`.bottom-nav-item[data-nav="${active}"]`);if(nav&&item){nav.style.setProperty('--active-index',item.dataset.index||0);nav.dataset.active=active}document.querySelectorAll('.bottom-nav-item').forEach(navItem=>{const isActive=navItem.dataset.nav===active;navItem.classList.toggle('is-active',isActive);navItem.setAttribute('aria-current',isActive?'page':'false')})}
 function updateBottomNav(name){moveBottomNav('home')}
 function updatePageBackground(name){document.body.classList.toggle('record-bg',name==='group'||name==='form'||name==='history')}
 function applyScreen(name){Object.values(screens).forEach(s=>s.classList.remove('active'));screens[name].classList.add('active');updateBottomNav(name);updatePageBackground(name);window.scrollTo({top:0,behavior:'smooth'});}
 function showScreen(name){if(document.startViewTransition){document.startViewTransition(()=>applyScreen(name));return}applyScreen(name);}function setSearchLoading(on){document.getElementById('searchBtn').classList.toggle('loading',!!on)}function setLoading(on){document.getElementById('loading').classList.toggle('show',!!on)}function escapeHtml(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}function escapeAttr(v){return escapeHtml(v).replace(/'/g,'&#39;')}
-document.querySelectorAll('.bottom-nav a').forEach(link=>{link.addEventListener('click',e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();moveBottomNav(link.dataset.nav);setTimeout(()=>document.body.classList.add('page-leaving'),140);setTimeout(()=>{window.location.href=link.href},440)})});
+document.querySelectorAll('.bottom-nav a').forEach(link=>{link.addEventListener('click',e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();if(link.dataset.nav==='act'){openReportLauncher();return}moveBottomNav(link.dataset.nav);setTimeout(()=>document.body.classList.add('page-leaving'),140);setTimeout(()=>{window.location.href=link.href},440)})});
 function handleTyping(){const input=document.getElementById('studentIdInput');document.getElementById('clearBtn').classList.toggle('show',!!input.value);clearTimeout(typingTimer);typingTimer=setTimeout(()=>loadSuggestions(input.value.trim()),180)}
 async function loadSuggestions(q){latestSearchQ=q;if(q.length<2){clearSuggestions();return}const cached=getCachedStudents(q);if(cached.length){lastSuggestions=cached;renderSuggestions(cached,q);return}setSearchLoading(true);try{const res=await jsonp('searchStudent',{q});if(q!==latestSearchQ)return;if(res&&res.success){lastSuggestions=res.students||[];rememberStudents(q,lastSuggestions);renderSuggestions(lastSuggestions,q)}else{renderMessage(res.message||'ไม่พบนักเรียน')}}catch(e){if(q===latestSearchQ)renderMessage(e.message||String(e))}finally{if(q===latestSearchQ)setSearchLoading(false)}}
 function renderSuggestions(students,q){const box=document.getElementById('suggestions');if(!students.length){box.innerHTML=`<div class="p-3 text-center fw-bold text-muted">ไม่พบนักเรียนจากคำค้น “${escapeHtml(q)}”</div>`;box.classList.add('has-results');return}box.innerHTML=students.slice(0,12).map(s=>`<button class="suggestion-item" type="button" onclick="chooseStudent('${escapeAttr(s.studentId)}')"><span class="suggestion-name">${escapeHtml(s.fullName)}</span><span class="suggestion-meta">${escapeHtml(s.room)} · เลขที่ ${escapeHtml(s.number)}</span></button>`).join('');box.classList.add('has-results')}
@@ -351,9 +361,7 @@ function selectStudent(student,view){currentStudent=student;clearSearchBox();if(
 function openInitialStudentFromUrl(){const params=new URLSearchParams(window.location.search);const q=params.get('studentId')||params.get('q');if(!q)return;document.getElementById('studentIdInput').value=q;document.getElementById('clearBtn').classList.add('show');searchStudent(params.get('view')==='history'?'history':'form')}
 async function prefetchHistory(student){const id=student?.studentId;if(!id||cacheGet(historyCacheKey(id)))return;try{const res=await jsonp('getHistory',{studentId:id});if(res&&res.success)cacheSet(historyCacheKey(id),res.history||[])}catch(e){}}
 function renderStudent(){if(!currentStudent)return;const full=`${currentStudent.room||'-'} · เลขที่ ${currentStudent.number||'-'} · เลขประจำตัว ${currentStudent.studentId||'-'}`;['studentName','formStudentName','historyStudentName'].forEach(id=>document.getElementById(id).textContent=currentStudent.fullName||'-');['studentDetail','formStudentDetail','historyStudentDetail'].forEach(id=>document.getElementById(id).textContent=full);['studentAvatar','formStudentAvatar','historyStudentAvatar'].forEach(id=>document.getElementById(id).innerHTML=renderAvatarHtml(currentStudent));document.getElementById('studentRoom').textContent='ห้อง '+(currentStudent.room||'-');document.getElementById('studentNumber').textContent='เลขที่ '+(currentStudent.number||'-');}
-function setQueueStatus(id,message){const box=document.getElementById(id);if(!box)return;box.textContent=message||'';box.classList.toggle('show',!!message)}
-function enqueueBehaviorSave(data){saveQueue=saveQueue.catch(()=>{}).then(()=>jsonp('saveBehavior',data));return saveQueue}
-function goToSearch(){currentStudent=null;selectedBehaviors=[];setQueueStatus('queueStatus','');setQueueStatus('groupQueueStatus','');clearSearchBox();clearGroupSearchBox();showScreen('search');setTimeout(()=>document.getElementById('studentIdInput').focus(),100)}function goToStudent(){if(!currentStudent)return goToSearch();showScreen('student')}function resetBehaviorSelection(){selectedBehaviors=[];document.querySelectorAll('#formScreen .behavior-option').forEach(e=>{e.classList.remove('active');e.setAttribute('aria-pressed','false')});setQueueStatus('queueStatus','');updateSaveButtonState()}function resetGroupBehaviorSelection(){selectedGroupBehaviors=[];document.querySelectorAll('.group-behavior-option').forEach(e=>{e.classList.remove('active');e.setAttribute('aria-pressed','false')});setQueueStatus('groupQueueStatus','');updateGroupSaveButtonState()}
+function goToSearch(){currentStudent=null;selectedBehaviors=[];clearSearchBox();clearGroupSearchBox();showScreen('search');setTimeout(()=>document.getElementById('studentIdInput').focus(),100)}function goToStudent(){if(!currentStudent)return goToSearch();showScreen('student')}function resetBehaviorSelection(){selectedBehaviors=[];document.querySelectorAll('#formScreen .behavior-option').forEach(e=>{e.classList.remove('active');e.setAttribute('aria-pressed','false')});updateSaveButtonState()}function resetGroupBehaviorSelection(){selectedGroupBehaviors=[];document.querySelectorAll('.group-behavior-option').forEach(e=>{e.classList.remove('active');e.setAttribute('aria-pressed','false')});updateGroupSaveButtonState()}
 function updateSaveButtonState(){const btn=document.getElementById('saveBtn');if(btn)btn.disabled=selectedBehaviors.length===0}
 function updateGroupSaveButtonState(){const btn=document.getElementById('groupSaveBtn');if(btn)btn.disabled=selectedGroupBehaviors.length===0}
 function goToGroup(){currentStudent=null;groupStudents=[];clearGroupSearchBox();resetGroupBehaviorSelection();document.getElementById('groupNoteInput').value='';renderGroupStudents();showScreen('group');setTimeout(()=>document.getElementById('groupSearchInput').focus(),100)}function goToForm(){if(!currentStudent)return goToSearch();resetBehaviorSelection();document.getElementById('noteInput').value='';renderStudent();showScreen('form')}function selectBehavior(el,type){const isSelected=selectedBehaviors.includes(type);if(isSelected){selectedBehaviors=selectedBehaviors.filter(v=>v!==type);el.classList.remove('active');el.setAttribute('aria-pressed','false');updateSaveButtonState();return}selectedBehaviors.push(type);el.classList.add('active');el.setAttribute('aria-pressed','true');updateSaveButtonState()}function selectGroupBehavior(el,type){const isSelected=selectedGroupBehaviors.includes(type);if(isSelected){selectedGroupBehaviors=selectedGroupBehaviors.filter(v=>v!==type);el.classList.remove('active');el.setAttribute('aria-pressed','false');updateGroupSaveButtonState();return}selectedGroupBehaviors.push(type);el.classList.add('active');el.setAttribute('aria-pressed','true');updateGroupSaveButtonState()}
@@ -366,17 +374,11 @@ async function submitBehavior(){
   }
 
   isSaving=true;
-  const saveBtn=document.getElementById('saveBtn');
-  const saveBtnText=saveBtn?.textContent||'ส่ง';
-  if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='กำลังบันทึก...'}
   setLoading(true);
-  setQueueStatus('queueStatus','กำลังเข้าคิวบันทึกข้อมูล...');
   const note=document.getElementById('noteInput').value.trim();
 
   try{
-    for(let i=0;i<selectedBehaviors.length;i++){
-      const behaviorType=selectedBehaviors[i];
-      setQueueStatus('queueStatus',`กำลังบันทึก ${i+1}/${selectedBehaviors.length}`);
+    for(const behaviorType of selectedBehaviors){
       const data={
         studentId:currentStudent.studentId,
         room:currentStudent.room,
@@ -385,11 +387,10 @@ async function submitBehavior(){
         behaviorType,
         note
       };
-      const res=await enqueueBehaviorSave(data);
+      const res=await jsonp('saveBehavior',data);
       if(!res.success){
         setLoading(false);
         isSaving=false;
-        if(saveBtn){saveBtn.disabled=false;saveBtn.textContent=saveBtnText}
         Swal.fire('บันทึกไม่สำเร็จ',res.message||`บันทึก ${behaviorType} ไม่สำเร็จ`,'error');
         return;
       }
@@ -401,9 +402,7 @@ async function submitBehavior(){
     const typeList=savedBehaviors.map(type=>`<li>${escapeHtml(type)}</li>`).join('');
 
     setLoading(false);
-    setQueueStatus('queueStatus','');
     isSaving=false;
-    if(saveBtn){saveBtn.disabled=false;saveBtn.textContent=saveBtnText}
 
     await Swal.fire({
       icon:'success',
@@ -414,9 +413,7 @@ async function submitBehavior(){
     goToSearch();
   }catch(e){
     setLoading(false);
-    setQueueStatus('queueStatus','');
     isSaving=false;
-    if(saveBtn){saveBtn.disabled=false;saveBtn.textContent=saveBtnText}
     Swal.fire('เชื่อมต่อไม่ได้',e.message||String(e),'error');
   }
 }
@@ -432,20 +429,12 @@ async function submitGroupBehavior(){
   }
 
   isSaving=true;
-  const groupSaveBtn=document.getElementById('groupSaveBtn');
-  const groupSaveBtnText=groupSaveBtn?.textContent||'ส่งข้อมูลกลุ่ม';
-  if(groupSaveBtn){groupSaveBtn.disabled=true;groupSaveBtn.textContent='กำลังบันทึก...'}
   setLoading(true);
-  setQueueStatus('groupQueueStatus','กำลังเข้าคิวบันทึกข้อมูลกลุ่ม...');
   const note=document.getElementById('groupNoteInput').value.trim();
 
   try{
-    const totalJobs=groupStudents.length*selectedGroupBehaviors.length;
-    let doneJobs=0;
     for(const student of groupStudents){
       for(const behaviorType of selectedGroupBehaviors){
-        doneJobs++;
-        setQueueStatus('groupQueueStatus',`กำลังบันทึก ${doneJobs}/${totalJobs}`);
         const data={
           studentId:student.studentId,
           room:student.room,
@@ -454,11 +443,10 @@ async function submitGroupBehavior(){
           behaviorType,
           note
         };
-        const res=await enqueueBehaviorSave(data);
+        const res=await jsonp('saveBehavior',data);
         if(!res.success){
           setLoading(false);
           isSaving=false;
-          if(groupSaveBtn){groupSaveBtn.disabled=false;groupSaveBtn.textContent=groupSaveBtnText}
           Swal.fire('บันทึกไม่สำเร็จ',res.message||`บันทึก ${student.fullName} / ${behaviorType} ไม่สำเร็จ`,'error');
           return;
         }
@@ -472,9 +460,7 @@ async function submitGroupBehavior(){
     const typeList=savedBehaviors.map(type=>`<li>${escapeHtml(type)}</li>`).join('');
 
     setLoading(false);
-    setQueueStatus('groupQueueStatus','');
     isSaving=false;
-    if(groupSaveBtn){groupSaveBtn.disabled=false;groupSaveBtn.textContent=groupSaveBtnText}
 
     await Swal.fire({
       icon:'success',
@@ -485,9 +471,7 @@ async function submitGroupBehavior(){
     goToSearch();
   }catch(e){
     setLoading(false);
-    setQueueStatus('groupQueueStatus','');
     isSaving=false;
-    if(groupSaveBtn){groupSaveBtn.disabled=false;groupSaveBtn.textContent=groupSaveBtnText}
     Swal.fire('เชื่อมต่อไม่ได้',e.message||String(e),'error');
   }
 }
