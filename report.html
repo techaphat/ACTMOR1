@@ -48,6 +48,10 @@
       background-attachment: fixed;
     }
 
+    body.preview-open {
+      overflow: hidden;
+    }
+
     .phone {
       width: min(430px, 100%);
       min-height: min(892px, calc(100vh - 28px));
@@ -885,6 +889,70 @@
       display: none;
     }
 
+    .preview-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 22px 14px calc(116px + env(safe-area-inset-bottom));
+      background: rgba(239,247,255,.42);
+      backdrop-filter: blur(7px) saturate(1.04);
+    }
+
+    .preview-modal.show {
+      display: flex;
+    }
+
+    .preview-panel {
+      width: min(96vw, 900px);
+      max-height: calc(100vh - 154px - env(safe-area-inset-bottom));
+      overflow: auto;
+      border-radius: 28px;
+      padding: 18px;
+      background: rgba(255,255,255,.9);
+      border: 1px solid rgba(255,255,255,.94);
+      box-shadow: 0 30px 90px rgba(31,45,70,.22), inset 0 1px 0 rgba(255,255,255,.96);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .preview-head {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin: -18px -18px 16px;
+      padding: 14px 16px;
+      border-radius: 28px 28px 20px 20px;
+      background: rgba(255,255,255,.9);
+      border-bottom: 1px solid rgba(221,232,246,.72);
+      backdrop-filter: blur(18px) saturate(1.08);
+    }
+
+    .preview-title {
+      color: #25364a;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .preview-close {
+      width: 42px;
+      height: 42px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(238,246,255,.9);
+      color: #50617a;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.96);
+    }
+
     .tab {
       color: #111;
     }
@@ -1088,7 +1156,7 @@
     .preview-actions {
       display: none;
       width: min(100%, 210mm);
-      margin: 0 auto 30px;
+      margin: 0 auto;
       gap: 10px;
       justify-content: center;
     }
@@ -1100,11 +1168,13 @@
     .preview-actions button {
       border: 0;
       border-radius: 999px;
-      padding: 12px 18px;
-      background: #111;
+      padding: 14px 26px;
+      background: linear-gradient(135deg, #ff4040, #ff9a5f);
       color: white;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 17px;
+      font-weight: 700;
+      box-shadow: 0 18px 36px rgba(255,105,87,.22), inset 0 1px 0 rgba(255,255,255,.42);
     }
 
     @media screen and (max-width: 460px) {
@@ -1150,6 +1220,27 @@
         bottom: calc(26px + env(safe-area-inset-bottom));
       }
 
+      .preview-modal {
+        padding: 14px 10px calc(118px + env(safe-area-inset-bottom));
+      }
+
+      .preview-panel {
+        width: 100%;
+        max-height: calc(100vh - 180px - env(safe-area-inset-bottom));
+        border-radius: 24px;
+        padding: 12px;
+      }
+
+      .preview-head {
+        margin: -12px -12px 12px;
+        padding: 12px 12px;
+        border-radius: 24px 24px 18px 18px;
+      }
+
+      .preview-title {
+        font-size: 16px;
+      }
+
       body.document-ready .print-sheets {
         width: 100%;
         overflow: visible;
@@ -1159,7 +1250,7 @@
         width: 210mm;
         height: 297mm;
         zoom: var(--mobile-sheet-scale, .48);
-        margin: 0 14px 28px;
+        margin: 0 auto 22px;
         box-shadow: 0 14px 34px rgba(31,45,70,.16);
       }
 
@@ -1453,7 +1544,18 @@
     </section>
   </main>
 
-  <section class="print-sheets" id="printSheets"></section>
+  <div class="preview-modal" id="previewModal" aria-hidden="true">
+    <section class="preview-panel" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+      <div class="preview-head">
+        <div class="preview-title" id="previewTitle">ตัวอย่างเอกสาร</div>
+        <button class="preview-close" type="button" id="closePreview" aria-label="ปิด">×</button>
+      </div>
+      <section class="print-sheets" id="printSheets"></section>
+    </section>
+    <div class="preview-actions">
+      <button type="button" id="downloadPdf">ดาวน์โหลด PDF</button>
+    </div>
+  </div>
 
   <div class="modal-backdrop" id="roomModal" aria-hidden="true">
     <section class="room-modal" role="dialog" aria-modal="true" aria-labelledby="roomModalTitle">
@@ -1570,10 +1672,6 @@
     </section>
   </div>
 
-  <div class="preview-actions">
-    <button type="button" id="printAgain">พิมพ์ / บันทึก PDF</button>
-  </div>
-
   <nav class="bottom-nav" aria-label="เมนูหลัก">
     <a class="bottom-nav-item" href="index.html" aria-label="หน้าแรก">
       <img src="ggicon.webp" alt="">
@@ -1596,6 +1694,7 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzk_5fHu-a0mouf-rBiE33r3FBrCBtxMCT_Ui8zMa-ZjP9dOQ0vcxrU1O1JSRBk-yGF6g/exec";
     const periodButtons = document.querySelectorAll(".period button[data-period]");
@@ -1612,6 +1711,7 @@
     const monthModal = document.getElementById("monthModal");
     const noteModal = document.getElementById("noteModal");
     const displayModal = document.getElementById("displayModal");
+    const previewModal = document.getElementById("previewModal");
     const suggestions = document.getElementById("suggestions");
     const selectedStudentInfo = document.getElementById("selectedStudentInfo");
     let selectedPeriod = "ปีการศึกษา";
@@ -1646,6 +1746,118 @@
       const viewport = Math.max(320, window.innerWidth || document.documentElement.clientWidth || 390);
       const scale = Math.min(1, Math.max(.38, (viewport - 28) / 794));
       document.documentElement.style.setProperty("--mobile-sheet-scale", scale.toFixed(4));
+    }
+
+    function openPreviewModal() {
+      previewModal.classList.add("show");
+      previewModal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("preview-open");
+      const panel = previewModal.querySelector(".preview-panel");
+      if (panel) panel.scrollTop = 0;
+    }
+
+    function closePreviewModal() {
+      previewModal.classList.remove("show");
+      previewModal.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("preview-open");
+    }
+
+    function safeFilePart(value) {
+      return String(value || "")
+        .trim()
+        .replace(/[\\/:*?"<>|]+/g, "-")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+    }
+
+    function pdfFileName() {
+      const target = selectedMode === "room"
+        ? selectedReportRoom
+        : (selectedStudent?.fullName || selectedStudent?.studentId || document.getElementById("studentName").value || "รายบุคคล");
+      const date = localIsoDate();
+      return `m1-report-${safeFilePart(target) || "document"}-${date}.pdf`;
+    }
+
+    async function downloadPdfDocument() {
+      const button = document.getElementById("downloadPdf");
+      const sheets = document.getElementById("printSheets");
+      if (!sheets || !sheets.children.length) return;
+
+      if (!window.html2pdf) {
+        alert("ยังโหลดเครื่องมือดาวน์โหลด PDF ไม่สำเร็จ กรุณาต่ออินเทอร์เน็ตแล้วลองใหม่อีกครั้ง");
+        return;
+      }
+
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "กำลังทำไฟล์ PDF...";
+
+      const clone = sheets.cloneNode(true);
+      clone.id = "pdfExportSheets";
+      clone.style.cssText = [
+        "display:block",
+        "position:fixed",
+        "left:-10000px",
+        "top:0",
+        "width:210mm",
+        "background:#fff",
+        "z-index:-1",
+        "overflow:visible"
+      ].join(";");
+
+      const cloneSheets = Array.from(clone.querySelectorAll(".print-sheet"));
+      cloneSheets.forEach((sheet, index) => {
+        sheet.style.cssText += [
+          "display:block",
+          "width:210mm",
+          "height:297mm",
+          "margin:0",
+          "box-shadow:none",
+          "zoom:1",
+          "transform:none",
+          "break-after:page",
+          "page-break-after:always"
+        ].join(";");
+        if (index === cloneSheets.length - 1) {
+          sheet.style.breakAfter = "auto";
+          sheet.style.pageBreakAfter = "auto";
+        }
+      });
+
+      document.body.appendChild(clone);
+
+      try {
+        if (document.fonts?.ready) await document.fonts.ready;
+        await window.html2pdf()
+          .set({
+            margin: 0,
+            filename: pdfFileName(),
+            image: { type: "jpeg", quality: .98 },
+            html2canvas: {
+              scale: Math.min(2, window.devicePixelRatio || 2),
+              useCORS: true,
+              allowTaint: false,
+              backgroundColor: "#ffffff",
+              scrollX: 0,
+              scrollY: 0
+            },
+            jsPDF: { unit: "mm", format: "a4", orientation: "portrait", compress: true },
+            pagebreak: { mode: ["css", "legacy"], after: ".print-sheet" }
+          })
+          .from(clone)
+          .save();
+        playTapTone("success");
+        vibrateFor("success");
+      } catch (error) {
+        playTapTone("error");
+        vibrateFor("error");
+        alert("ดาวน์โหลด PDF ไม่สำเร็จ: " + (error.message || String(error)));
+      } finally {
+        clone.remove();
+        button.disabled = false;
+        button.textContent = originalText;
+      }
     }
 
     function playTapTone(kind = "tap") {
@@ -2748,13 +2960,21 @@
       vibrateFor("success");
       updateMobileSheetScale();
       document.body.classList.add("document-ready");
-      document.getElementById("printSheets").scrollIntoView({behavior: "smooth", block: "start"});
+      openPreviewModal();
 
       updateCreateButtonState();
     });
 
-    document.getElementById("printAgain").addEventListener("click", () => {
-      window.print();
+    document.getElementById("downloadPdf").addEventListener("click", () => {
+      downloadPdfDocument();
+    });
+
+    document.getElementById("closePreview").addEventListener("click", () => {
+      closePreviewModal();
+    });
+
+    previewModal.addEventListener("click", (event) => {
+      if (event.target === previewModal) closePreviewModal();
     });
 
     window.addEventListener("resize", updateMobileSheetScale);
