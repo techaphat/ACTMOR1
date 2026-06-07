@@ -1781,6 +1781,12 @@
       return `m1-report-${safeFilePart(target) || "document"}-${date}.pdf`;
     }
 
+    function setExportStyle(el, styles) {
+      Object.keys(styles).forEach((key) => {
+        el.style[key] = styles[key];
+      });
+    }
+
     async function downloadPdfDocument() {
       const button = document.getElementById("downloadPdf");
       const sheets = document.getElementById("printSheets");
@@ -1801,57 +1807,64 @@
       try {
         if (document.fonts?.ready) await document.fonts.ready;
 
-        // สำคัญ: ไม่ใช้ window.print() และไม่จับภาพ element ที่ซ่อน/อยู่นอกจอ
-        // เพราะบาง browser จะได้ PDF ขาวล้วน จึงสร้างชั้น export ที่มองเห็นจริงชั่วคราว
+        // สร้างเอกสารสำหรับ export แยกจาก preview โดยใช้ px คงที่ของ A4
+        // เพื่อเลี่ยงปัญหา mm/zoom ของ browser ที่ทำให้ภาพแตก ซ้อน หรือ crop
         exportLayer = document.createElement("div");
         exportLayer.id = "pdfExportLayer";
         exportLayer.setAttribute("aria-hidden", "true");
-        exportLayer.style.cssText = [
-          "position:fixed",
-          "left:0",
-          "top:0",
-          "width:210mm",
-          "min-height:297mm",
-          "background:#ffffff",
-          "z-index:2147483647",
-          "overflow:visible",
-          "pointer-events:none"
-        ].join(";");
+        setExportStyle(exportLayer, {
+          position: "absolute",
+          left: "0",
+          top: "0",
+          width: "794px",
+          background: "#ffffff",
+          overflow: "visible",
+          pointerEvents: "none",
+          zIndex: "-1"
+        });
 
         const clone = sheets.cloneNode(true);
         clone.id = "pdfExportSheets";
-        clone.style.cssText = "display:block;width:210mm;background:#ffffff;overflow:visible;";
+        setExportStyle(clone, {
+          display: "block",
+          width: "794px",
+          background: "#ffffff",
+          overflow: "visible"
+        });
 
         const exportSheets = Array.from(clone.querySelectorAll(".print-sheet"));
         exportSheets.forEach((sheet, index) => {
-          sheet.style.cssText += [
-            "display:block",
-            "width:210mm",
-            "height:297mm",
-            "margin:0",
-            "padding:16mm 18mm 18mm",
-            "box-shadow:none",
-            "background:#ffffff",
-            "color:#000000",
-            "zoom:1",
-            "transform:none",
-            "page-break-after:always",
-            "break-after:page",
-            "overflow:hidden"
-          ].join(";");
-          if (index > 0) sheet.style.marginTop = "0";
+          setExportStyle(sheet, {
+            display: "block",
+            width: "794px",
+            height: "1123px",
+            minHeight: "1123px",
+            maxHeight: "1123px",
+            margin: "0",
+            padding: "60px 68px 68px",
+            boxSizing: "border-box",
+            boxShadow: "none",
+            background: "#ffffff",
+            color: "#000000",
+            overflow: "hidden",
+            transform: "none",
+            zoom: "1",
+            pageBreakAfter: index === exportSheets.length - 1 ? "auto" : "always",
+            breakAfter: index === exportSheets.length - 1 ? "auto" : "page"
+          });
         });
 
         exportLayer.appendChild(clone);
         document.body.appendChild(exportLayer);
 
-        // ให้ browser layout หน้า export ให้เสร็จก่อนจับภาพ
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        await new Promise(resolve => setTimeout(resolve, 180));
+        await new Promise(resolve => setTimeout(resolve, 250));
 
-        const pdf = new jsPDFCtor({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+        const pdf = new jsPDFCtor({ unit: "mm", format: "a4", orientation: "portrait", compress: false });
         const pageElements = Array.from(exportLayer.querySelectorAll(".print-sheet"));
-        const scale = Math.min(2.2, Math.max(1.5, window.devicePixelRatio || 2));
+
+        // 4x = ประมาณ 384 DPI สำหรับ A4 ทำให้ตัวอักษรคมขึ้นมากกว่าแบบเดิม
+        const scale = 4;
 
         for (let i = 0; i < pageElements.length; i += 1) {
           const page = pageElements[i];
@@ -1863,19 +1876,20 @@
             logging: false,
             scrollX: 0,
             scrollY: 0,
-            windowWidth: page.scrollWidth,
-            windowHeight: page.scrollHeight,
-            width: page.offsetWidth,
-            height: page.offsetHeight
+            width: 794,
+            height: 1123,
+            windowWidth: 794,
+            windowHeight: 1123,
+            removeContainer: true
           });
 
           if (!canvas.width || !canvas.height) {
             throw new Error("จับภาพหน้าเอกสารไม่สำเร็จ");
           }
 
-          const imageData = canvas.toDataURL("image/jpeg", 0.98);
+          const imageData = canvas.toDataURL("image/png");
           if (i > 0) pdf.addPage("a4", "portrait");
-          pdf.addImage(imageData, "JPEG", 0, 0, 210, 297, undefined, "FAST");
+          pdf.addImage(imageData, "PNG", 0, 0, 210, 297, undefined, "SLOW");
         }
 
         pdf.save(pdfFileName());
