@@ -1697,7 +1697,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxsH8KDL5e2USLz8O_B9oeX4BogvkI12hceoDB0Njwu8eudMl4-43G4ZkMm7AjElq-BLw/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzk_5fHu-a0mouf-rBiE33r3FBrCBtxMCT_Ui8zMa-ZjP9dOQ0vcxrU1O1JSRBk-yGF6g/exec";
     const periodButtons = document.querySelectorAll(".period button[data-period]");
     const modeButtons = document.querySelectorAll(".tab");
     const studentFinder = document.getElementById("studentFinder");
@@ -2045,7 +2045,7 @@
         const timer = setTimeout(() => {
           cleanup();
           reject(new Error("เชื่อมต่อช้าเกินไป กรุณาลองใหม่"));
-        }, 25000);
+        }, 30000);
 
         function cleanup() {
           clearTimeout(timer);
@@ -2314,7 +2314,7 @@
       suggestions.classList.add("show");
       try {
         const res = await jsonp("searchStudent", {q});
-        const students = res && res.success ? (res.students || []).map(normalizeStudent) : [];
+        const students = res && res.success ? (res.students || []) : [];
         if (!students.length) {
           suggestions.innerHTML = `<div class="suggestion">ไม่พบนักเรียน</div>`;
           return;
@@ -2338,7 +2338,7 @@
       roomStudentList.innerHTML = `<div class="suggestion">กำลังโหลดรายชื่อ...</div>`;
       roomStudentList.classList.add("show");
       const res = await jsonp("getStudents");
-      allStudents = res && res.success ? (res.students || []).map(normalizeStudent) : [];
+      allStudents = res && res.success ? (res.students || []) : [];
       return allStudents;
     }
 
@@ -2450,7 +2450,6 @@
     });
 
     function chooseStudent(student) {
-      student = normalizeStudent(student);
       selectedStudent = student;
       document.getElementById("studentName").value = student.fullName || "";
       selectedStudentInfo.textContent = `${student.fullName || ""} · ${student.room || ""} · เลขที่ ${student.number || ""} · ${student.studentId || ""}`;
@@ -2470,8 +2469,7 @@
     ];
 
     function formatThaiDate(value) {
-      const iso = parseDateToIso(value);
-      const date = iso ? new Date(iso + "T00:00:00") : new Date(value);
+      const date = new Date(value);
       if (Number.isNaN(date.getTime())) return value || "-";
       return `${date.getDate()} ${thaiMonths[date.getMonth()]} ${date.getFullYear() + 543}`;
     }
@@ -2538,84 +2536,6 @@
       return found === undefined ? "" : found;
     }
 
-    function cleanText(value) {
-      return String(value ?? "").replace(/\s+/g, " ").trim();
-    }
-
-    function getAny(source = {}, keys = []) {
-      for (const key of keys) {
-        if (source[key] !== undefined && source[key] !== null && String(source[key]).trim() !== "") return source[key];
-      }
-      return "";
-    }
-
-    function normalizeRoom(value) {
-      const raw = cleanText(value);
-      if (!raw) return "";
-      const text = raw.replace(/^ม\.?\s*/, "ม.").replace(/^ม1\//, "ม.1/");
-      const match = text.match(/(?:ม\.?\s*)?1\s*\/?\s*([0-9]+|[A-Za-zก-ฮ]+)/i);
-      if (match) return `ม.1/${match[1].toString().toUpperCase()}`;
-      return text;
-    }
-
-    function parseDateToIso(value) {
-      if (!value) return "";
-      if (value instanceof Date && !Number.isNaN(value.getTime())) return localIsoDate(value);
-      const text = cleanText(value);
-      if (!text) return "";
-      if (/^\d{4}-\d{2}-\d{2}/.test(text)) return text.slice(0, 10);
-      const dmy = text.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/);
-      if (dmy) {
-        let year = Number(dmy[3]);
-        if (year < 100) year += 2000;
-        if (year > 2400) year -= 543;
-        const month = String(Number(dmy[2])).padStart(2, "0");
-        const day = String(Number(dmy[1])).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-      }
-      const parsed = new Date(text);
-      if (!Number.isNaN(parsed.getTime())) return localIsoDate(parsed);
-      return "";
-    }
-
-    function normalizeStudent(student = {}) {
-      const prefix = cleanText(getAny(student, ["prefix", "title", "คำนำหน้า"]));
-      const firstName = cleanText(getAny(student, ["firstName", "name", "ชื่อ"]));
-      const lastName = cleanText(getAny(student, ["lastName", "surname", "สกุล", "นามสกุล"]));
-      const fullName = cleanText(getAny(student, ["fullName", "studentName", "nameFull", "ชื่อ - สกุล", "ชื่อสกุล", "ชื่อนามสกุล"])) || cleanText(`${prefix}${firstName ? " " + firstName : ""}${lastName ? " " + lastName : ""}`);
-      return {
-        ...student,
-        studentId: cleanText(getAny(student, ["studentId", "studentID", "id", "รหัสนักเรียน", "เลขประจำตัว", "เลขประจำตัวนักเรียน"])),
-        fullName,
-        room: normalizeRoom(getAny(student, ["room", "classRoom", "class", "ห้อง", "ชั้น/ห้อง"])),
-        number: cleanText(studentNumberFrom(student))
-      };
-    }
-
-    function normalizeRecord(record = {}) {
-      const prefix = cleanText(getAny(record, ["prefix", "title", "คำนำหน้า"]));
-      const firstName = cleanText(getAny(record, ["firstName", "name", "ชื่อ"]));
-      const lastName = cleanText(getAny(record, ["lastName", "surname", "สกุล", "นามสกุล"]));
-      const fullName = cleanText(getAny(record, ["fullName", "studentName", "nameFull", "ชื่อ - สกุล", "ชื่อสกุล", "ชื่อนามสกุล", "นักเรียน"])) || cleanText(`${prefix}${firstName ? " " + firstName : ""}${lastName ? " " + lastName : ""}`);
-      const dateValue = getAny(record, ["date", "recordDate", "วันที่", "วันเดือนปี", "timestamp", "Timestamp", "time", "เวลา"]);
-      const timestamp = getAny(record, ["timestamp", "Timestamp", "time", "เวลา", "createdAt", "created_at"]) || dateValue;
-      const behaviorType = cleanText(getAny(record, ["behaviorType", "behavior", "type", "category", "ประเภทพฤติกรรม", "พฤติกรรม", "ประเภท", "รายการ"]));
-      const actionType = cleanText(getAny(record, ["actionType", "action", "actionTaken", "behaviorAction", "management", "manageType", "status", "result", "การดำเนินการ", "ดำเนินการ", "การจัดการ", "สถานะ"]));
-      const note = cleanText(getAny(record, ["note", "remark", "remarks", "comment", "หมายเหตุ", "บันทึก", "รายละเอียด"]));
-      return {
-        ...record,
-        timestamp: cleanText(timestamp),
-        date: parseDateToIso(dateValue) || cleanText(record.date || ""),
-        studentId: cleanText(getAny(record, ["studentId", "studentID", "id", "รหัสนักเรียน", "เลขประจำตัว", "เลขประจำตัวนักเรียน"])),
-        fullName,
-        room: normalizeRoom(getAny(record, ["room", "classRoom", "class", "ห้อง", "ชั้น/ห้อง"])),
-        number: cleanText(studentNumberFrom(record)),
-        behaviorType: behaviorType || "ไม่ระบุ",
-        actionType,
-        note
-      };
-    }
-
     function studentNumberFrom(value = {}) {
       return firstFilled(
         value.number,
@@ -2638,6 +2558,22 @@
         (record.fullName && student.fullName && String(student.fullName) === String(record.fullName) && (!record.room || String(student.room || "") === String(record.room || "")))
       ));
       return match ? studentNumberFrom(match) : "";
+    }
+
+    function getActionText(record = {}) {
+      return firstFilled(
+        record.actionType,
+        record.action,
+        record.actionTaken,
+        record.behaviorAction,
+        record.management,
+        record.manageType,
+        record.status,
+        record["การดำเนินการ"],
+        record["ดำเนินการ"],
+        record["การจัดการ"],
+        record["สถานะ"]
+      );
     }
 
     function numberSortValue(value) {
@@ -2799,7 +2735,7 @@
                   <tr>
                     ${!isHidden("sectionCount") ? `<td>${chunkIndex * 18 + index + 1}</td>` : ""}
                     ${!isHidden("recordDate") ? `<td>${escapeHtml(formatThaiDate(record.date))}</td>` : ""}
-                    ${!isHidden("behaviorAction") ? `<td>${escapeHtml(record.actionType || "")}</td>` : ""}
+                    ${!isHidden("behaviorAction") ? `<td>${escapeHtml(getActionText(record))}</td>` : ""}
                     ${!isHidden("behaviorNote") ? `<td>${escapeHtml(record.note || "")}</td>` : ""}
                     ${headers ? "" : `<td>${escapeHtml(behaviorName)}</td>`}
                   </tr>
@@ -2882,10 +2818,11 @@
             </tr>
           `);
           logs.forEach((record, index) => {
+            const actionText = getActionText(record);
             const details = [
               !isHidden("sectionCount") ? `<strong>ครั้งที่</strong> ${index + 1}` : "",
               !isHidden("recordDate") ? escapeHtml(formatThaiDate(record.date)) : "",
-              !isHidden("behaviorAction") && record.actionType ? escapeHtml(record.actionType) : "",
+              !isHidden("behaviorAction") && actionText ? `<strong>การดำเนินการ</strong> ${escapeHtml(actionText)}` : "",
               !isHidden("behaviorNote") && record.note ? escapeHtml(record.note) : ""
             ].filter(Boolean).join(" - ");
             if (!details) return;
@@ -2923,7 +2860,6 @@
     }
 
     function renderDocument(report, params) {
-      report.records = (report.records || []).map(normalizeRecord);
       const pageContents = selectedMode === "room"
         ? renderRoomPages(report)
         : renderPersonPages(report);
@@ -2940,11 +2876,10 @@
 
       reports.forEach((report) => {
         (report.records || []).forEach((record) => {
-          const normalized = normalizeRecord(record);
-          const key = [normalized.timestamp, normalized.studentId, normalized.date, normalized.behaviorType, normalized.actionType, normalized.note].join("|");
+          const key = [record.timestamp, record.studentId, record.date, record.behaviorType, record.note].join("|");
           if (seen.has(key)) return;
           seen.add(key);
-          records.push(normalized);
+          records.push(record);
         });
       });
 
