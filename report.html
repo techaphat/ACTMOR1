@@ -2489,6 +2489,36 @@
       return pages.length ? pages : [`<section class="doc-section"><div class="doc-empty">ไม่ปรากฏข้อมูล</div></section>`];
     }
 
+    function getRecordAction(record) {
+      return record?.actionType
+        || record?.action
+        || record?.actionTaken
+        || record?.behaviorAction
+        || record?.management
+        || record?.manageType
+        || record?.status
+        || record?.["การดำเนินการ"]
+        || record?.["ดำเนินการ"]
+        || record?.["การจัดการ"]
+        || record?.["สถานะ"]
+        || "";
+    }
+
+    function normalizeReportRecord(record) {
+      if (!record || typeof record !== "object") return {};
+      return {
+        ...record,
+        actionType: getRecordAction(record),
+        note: record.note || record.remark || record.comment || record["หมายเหตุ"] || record["บันทึกเพิ่มเติม"] || "",
+        behaviorType: record.behaviorType || record.behavior || record.type || record["ประเภทพฤติกรรม"] || record["พฤติกรรม"] || "ไม่ระบุ",
+        date: record.date || record.recordDate || record["วันที่"] || record.timestamp || "",
+        studentId: record.studentId || record.id || record["เลขประจำตัว"] || record["รหัสนักเรียน"] || "",
+        fullName: record.fullName || record.studentName || record.name || record["ชื่อ - สกุล"] || record["ชื่อ-สกุล"] || record["ชื่อ"] || "",
+        room: record.room || record.classRoom || record.class || record["ห้อง"] || "",
+        number: record.number || record.studentNo || record.no || record["เลขที่"] || ""
+      };
+    }
+
     function renderPersonPages(report) {
       const grouped = groupBy(report.records || [], "behaviorType");
       const behaviorNames = Object.keys(grouped).sort((a, b) => a.localeCompare(b, "th"));
@@ -2521,7 +2551,7 @@
                   <tr>
                     ${!isHidden("sectionCount") ? `<td>${chunkIndex * 18 + index + 1}</td>` : ""}
                     ${!isHidden("recordDate") ? `<td>${escapeHtml(formatThaiDate(record.date))}</td>` : ""}
-                    ${!isHidden("behaviorAction") ? `<td>${escapeHtml(record.actionType || "")}</td>` : ""}
+                    ${!isHidden("behaviorAction") ? `<td>${escapeHtml(getRecordAction(record))}</td>` : ""}
                     ${!isHidden("behaviorNote") ? `<td>${escapeHtml(record.note || "")}</td>` : ""}
                     ${headers ? "" : `<td>${escapeHtml(behaviorName)}</td>`}
                   </tr>
@@ -2607,7 +2637,7 @@
             const details = [
               !isHidden("sectionCount") ? `<strong>ครั้งที่</strong> ${index + 1}` : "",
               !isHidden("recordDate") ? escapeHtml(formatThaiDate(record.date)) : "",
-              !isHidden("behaviorAction") && record.actionType ? `<strong>การดำเนินการ</strong> ${escapeHtml(record.actionType)}` : "",
+              !isHidden("behaviorAction") && getRecordAction(record) ? `<strong>การดำเนินการ</strong> ${escapeHtml(getRecordAction(record))}` : "",
               !isHidden("behaviorNote") && record.note ? escapeHtml(record.note) : ""
             ].filter(Boolean).join(" - ");
             if (!details) return;
@@ -2660,7 +2690,8 @@
       const records = [];
 
       reports.forEach((report) => {
-        (report.records || []).forEach((record) => {
+        (report.records || []).forEach((rawRecord) => {
+          const record = normalizeReportRecord(rawRecord);
           const key = [record.timestamp, record.studentId, record.date, record.behaviorType, record.actionType, record.note].join("|");
           if (seen.has(key)) return;
           seen.add(key);
