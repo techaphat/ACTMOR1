@@ -4876,6 +4876,43 @@
       return 0;
     }
 
+    function recordBangkokIsoDate(record = {}) {
+      if (asNumber(record.sortAt)) {
+        const parts = bangkokParts(new Date(asNumber(record.sortAt)));
+        return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+      }
+      const slash = String(record.date || "").match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (slash) {
+        return `${slash[3]}-${slash[2].padStart(2, "0")}-${slash[1].padStart(2, "0")}`;
+      }
+      return "";
+    }
+
+    function academicBounds(yearValue) {
+      const year = Number(yearValue || currentAcademicYear());
+      return {
+        from: `${year}-05-01`,
+        to: `${year + 1}-04-30`
+      };
+    }
+
+    function filterRecordsForDashboardPeriod(records = [], data = {}) {
+      const mode = data.mode || state.mode;
+      if (mode === "monthly" || mode === "month") {
+        const month = data.month || $("month")?.value || thisMonth();
+        return records.filter(record => recordBangkokIsoDate(record).slice(0, 7) === month);
+      }
+      if (mode === "daily" || mode === "today") {
+        const date = data.date || $("date")?.value || today();
+        return records.filter(record => recordBangkokIsoDate(record) === date);
+      }
+      const {from, to} = academicBounds(data.academicYear);
+      return records.filter(record => {
+        const date = recordBangkokIsoDate(record);
+        return date && date >= from && date <= to;
+      });
+    }
+
     function deriveDashboardSummary(records = []) {
       const byType = {};
       const byRoom = {};
@@ -4943,18 +4980,19 @@
         .map(item => normalizeStudent(item));
       const actionRecords = collectStudentRecords(data, ["actionRecords", "actionRecord", "actions"])
         .map(item => normalizeStudent(item));
-      const derived = deriveDashboardSummary([...recentRecords, ...actionRecords]);
+      const periodRecords = filterRecordsForDashboardPeriod([...recentRecords, ...actionRecords], data);
+      const derived = deriveDashboardSummary(periodRecords);
       const sourceByType = data.byType || {};
       const hasSummaryCounts = Object.values(sourceByType).some(value => asNumber(value) > 0);
       const shouldUseDerived = data.summaryMissing || !hasSummaryCounts;
-      const byType = shouldUseDerived && derived.total ? derived.byType : sourceByType;
-      const byAction = shouldUseDerived && derived.total ? derived.byAction : normalizeActionSummary(data.byAction, data);
-      const byRoom = shouldUseDerived && derived.total ? derived.byRoom : (data.byRoom || {});
+      const byType = shouldUseDerived ? derived.byType : sourceByType;
+      const byAction = shouldUseDerived ? derived.byAction : normalizeActionSummary(data.byAction, data);
+      const byRoom = shouldUseDerived ? derived.byRoom : (data.byRoom || {});
       const finalTopStudents = topStudents.length ? topStudents : derived.topStudents;
-      const derivedSummary = shouldUseDerived && derived.total > 0;
+      const derivedSummary = shouldUseDerived;
       return {
         ...data,
-        total: asNumber((shouldUseDerived && derived.total) || data.total || Object.values(byType).reduce((sum, value) => sum + asNumber(value), 0)),
+        total: asNumber(shouldUseDerived ? derived.total : (data.total || Object.values(byType).reduce((sum, value) => sum + asNumber(value), 0))),
         byType,
         byAction,
         byRoom,
@@ -5223,7 +5261,7 @@
     }
 
     function roomSourceRecords() {
-      const source = combinedStudentRecords();
+      const source = filterRecordsForDashboardPeriod(combinedStudentRecords(), state.data);
       return source.filter(student => state.room === "ALL" || student.room === state.room);
     }
 
