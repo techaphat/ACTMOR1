@@ -1461,6 +1461,40 @@
       font-weight: 950;
     }
 
+    .recent-card {
+      align-items: stretch;
+    }
+
+    .recent-card .student-main {
+      gap: 9px;
+    }
+
+    .recent-topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: #5f6f83;
+      font-size: 12px;
+      font-weight: 760;
+    }
+
+    .recent-time {
+      border-radius: 999px;
+      padding: 5px 8px;
+      background: rgba(235,244,254,.86);
+      color: #1f65c7;
+      white-space: nowrap;
+    }
+
+    .recent-card .student-name {
+      font-size: 17px;
+    }
+
+    .recent-card .student-meta {
+      gap: 6px;
+    }
+
     .tracking-card {
       display: grid;
       gap: 10px;
@@ -4689,16 +4723,18 @@
 
     function normalizeStudent(record, fallbackType = "") {
       const rawDate = record.date || record.recordDate || record.day || record.createdDate || record.recordedAt || "";
+      const rawTime = record.time || record.recordedAt || record.createdAt || record["เวลา"] || record.date || "";
       return {
         fullName: record.fullName || record.name || record.studentName || record["ชื่อ"] || record["ชื่อ - สกุล"] || record["ชื่อ-สกุล"] || "ชื่อ - สกุล",
         room: record.room || record.classroom || record.class || record["ห้อง"] || record["ห้องเรียน"] || "ห้องเรียน",
-        number: record.number || record.no || record.studentNo || record["เลขที่"] || "เลขที่",
+        number: record.number || record.no || record.studentNo || record["เลขที่"] || "",
         studentId: record.studentId || record.student_id || record.id || record["เลขประจำตัว"] || record["รหัสนักเรียน"] || "เลขประจำตัว",
         count: asNumber(record.count || record.total || 1),
         behaviorType: normalizeBehaviorName(record.behaviorType || record.type || record.behavior || record["พฤติกรรม"] || record["ประเภท"] || fallbackType || "รายการ"),
         actionType: record.actionType || record.action || record.action_type || record["การดำเนินการ"] || "",
-        time: record.time || record.recordedAt || record.createdAt || record["เวลา"] || record.date || "",
-        date: rawDate ? formatRecordDate(rawDate) : ""
+        time: rawTime ? formatRecordTime(rawTime) : "",
+        date: rawDate ? formatRecordDate(rawDate) : "",
+        sortAt: recordSortValue(record)
       };
     }
 
@@ -4709,6 +4745,34 @@
       const slash = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
       if (slash) return `${slash[1].padStart(2, "0")}/${slash[2].padStart(2, "0")}/${slash[3]}`;
       return raw.length > 10 ? raw.slice(0, 10) : raw;
+    }
+
+    function formatRecordTime(value) {
+      const raw = String(value || "").trim();
+      const iso = raw.match(/^\d{4}-\d{2}-\d{2}T/);
+      if (iso) {
+        const date = new Date(raw);
+        if (!Number.isNaN(date.getTime())) {
+          return date.toLocaleTimeString("th-TH", {hour: "2-digit", minute: "2-digit"});
+        }
+      }
+      const match = raw.match(/(\d{1,2}):(\d{2})(?::\d{2})?/);
+      if (match) return `${String(match[1]).padStart(2, "0")}:${match[2]}`;
+      return raw.length > 10 ? raw.slice(0, 10) : raw;
+    }
+
+    function recordSortValue(record = {}) {
+      const raw = record.timestamp || record.recordedAt || record.createdAt || "";
+      const parsed = raw ? new Date(raw) : null;
+      if (parsed && !Number.isNaN(parsed.getTime())) return parsed.getTime();
+      const dateText = String(record.date || record.recordDate || record.day || "").trim();
+      const timeText = String(record.time || record["เวลา"] || "").trim();
+      const isoDate = dateText.match(/(\d{4})-(\d{2})-(\d{2})/);
+      if (isoDate) {
+        const parsedDate = new Date(`${isoDate[1]}-${isoDate[2]}-${isoDate[3]}T${timeText || "00:00:00"}`);
+        if (!Number.isNaN(parsedDate.getTime())) return parsedDate.getTime();
+      }
+      return 0;
     }
 
     function normalizeData(raw) {
@@ -4774,7 +4838,7 @@
         .sort((a, b) => {
           if (state.sort === "name-asc") return a.fullName.localeCompare(b.fullName, "th");
           if (state.sort === "room-asc") return a.room.localeCompare(b.room, "th");
-          if (state.sort === "latest") return String(b.time).localeCompare(String(a.time));
+          if (state.sort === "latest" || mode === "recent") return asNumber(b.sortAt) - asNumber(a.sortAt);
           return b.count - a.count;
         });
     }
@@ -5428,13 +5492,16 @@
 
     function actionRecordCard(student) {
       const primaryAction = String(student.actionType || "").split(",")[0].trim() || "ตักเตือน";
+      const numberTag = String(student.number || "").trim()
+        ? `<span class="tag">เลขที่ ${escapeHtml(student.number)}</span>`
+        : "";
       return `
         <a class="student-card stack-card" style="${actionToneStyle(primaryAction)}" href="${escapeHtml(studentHistoryHref(student))}" aria-label="ดูประวัติ ${escapeHtml(student.fullName)}">
           <div class="student-main">
             <div class="student-name">${escapeHtml(student.fullName)}</div>
             <div class="student-meta">
               <span class="tag tone-pill" style="${roomToneStyle(student.room)}">${escapeHtml(student.room)}</span>
-              <span class="tag">เลขที่ ${escapeHtml(student.number)}</span>
+              ${numberTag}
               <span class="tag">${escapeHtml(student.studentId)}</span>
               ${student.date ? `<span class="tag">${escapeHtml(student.date)}</span>` : ""}
               ${student.time ? `<span class="tag">${escapeHtml(student.time)}</span>` : ""}
@@ -5447,13 +5514,16 @@
     }
 
     function studentCard(student, options = {}) {
+      const numberTag = String(student.number || "").trim()
+        ? `<span class="tag">เลขที่ ${escapeHtml(student.number)}</span>`
+        : "";
       return `
         <a class="student-card stack-card" style="${behaviorToneStyle(student.behaviorType)}" href="${escapeHtml(studentHistoryHref(student))}" aria-label="ดูประวัติ ${escapeHtml(student.fullName)}">
           <div class="student-main">
             <div class="student-name">${escapeHtml(student.fullName)}</div>
             <div class="student-meta">
               <span class="tag tone-pill" style="${roomToneStyle(student.room)}">${escapeHtml(student.room)}</span>
-              <span class="tag">เลขที่ ${escapeHtml(student.number)}</span>
+              ${numberTag}
               <span class="tag">${escapeHtml(student.studentId)}</span>
               ${options.showDate && student.date ? `<span class="tag">${escapeHtml(student.date)}</span>` : ""}
               ${student.time ? `<span class="tag">${escapeHtml(student.time)}</span>` : ""}
@@ -5462,6 +5532,30 @@
             </div>
           </div>
           ${options.hideCount ? "" : `<div class="count-badge">${student.count}${options.countLabel ? `<span class="count-label">${escapeHtml(options.countLabel)}</span>` : ""}</div>`}
+        </a>
+      `;
+    }
+
+    function recentStudentCard(student) {
+      const numberTag = String(student.number || "").trim()
+        ? `<span class="tag">เลขที่ ${escapeHtml(student.number)}</span>`
+        : "";
+      const whenText = [student.date, student.time].filter(Boolean).join(" · ");
+      return `
+        <a class="student-card stack-card recent-card" style="${behaviorToneStyle(student.behaviorType)}" href="${escapeHtml(studentHistoryHref(student))}" aria-label="ดูประวัติ ${escapeHtml(student.fullName)}">
+          <div class="student-main">
+            <div class="recent-topline">
+              <span>${escapeHtml(student.behaviorType || "รายการ")}</span>
+              ${whenText ? `<span class="recent-time">${escapeHtml(whenText)}</span>` : ""}
+            </div>
+            <div class="student-name">${escapeHtml(student.fullName)}</div>
+            <div class="student-meta">
+              <span class="tag tone-pill" style="${roomToneStyle(student.room)}">${escapeHtml(student.room)}</span>
+              ${numberTag}
+              <span class="tag">${escapeHtml(student.studentId)}</span>
+              ${student.actionType ? `<span class="tag behavior">${escapeHtml(student.actionType)}</span>` : ""}
+            </div>
+          </div>
         </a>
       `;
     }
@@ -5476,7 +5570,7 @@
           </div>
         </div>
         <div class="student-list stack-list">
-          ${students.length ? students.map(student => studentCard(student, {hideCount: mode === "recent", showDate: mode === "recent"})).join("") : `<div class="empty">${escapeHtml(emptyText)}</div>`}
+          ${students.length ? students.map(student => mode === "recent" ? recentStudentCard(student) : studentCard(student)).join("") : `<div class="empty">${escapeHtml(emptyText)}</div>`}
         </div>
       `;
     }
@@ -5680,7 +5774,7 @@
 
     async function ensureLatestRecordsForUntimedPages() {
       if (!isUntimedPage()) return;
-      if (state.page === "recent" && mergedStudents("recent").length) return;
+      if (state.page !== "recent" && state.page !== "follow") return;
       if (state.page === "follow" && lunchLateStudents().length) return;
       try {
         const latest = await jsonp({action: "getLatestLogs", limit: 100}, 12000);
