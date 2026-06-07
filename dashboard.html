@@ -1686,6 +1686,46 @@
       justify-content: flex-end;
     }
 
+    .data-guide {
+      position: fixed;
+      z-index: 79;
+      left: 50%;
+      bottom: calc(88px + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      width: min(86vw, 430px);
+      min-height: 42px;
+      border-radius: 999px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #25364a;
+      background: rgba(255, 255, 255, .88);
+      border: 1px solid rgba(255, 255, 255, .94);
+      box-shadow: 0 16px 36px rgba(42, 57, 82, .14), inset 0 1px 0 rgba(255, 255, 255, .96);
+      backdrop-filter: blur(18px) saturate(1.18);
+      font-size: 13px;
+      font-weight: 820;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .data-guide::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: #2bad67;
+      box-shadow: 0 0 0 4px rgba(43, 173, 103, .12);
+      flex: 0 0 auto;
+    }
+
+    .data-guide.is-error::before {
+      background: #e24d5c;
+      box-shadow: 0 0 0 4px rgba(226, 77, 92, .12);
+    }
+
     .floating-bottom-nav {
       --active-index: 1;
       position: fixed;
@@ -4414,6 +4454,7 @@
     </div>
 
     <section id="mainPanel" class="panel card"></section>
+    <div id="dataGuide" class="data-guide">กำลังตรวจสอบช่วงข้อมูล</div>
 
   </main>
 
@@ -4475,6 +4516,18 @@
         {time: "12:35", fullName: "ชื่อ - สกุล", room: "ม.1/3", number: "18", studentId: "10002", behaviorType: "สายพัก 10", actionType: "ตักเตือน, ปกครอง1"}
       ],
       demo: true
+    };
+    const EMPTY_DATA = {
+      success: true,
+      mode: "empty",
+      total: 0,
+      byType: {},
+      byAction: {"ตักเตือน": 0, "ปกครอง1": 0, "ปกครอง2": 0, "ปกครอง3": 0},
+      byRoom: {},
+      topStudents: [],
+      recentRecords: [],
+      actionRecords: [],
+      updatedAt: ""
     };
 
     const $ = id => document.getElementById(id);
@@ -4597,7 +4650,7 @@
       sort: "count-desc",
       searchResults: [],
       searchLoading: false,
-      data: FALLBACK
+      data: EMPTY_DATA
     };
     let searchTimer = null;
     let latestSearchQuery = "";
@@ -4608,25 +4661,52 @@
       "room-asc": "เรียงตามห้อง",
       "latest": "เรียงล่าสุด"
     };
+    const BANGKOK_TIME_ZONE = "Asia/Bangkok";
     const MONTH_NAMES = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    const MONTH_FULL_NAMES = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
     const WEEKDAYS = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
     const pickerState = {
       dateView: new Date(),
       monthView: new Date().getFullYear()
     };
 
+    function bangkokParts(date = new Date()) {
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: BANGKOK_TIME_ZONE,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      }).formatToParts(date).reduce((map, part) => {
+        if (part.type !== "literal") map[part.type] = part.value;
+        return map;
+      }, {});
+      return {
+        year: Number(parts.year),
+        month: Number(parts.month),
+        day: Number(parts.day),
+        hour: Number(parts.hour),
+        minute: Number(parts.minute),
+        second: Number(parts.second)
+      };
+    }
+
     function today() {
-      return new Date().toISOString().slice(0, 10);
+      const now = bangkokParts();
+      return `${now.year}-${String(now.month).padStart(2, "0")}-${String(now.day).padStart(2, "0")}`;
     }
 
     function thisMonth() {
-      return new Date().toISOString().slice(0, 7);
+      const now = bangkokParts();
+      return `${now.year}-${String(now.month).padStart(2, "0")}`;
     }
 
     function currentAcademicYear() {
-      const now = new Date();
-      const year = now.getFullYear();
-      return String(now.getMonth() + 1 >= 5 ? year : year - 1);
+      const now = bangkokParts();
+      return String(now.month >= 5 ? now.year : now.year - 1);
     }
 
     function dashboardPeriod() {
@@ -4639,7 +4719,7 @@
       if (!value) return "";
       const date = new Date(value);
       if (Number.isNaN(date.getTime())) return String(value);
-      return date.toLocaleString("th-TH", {dateStyle: "short", timeStyle: "short"});
+      return date.toLocaleString("th-TH", {dateStyle: "short", timeStyle: "short", timeZone: BANGKOK_TIME_ZONE});
     }
 
     function parseDateValue(value) {
@@ -4657,13 +4737,23 @@
       return `${month}/${year}`;
     }
 
+    function formatThaiDateLong(value) {
+      const [year, month, day] = String(value || today()).split("-").map(Number);
+      return `${day} ${MONTH_FULL_NAMES[Math.max(0, Math.min(11, (month || 1) - 1))]} ${year + 543}`;
+    }
+
+    function formatThaiMonthLong(value) {
+      const [year, month] = String(value || thisMonth()).split("-").map(Number);
+      return `${MONTH_FULL_NAMES[Math.max(0, Math.min(11, (month || 1) - 1))]} ${year + 543}`;
+    }
+
     function updateDateLabels() {
       $("dateButton").textContent = formatDateDisplay($("date").value);
       $("monthButton").textContent = formatMonthDisplay($("month").value);
       const calendarIcon = document.querySelector(".calendar-icon");
       if (calendarIcon) {
         const selected = parseDateValue($("date").value);
-        calendarIcon.dataset.month = selected.toLocaleDateString("en-US", {month: "short"}).toUpperCase();
+        calendarIcon.dataset.month = selected.toLocaleDateString("en-US", {month: "short", timeZone: BANGKOK_TIME_ZONE}).toUpperCase();
         calendarIcon.dataset.day = String(selected.getDate());
       }
     }
@@ -4740,6 +4830,17 @@
 
     function formatRecordDate(value) {
       const raw = String(value || "").trim();
+      if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) {
+        const date = new Date(raw);
+        if (!Number.isNaN(date.getTime())) {
+          return date.toLocaleDateString("th-TH-u-ca-gregory", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            timeZone: BANGKOK_TIME_ZONE
+          });
+        }
+      }
       const iso = raw.match(/(\d{4})-(\d{2})-(\d{2})/);
       if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
       const slash = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
@@ -4753,7 +4854,7 @@
       if (iso) {
         const date = new Date(raw);
         if (!Number.isNaN(date.getTime())) {
-          return date.toLocaleTimeString("th-TH", {hour: "2-digit", minute: "2-digit"});
+          return date.toLocaleTimeString("th-TH", {hour: "2-digit", minute: "2-digit", timeZone: BANGKOK_TIME_ZONE});
         }
       }
       const match = raw.match(/(\d{1,2}):(\d{2})(?::\d{2})?/);
@@ -4775,26 +4876,92 @@
       return 0;
     }
 
+    function deriveDashboardSummary(records = []) {
+      const byType = {};
+      const byRoom = {};
+      const byStudent = new Map();
+      const byAction = {"ตักเตือน": 0, "ปกครอง1": 0, "ปกครอง2": 0, "ปกครอง3": 0};
+      const seen = new Set();
+      const uniqueRecords = [];
+
+      records.forEach(record => {
+        const key = [
+          record.sortAt || "",
+          record.studentId || "",
+          record.fullName || "",
+          record.room || "",
+          normalizeBehaviorName(record.behaviorType),
+          record.actionType || ""
+        ].join("|");
+        if (seen.has(key)) return;
+        seen.add(key);
+        uniqueRecords.push(record);
+      });
+
+      uniqueRecords.forEach(record => {
+        const behavior = normalizeBehaviorName(record.behaviorType) || "อื่น ๆ";
+        const room = record.room || "ไม่ระบุห้อง";
+        byType[behavior] = (byType[behavior] || 0) + 1;
+        byRoom[room] = (byRoom[room] || 0) + 1;
+
+        String(record.actionType || "")
+          .split(",")
+          .map(value => value.trim())
+          .filter(action => Object.prototype.hasOwnProperty.call(byAction, action))
+          .forEach(action => byAction[action] += 1);
+
+        const studentKey = [
+          record.studentId || "",
+          record.fullName || "",
+          record.room || "",
+          normalizeBehaviorName(record.behaviorType)
+        ].join("|");
+        if (!byStudent.has(studentKey)) {
+          byStudent.set(studentKey, {
+            ...record,
+            count: 0
+          });
+        }
+        byStudent.get(studentKey).count += 1;
+      });
+
+      return {
+        total: uniqueRecords.length,
+        byType,
+        byRoom,
+        byAction,
+        topStudents: [...byStudent.values()]
+          .sort((a, b) => asNumber(b.count) - asNumber(a.count) || asNumber(b.sortAt) - asNumber(a.sortAt))
+      };
+    }
+
     function normalizeData(raw) {
       const data = raw && raw.success ? raw : FALLBACK;
-      const byType = data.byType || {};
-      const byAction = normalizeActionSummary(data.byAction, data);
-      const byRoom = data.byRoom || {};
       const topStudents = collectStudentRecords(data, ["topStudents", "topStudent", "top", "students", "studentSummary", "byStudent"])
         .map(item => normalizeStudent(item));
       const recentRecords = collectStudentRecords(data, ["recentRecords", "recentRecord", "recent", "latest", "latestRecords", "records", "items", "logs", "history"])
         .map(item => normalizeStudent(item));
       const actionRecords = collectStudentRecords(data, ["actionRecords", "actionRecord", "actions"])
         .map(item => normalizeStudent(item));
+      const derived = deriveDashboardSummary([...recentRecords, ...actionRecords]);
+      const sourceByType = data.byType || {};
+      const hasSummaryCounts = Object.values(sourceByType).some(value => asNumber(value) > 0);
+      const shouldUseDerived = data.summaryMissing || !hasSummaryCounts;
+      const byType = shouldUseDerived && derived.total ? derived.byType : sourceByType;
+      const byAction = shouldUseDerived && derived.total ? derived.byAction : normalizeActionSummary(data.byAction, data);
+      const byRoom = shouldUseDerived && derived.total ? derived.byRoom : (data.byRoom || {});
+      const finalTopStudents = topStudents.length ? topStudents : derived.topStudents;
+      const derivedSummary = shouldUseDerived && derived.total > 0;
       return {
         ...data,
-        total: asNumber(data.total || Object.values(byType).reduce((sum, value) => sum + asNumber(value), 0)),
+        total: asNumber((shouldUseDerived && derived.total) || data.total || Object.values(byType).reduce((sum, value) => sum + asNumber(value), 0)),
         byType,
         byAction,
         byRoom,
-        topStudents,
+        topStudents: finalTopStudents,
         recentRecords,
-        actionRecords
+        actionRecords,
+        derivedSummary
       };
     }
 
@@ -4897,18 +5064,22 @@
     }
 
     function combinedStudentRecords() {
-      const records = (state.data.recentRecords || []).length
-        ? state.data.recentRecords
-        : (state.data.topStudents || []);
+      const liveRecords = [
+        ...(state.data.recentRecords || []),
+        ...(state.data.actionRecords || [])
+      ];
+      const records = liveRecords.length ? liveRecords : (state.data.topStudents || []);
       const seen = new Set();
       return records.filter(record => {
         const key = [
+          record.sortAt || "",
           record.studentId || "",
           record.fullName || "",
           record.room || "",
           normalizeBehaviorName(record.behaviorType),
           record.time || "",
-          record.date || ""
+          record.date || "",
+          record.actionType || ""
         ].join("|");
         if (seen.has(key)) return false;
         seen.add(key);
@@ -5256,11 +5427,39 @@
 
     function renderStatus() {
       $("liveBadge").textContent = "พร้อม";
+      if (state.data.loadError) {
+        $("liveBadge").textContent = "ตรวจสอบ";
+        $("status").textContent = `โหลดข้อมูลหลังบ้านไม่สำเร็จ: ${state.data.loadError}`;
+        return;
+      }
       const updated = formatUpdatedAt(state.data.updatedAt);
-      const source = state.data.summaryMissing ? "ยังไม่มี Summary" : state.data.cacheHit ? "จาก Cache" : "จาก Summary";
+      const source = state.data.derivedSummary ? "คำนวณจากรายการจริง" : state.data.summaryMissing ? "ยังไม่มี Summary" : state.data.cacheHit ? "จาก Cache" : "จาก Summary";
       $("status").textContent = updated
         ? `ข้อมูลล่าสุดเมื่อ ${updated} · ${source} · ข้อมูลอัปเดตอัตโนมัติทุก 1 นาที`
         : "ข้อมูลอัปเดตอัตโนมัติทุก 1 นาที";
+    }
+
+    function periodGuideText() {
+      const roomText = state.room === "ALL" ? "ทุกห้อง" : state.room;
+      if (state.data.loadError) return `ตรวจสอบหลังบ้าน · ${roomText}`;
+      if (state.mode === "academic") {
+        const year = currentAcademicYear();
+        return `กำลังดูปีการศึกษา ${Number(year) + 543} · ${roomText}`;
+      }
+      if (state.mode === "monthly") {
+        return `กำลังดูเดือน ${formatThaiMonthLong($("month").value)} · ${roomText}`;
+      }
+      return `กำลังดูวันนี้ ${formatThaiDateLong($("date").value)} · ${roomText}`;
+    }
+
+    function updateDataGuide() {
+      const guide = $("dataGuide");
+      if (!guide) return;
+      const showGuide = state.page === "overview" || state.page === "rooms";
+      guide.classList.toggle("hidden", !showGuide);
+      if (!showGuide) return;
+      guide.textContent = periodGuideText();
+      guide.classList.toggle("is-error", Boolean(state.data.loadError));
     }
 
     let stackFrame = 0;
@@ -5735,6 +5934,7 @@
       $("mainPanel").style.animation = "";
       renderStatus();
       renderRooms();
+      updateDataGuide();
       updateStackCards();
     }
 
@@ -5765,7 +5965,11 @@
         if (!data.success) throw new Error(data.message || "โหลดข้อมูลไม่สำเร็จ");
         state.data = normalizeData(data);
       } catch (error) {
-        state.data = normalizeData({...FALLBACK, mode: state.mode});
+        state.data = normalizeData({
+          ...EMPTY_DATA,
+          mode: state.mode,
+          loadError: error.message || String(error)
+        });
       }
       await ensureLatestRecordsForUntimedPages();
       document.body.classList.remove("is-loading");
