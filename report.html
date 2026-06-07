@@ -1697,7 +1697,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbzk_5fHu-a0mouf-rBiE33r3FBrCBtxMCT_Ui8zMa-ZjP9dOQ0vcxrU1O1JSRBk-yGF6g/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxsH8KDL5e2USLz8O_B9oeX4BogvkI12hceoDB0Njwu8eudMl4-43G4ZkMm7AjElq-BLw/exec";
     const periodButtons = document.querySelectorAll(".period button[data-period]");
     const modeButtons = document.querySelectorAll(".tab");
     const studentFinder = document.getElementById("studentFinder");
@@ -2561,7 +2561,7 @@
     }
 
     function getActionText(record = {}) {
-      return firstFilled(
+      const direct = firstFilled(
         record.actionType,
         record.action,
         record.actionTaken,
@@ -2574,6 +2574,10 @@
         record["การจัดการ"],
         record["สถานะ"]
       );
+      if (direct) return direct;
+      const noteText = String(record.note || "").trim();
+      if (/^(ตักเตือน|เตือน|ปกครอง\s*[123๑๒๓]|ปกครองครั้งที่\s*[123๑๒๓])$/.test(noteText)) return noteText;
+      return "";
     }
 
     function numberSortValue(value) {
@@ -2876,7 +2880,7 @@
 
       reports.forEach((report) => {
         (report.records || []).forEach((record) => {
-          const key = [record.timestamp, record.studentId, record.date, record.behaviorType, record.note].join("|");
+          const key = [record.timestamp, record.studentId, record.date, record.behaviorType, getActionText(record), record.note].join("|");
           if (seen.has(key)) return;
           seen.add(key);
           records.push(record);
