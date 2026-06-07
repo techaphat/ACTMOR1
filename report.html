@@ -3,19 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ACT MOR1</title>
-  <meta name="application-name" content="ACT MOR1">
-  <meta name="apple-mobile-web-app-title" content="ACT MOR1">
-  <link rel="manifest" href="manifest.webmanifest">
-  <script>
-    (() => {
-      const standalone = window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone;
-      const directReportLaunch = standalone && /(^|\/)report\.html(?:[?#].*)?$/.test(window.location.href);
-      const allowed = sessionStorage.getItem("actmor1:allow-report") === "1";
-      if (directReportLaunch && !allowed) window.location.replace("index.html");
-      sessionStorage.removeItem("actmor1:allow-report");
-    })();
-  </script>
+  <title>ม.1 Report</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://cdn.jsdelivr.net/gh/lazywasabi/thai-web-fonts@7/fonts/LINESeedSansTH/LINESeedSansTH.css" rel="stylesheet">
@@ -60,6 +48,10 @@
       background-attachment: fixed;
     }
 
+    body.preview-open {
+      overflow: hidden;
+    }
+
     .phone {
       width: min(430px, 100%);
       min-height: min(892px, calc(100vh - 28px));
@@ -89,7 +81,7 @@
     }
 
     body.document-ready .bottom-nav {
-      display: none;
+      display: grid;
     }
 
     .logo {
@@ -897,6 +889,70 @@
       display: none;
     }
 
+    .preview-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 22px 14px calc(116px + env(safe-area-inset-bottom));
+      background: rgba(239,247,255,.42);
+      backdrop-filter: blur(7px) saturate(1.04);
+    }
+
+    .preview-modal.show {
+      display: flex;
+    }
+
+    .preview-panel {
+      width: min(96vw, 900px);
+      max-height: calc(100vh - 154px - env(safe-area-inset-bottom));
+      overflow: auto;
+      border-radius: 28px;
+      padding: 18px;
+      background: rgba(255,255,255,.9);
+      border: 1px solid rgba(255,255,255,.94);
+      box-shadow: 0 30px 90px rgba(31,45,70,.22), inset 0 1px 0 rgba(255,255,255,.96);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .preview-head {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin: -18px -18px 16px;
+      padding: 14px 16px;
+      border-radius: 28px 28px 20px 20px;
+      background: rgba(255,255,255,.9);
+      border-bottom: 1px solid rgba(221,232,246,.72);
+      backdrop-filter: blur(18px) saturate(1.08);
+    }
+
+    .preview-title {
+      color: #25364a;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .preview-close {
+      width: 42px;
+      height: 42px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(238,246,255,.9);
+      color: #50617a;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.96);
+    }
+
     .tab {
       color: #111;
     }
@@ -908,8 +964,8 @@
       padding: 16mm 18mm 18mm;
       position: relative;
       color: #000;
-      font-size: 13.5pt;
-      line-height: 1.2;
+      font-size: 10.75pt;
+      line-height: 1.16;
       font-family: "Sarabun", "TH Sarabun New", "Noto Sans Thai", Arial, sans-serif;
       font-synthesis: none;
       font-optical-sizing: none;
@@ -946,13 +1002,13 @@
 
     .doc-title .small {
       font-family: "IBM Plex Sans Thai", "Noto Sans Thai", Arial, sans-serif;
-      font-size: 9.75pt;
+      font-size: 7.75pt;
       font-weight: 700;
     }
 
     .doc-title h1 {
       font-family: "IBM Plex Sans Thai", "Noto Sans Thai", Arial, sans-serif;
-      font-size: 17.25pt;
+      font-size: 14.25pt;
       line-height: 1.05;
       margin: 2px 0 0;
     }
@@ -962,7 +1018,7 @@
       min-width: 36mm;
       text-align: right;
       line-height: 1.35;
-      font-size: 9pt;
+      font-size: 7.25pt;
     }
 
     .doc-meta strong {
@@ -990,7 +1046,7 @@
     .line {
       flex: 1;
       border-bottom: 1px solid #777;
-      min-height: 12.75pt;
+      min-height: 10pt;
       padding: 0 6px 1px;
       text-align: center;
     }
@@ -1005,16 +1061,16 @@
       margin: 0 0 26px;
     }
 
-    .doc-content {
-      padding-bottom: 25mm;
-    }
+      .doc-content {
+        padding-bottom: 32mm;
+      }
 
     .section-head {
       display: flex;
       justify-content: space-between;
       gap: 20px;
       margin-bottom: 8px;
-      font-size: 12pt;
+      font-size: 9.5pt;
     }
 
     .section-head strong {
@@ -1025,7 +1081,7 @@
       width: 78%;
       margin-left: 24mm;
       border-collapse: collapse;
-      font-size: 9.75pt;
+      font-size: 7.75pt;
     }
 
     .doc-table.room-table {
@@ -1058,19 +1114,19 @@
       position: absolute;
       left: 18mm;
       right: 18mm;
-      bottom: 8mm;
+      bottom: 14mm;
     }
 
     .doc-total {
       text-align: right;
-      font-size: 12pt;
+      font-size: 9.5pt;
       font-weight: 700;
       margin-bottom: 2px;
     }
 
     .doc-page-number {
       text-align: right;
-      font-size: 9.75pt;
+      font-size: 7.75pt;
       margin-bottom: 8px;
     }
 
@@ -1079,19 +1135,19 @@
     }
 
     .doc-range {
-      font-size: 9.75pt;
+      font-size: 7.75pt;
     }
 
     .doc-notes {
       margin-top: 6px;
-      font-size: 10.5pt;
+      font-size: 8.5pt;
     }
 
     .note-line {
       display: block;
-      height: 13.5pt;
+      height: 10.75pt;
       border-bottom: 1px dashed #777;
-      line-height: 13.5pt;
+      line-height: 10.75pt;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1100,7 +1156,7 @@
     .preview-actions {
       display: none;
       width: min(100%, 210mm);
-      margin: 0 auto 30px;
+      margin: 0 auto;
       gap: 10px;
       justify-content: center;
     }
@@ -1112,17 +1168,24 @@
     .preview-actions button {
       border: 0;
       border-radius: 999px;
-      padding: 12px 18px;
-      background: #111;
+      padding: 14px 26px;
+      background: linear-gradient(135deg, #ff4040, #ff9a5f);
       color: white;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 17px;
+      font-weight: 700;
+      box-shadow: 0 18px 36px rgba(255,105,87,.22), inset 0 1px 0 rgba(255,255,255,.42);
     }
 
     @media screen and (max-width: 460px) {
       body {
         padding: 0 0 132px;
         place-items: stretch;
+      }
+
+      body.document-ready {
+        padding: 0 0 calc(132px + env(safe-area-inset-bottom));
+        overflow-x: hidden;
       }
 
       .phone {
@@ -1155,6 +1218,48 @@
       .bottom-nav {
         width: min(78vw, 328px);
         bottom: calc(26px + env(safe-area-inset-bottom));
+      }
+
+      .preview-modal {
+        padding: 14px 10px calc(118px + env(safe-area-inset-bottom));
+      }
+
+      .preview-panel {
+        width: 100%;
+        max-height: calc(100vh - 180px - env(safe-area-inset-bottom));
+        border-radius: 24px;
+        padding: 12px;
+      }
+
+      .preview-head {
+        margin: -12px -12px 12px;
+        padding: 12px 12px;
+        border-radius: 24px 24px 18px 18px;
+      }
+
+      .preview-title {
+        font-size: 16px;
+      }
+
+      body.document-ready .print-sheets {
+        width: 100%;
+        overflow: visible;
+      }
+
+      body.document-ready .print-sheet {
+        width: 210mm;
+        height: 297mm;
+        zoom: var(--mobile-sheet-scale, .48);
+        margin: 0 auto 22px;
+        box-shadow: 0 14px 34px rgba(31,45,70,.16);
+      }
+
+      @supports not (zoom: 1) {
+        body.document-ready .print-sheet {
+          transform: scale(var(--mobile-sheet-scale, .48));
+          transform-origin: top left;
+          margin-bottom: 28px;
+        }
       }
     }
 
@@ -1194,8 +1299,8 @@
         padding: 16mm 18mm 12mm;
         position: relative;
         color: #000;
-        font-size: 13.5pt;
-        line-height: 1.2;
+        font-size: 10.75pt;
+        line-height: 1.16;
         font-family: "Sarabun", "TH Sarabun New", "Noto Sans Thai", Arial, sans-serif;
         font-synthesis: none;
         font-optical-sizing: none;
@@ -1233,13 +1338,13 @@
 
       .doc-title .small {
         font-family: "IBM Plex Sans Thai", "Noto Sans Thai", Arial, sans-serif;
-        font-size: 9.75pt;
+        font-size: 7.75pt;
         font-weight: 700;
       }
 
       .doc-title h1 {
         font-family: "IBM Plex Sans Thai", "Noto Sans Thai", Arial, sans-serif;
-        font-size: 17.25pt;
+        font-size: 14.25pt;
         line-height: 1.05;
         margin: 2px 0 0;
       }
@@ -1249,7 +1354,7 @@
         min-width: 36mm;
         text-align: right;
         line-height: 1.35;
-        font-size: 9pt;
+        font-size: 7.25pt;
       }
 
       .doc-meta strong {
@@ -1277,7 +1382,7 @@
       .line {
         flex: 1;
         border-bottom: 1px solid #777;
-        min-height: 12.75pt;
+        min-height: 10pt;
         padding: 0 6px 1px;
         text-align: center;
       }
@@ -1292,16 +1397,16 @@
         margin: 0 0 26px;
       }
 
-      .doc-content {
-        padding-bottom: 25mm;
-      }
+    .doc-content {
+      padding-bottom: 32mm;
+    }
 
       .section-head {
         display: flex;
         justify-content: space-between;
         gap: 20px;
         margin-bottom: 8px;
-        font-size: 12pt;
+        font-size: 9.5pt;
       }
 
       .section-head strong {
@@ -1312,7 +1417,7 @@
         width: 78%;
         margin-left: 24mm;
         border-collapse: collapse;
-        font-size: 9.75pt;
+        font-size: 7.75pt;
       }
 
       .doc-table.room-table {
@@ -1345,20 +1450,20 @@
         position: absolute;
         left: 18mm;
         right: 18mm;
-        bottom: 8mm;
+        bottom: 14mm;
         margin-top: 0;
       }
 
       .doc-total {
         text-align: right;
-        font-size: 12pt;
+        font-size: 9.5pt;
         font-weight: 700;
         margin-bottom: 2px;
       }
 
       .doc-page-number {
         text-align: right;
-        font-size: 9.75pt;
+        font-size: 7.75pt;
         margin-bottom: 8px;
       }
 
@@ -1367,19 +1472,19 @@
       }
 
       .doc-range {
-        font-size: 9.75pt;
+        font-size: 7.75pt;
       }
 
       .doc-notes {
         margin-top: 6px;
-        font-size: 10.5pt;
+        font-size: 8.5pt;
       }
 
       .note-line {
         display: block;
-        height: 13.5pt;
+        height: 10.75pt;
         border-bottom: 1px dashed #777;
-        line-height: 13.5pt;
+        line-height: 10.75pt;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -1439,7 +1544,18 @@
     </section>
   </main>
 
-  <section class="print-sheets" id="printSheets"></section>
+  <div class="preview-modal" id="previewModal" aria-hidden="true">
+    <section class="preview-panel" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+      <div class="preview-head">
+        <div class="preview-title" id="previewTitle">ตัวอย่างเอกสาร</div>
+        <button class="preview-close" type="button" id="closePreview" aria-label="ปิด">×</button>
+      </div>
+      <section class="print-sheets" id="printSheets"></section>
+    </section>
+    <div class="preview-actions">
+      <button type="button" id="downloadPdf">ดาวน์โหลด PDF</button>
+    </div>
+  </div>
 
   <div class="modal-backdrop" id="roomModal" aria-hidden="true">
     <section class="room-modal" role="dialog" aria-modal="true" aria-labelledby="roomModalTitle">
@@ -1557,10 +1673,6 @@
     </section>
   </div>
 
-  <div class="preview-actions">
-    <button type="button" id="printAgain">พิมพ์ / บันทึก PDF</button>
-  </div>
-
   <nav class="bottom-nav" aria-label="เมนูหลัก">
     <a class="bottom-nav-item" href="index.html" aria-label="หน้าแรก">
       <img src="ggicon.webp" alt="">
@@ -1583,6 +1695,7 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxsH8KDL5e2USLz8O_B9oeX4BogvkI12hceoDB0Njwu8eudMl4-43G4ZkMm7AjElq-BLw/exec";
     const periodButtons = document.querySelectorAll(".period button[data-period]");
@@ -1599,6 +1712,7 @@
     const monthModal = document.getElementById("monthModal");
     const noteModal = document.getElementById("noteModal");
     const displayModal = document.getElementById("displayModal");
+    const previewModal = document.getElementById("previewModal");
     const suggestions = document.getElementById("suggestions");
     const selectedStudentInfo = document.getElementById("selectedStudentInfo");
     let selectedPeriod = "ปีการศึกษา";
@@ -1627,6 +1741,124 @@
       const ready = canCreateDocument();
       button.disabled = !ready;
       button.textContent = "สร้างเอกสาร";
+    }
+
+    function updateMobileSheetScale() {
+      const viewport = Math.max(320, window.innerWidth || document.documentElement.clientWidth || 390);
+      const scale = Math.min(1, Math.max(.38, (viewport - 28) / 794));
+      document.documentElement.style.setProperty("--mobile-sheet-scale", scale.toFixed(4));
+    }
+
+    function openPreviewModal() {
+      previewModal.classList.add("show");
+      previewModal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("preview-open");
+      const panel = previewModal.querySelector(".preview-panel");
+      if (panel) panel.scrollTop = 0;
+    }
+
+    function closePreviewModal() {
+      previewModal.classList.remove("show");
+      previewModal.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("preview-open");
+    }
+
+    function safeFilePart(value) {
+      return String(value || "")
+        .trim()
+        .replace(/[\\/:*?"<>|]+/g, "-")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+    }
+
+    function pdfFileName() {
+      const target = selectedMode === "room"
+        ? selectedReportRoom
+        : (selectedStudent?.fullName || selectedStudent?.studentId || document.getElementById("studentName").value || "รายบุคคล");
+      const date = localIsoDate();
+      return `m1-report-${safeFilePart(target) || "document"}-${date}.pdf`;
+    }
+
+    async function downloadPdfDocument() {
+      const button = document.getElementById("downloadPdf");
+      const sheets = document.getElementById("printSheets");
+      if (!sheets || !sheets.children.length) return;
+
+      if (!window.html2pdf) {
+        alert("ยังโหลดเครื่องมือดาวน์โหลด PDF ไม่สำเร็จ กรุณาต่ออินเทอร์เน็ตแล้วลองใหม่อีกครั้ง");
+        return;
+      }
+
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "กำลังทำไฟล์ PDF...";
+
+      const clone = sheets.cloneNode(true);
+      clone.id = "pdfExportSheets";
+      clone.style.cssText = [
+        "display:block",
+        "position:fixed",
+        "left:-10000px",
+        "top:0",
+        "width:210mm",
+        "background:#fff",
+        "z-index:-1",
+        "overflow:visible"
+      ].join(";");
+
+      const cloneSheets = Array.from(clone.querySelectorAll(".print-sheet"));
+      cloneSheets.forEach((sheet, index) => {
+        sheet.style.cssText += [
+          "display:block",
+          "width:210mm",
+          "height:297mm",
+          "margin:0",
+          "box-shadow:none",
+          "zoom:1",
+          "transform:none",
+          "break-after:page",
+          "page-break-after:always"
+        ].join(";");
+        if (index === cloneSheets.length - 1) {
+          sheet.style.breakAfter = "auto";
+          sheet.style.pageBreakAfter = "auto";
+        }
+      });
+
+      document.body.appendChild(clone);
+
+      try {
+        if (document.fonts?.ready) await document.fonts.ready;
+        await window.html2pdf()
+          .set({
+            margin: 0,
+            filename: pdfFileName(),
+            image: { type: "jpeg", quality: .98 },
+            html2canvas: {
+              scale: Math.min(2, window.devicePixelRatio || 2),
+              useCORS: true,
+              allowTaint: false,
+              backgroundColor: "#ffffff",
+              scrollX: 0,
+              scrollY: 0
+            },
+            jsPDF: { unit: "mm", format: "a4", orientation: "portrait", compress: true },
+            pagebreak: { mode: ["css", "legacy"], after: ".print-sheet" }
+          })
+          .from(clone)
+          .save();
+        playTapTone("success");
+        vibrateFor("success");
+      } catch (error) {
+        playTapTone("error");
+        vibrateFor("error");
+        alert("ดาวน์โหลด PDF ไม่สำเร็จ: " + (error.message || String(error)));
+      } finally {
+        clone.remove();
+        button.disabled = false;
+        button.textContent = originalText;
+      }
     }
 
     function playTapTone(kind = "tap") {
@@ -1779,11 +2011,6 @@
       event.stopPropagation();
       updateToLatestVersion(event.currentTarget);
     });
-    document.querySelectorAll('a[href="report.html"]').forEach((link) => link.addEventListener("click", () => {
-      try {
-        sessionStorage.setItem("actmor1:allow-report", "1");
-      } catch (error) {}
-    }));
 
     document.querySelectorAll(".bottom-nav a").forEach((link) => {
       link.addEventListener("click", (event) => {
@@ -1818,7 +2045,7 @@
         const timer = setTimeout(() => {
           cleanup();
           reject(new Error("เชื่อมต่อช้าเกินไป กรุณาลองใหม่"));
-        }, 15000);
+        }, 25000);
 
         function cleanup() {
           clearTimeout(timer);
@@ -2087,7 +2314,7 @@
       suggestions.classList.add("show");
       try {
         const res = await jsonp("searchStudent", {q});
-        const students = res && res.success ? (res.students || []) : [];
+        const students = res && res.success ? (res.students || []).map(normalizeStudent) : [];
         if (!students.length) {
           suggestions.innerHTML = `<div class="suggestion">ไม่พบนักเรียน</div>`;
           return;
@@ -2111,7 +2338,7 @@
       roomStudentList.innerHTML = `<div class="suggestion">กำลังโหลดรายชื่อ...</div>`;
       roomStudentList.classList.add("show");
       const res = await jsonp("getStudents");
-      allStudents = res && res.success ? (res.students || []) : [];
+      allStudents = res && res.success ? (res.students || []).map(normalizeStudent) : [];
       return allStudents;
     }
 
@@ -2223,6 +2450,7 @@
     });
 
     function chooseStudent(student) {
+      student = normalizeStudent(student);
       selectedStudent = student;
       document.getElementById("studentName").value = student.fullName || "";
       selectedStudentInfo.textContent = `${student.fullName || ""} · ${student.room || ""} · เลขที่ ${student.number || ""} · ${student.studentId || ""}`;
@@ -2242,7 +2470,8 @@
     ];
 
     function formatThaiDate(value) {
-      const date = new Date(value);
+      const iso = parseDateToIso(value);
+      const date = iso ? new Date(iso + "T00:00:00") : new Date(value);
       if (Number.isNaN(date.getTime())) return value || "-";
       return `${date.getDate()} ${thaiMonths[date.getMonth()]} ${date.getFullYear() + 543}`;
     }
@@ -2250,11 +2479,6 @@
     function lastDayOfMonth(monthValue) {
       const [year, month] = String(monthValue || localMonth()).split("-").map(Number);
       return localIsoDate(new Date(year, month, 0));
-    }
-
-    function academicYearFromDate(value = localIsoDate()) {
-      const [year, month] = String(value || localIsoDate()).split("-").map(Number);
-      return String(month >= 5 ? year : year - 1);
     }
 
     function selectedDateBounds(records = []) {
@@ -2284,35 +2508,11 @@
     function filterRecordsBySelectedPeriod(records) {
       const items = records || [];
       if (selectedPeriod === "ปีการศึกษา") {
-        const academicYear = academicYearFromDate();
-        return items.filter((record) => !record.date || academicYearFromDate(record.date) === academicYear);
+        const today = localIsoDate();
+        return items.filter((record) => !record.date || record.date <= today);
       }
       const {from, to} = selectedDateBounds(items);
       return items.filter((record) => record.date && record.date >= from && record.date <= to);
-    }
-
-    function reportPeriodParams() {
-      if (selectedPeriod === "วัน") {
-        const {from, to} = selectedDateBounds();
-        return {
-          period: "day",
-          date: from,
-          dateFrom: from,
-          dateTo: to
-        };
-      }
-
-      if (selectedPeriod === "เดือน") {
-        return {
-          period: "month",
-          month: selectedMonth || localMonth()
-        };
-      }
-
-      return {
-        period: "year",
-        academicYear: academicYearFromDate()
-      };
     }
 
     function totalText(report) {
@@ -2336,6 +2536,84 @@
     function firstFilled(...values) {
       const found = values.find((value) => value !== undefined && value !== null && String(value).trim() !== "");
       return found === undefined ? "" : found;
+    }
+
+    function cleanText(value) {
+      return String(value ?? "").replace(/\s+/g, " ").trim();
+    }
+
+    function getAny(source = {}, keys = []) {
+      for (const key of keys) {
+        if (source[key] !== undefined && source[key] !== null && String(source[key]).trim() !== "") return source[key];
+      }
+      return "";
+    }
+
+    function normalizeRoom(value) {
+      const raw = cleanText(value);
+      if (!raw) return "";
+      const text = raw.replace(/^ม\.?\s*/, "ม.").replace(/^ม1\//, "ม.1/");
+      const match = text.match(/(?:ม\.?\s*)?1\s*\/?\s*([0-9]+|[A-Za-zก-ฮ]+)/i);
+      if (match) return `ม.1/${match[1].toString().toUpperCase()}`;
+      return text;
+    }
+
+    function parseDateToIso(value) {
+      if (!value) return "";
+      if (value instanceof Date && !Number.isNaN(value.getTime())) return localIsoDate(value);
+      const text = cleanText(value);
+      if (!text) return "";
+      if (/^\d{4}-\d{2}-\d{2}/.test(text)) return text.slice(0, 10);
+      const dmy = text.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/);
+      if (dmy) {
+        let year = Number(dmy[3]);
+        if (year < 100) year += 2000;
+        if (year > 2400) year -= 543;
+        const month = String(Number(dmy[2])).padStart(2, "0");
+        const day = String(Number(dmy[1])).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+      const parsed = new Date(text);
+      if (!Number.isNaN(parsed.getTime())) return localIsoDate(parsed);
+      return "";
+    }
+
+    function normalizeStudent(student = {}) {
+      const prefix = cleanText(getAny(student, ["prefix", "title", "คำนำหน้า"]));
+      const firstName = cleanText(getAny(student, ["firstName", "name", "ชื่อ"]));
+      const lastName = cleanText(getAny(student, ["lastName", "surname", "สกุล", "นามสกุล"]));
+      const fullName = cleanText(getAny(student, ["fullName", "studentName", "nameFull", "ชื่อ - สกุล", "ชื่อสกุล", "ชื่อนามสกุล"])) || cleanText(`${prefix}${firstName ? " " + firstName : ""}${lastName ? " " + lastName : ""}`);
+      return {
+        ...student,
+        studentId: cleanText(getAny(student, ["studentId", "studentID", "id", "รหัสนักเรียน", "เลขประจำตัว", "เลขประจำตัวนักเรียน"])),
+        fullName,
+        room: normalizeRoom(getAny(student, ["room", "classRoom", "class", "ห้อง", "ชั้น/ห้อง"])),
+        number: cleanText(studentNumberFrom(student))
+      };
+    }
+
+    function normalizeRecord(record = {}) {
+      const prefix = cleanText(getAny(record, ["prefix", "title", "คำนำหน้า"]));
+      const firstName = cleanText(getAny(record, ["firstName", "name", "ชื่อ"]));
+      const lastName = cleanText(getAny(record, ["lastName", "surname", "สกุล", "นามสกุล"]));
+      const fullName = cleanText(getAny(record, ["fullName", "studentName", "nameFull", "ชื่อ - สกุล", "ชื่อสกุล", "ชื่อนามสกุล", "นักเรียน"])) || cleanText(`${prefix}${firstName ? " " + firstName : ""}${lastName ? " " + lastName : ""}`);
+      const dateValue = getAny(record, ["date", "recordDate", "วันที่", "วันเดือนปี", "timestamp", "Timestamp", "time", "เวลา"]);
+      const timestamp = getAny(record, ["timestamp", "Timestamp", "time", "เวลา", "createdAt", "created_at"]) || dateValue;
+      const behaviorType = cleanText(getAny(record, ["behaviorType", "behavior", "type", "category", "ประเภทพฤติกรรม", "พฤติกรรม", "ประเภท", "รายการ"]));
+      const actionType = cleanText(getAny(record, ["actionType", "action", "actionTaken", "behaviorAction", "management", "manageType", "status", "result", "การดำเนินการ", "ดำเนินการ", "การจัดการ", "สถานะ"]));
+      const note = cleanText(getAny(record, ["note", "remark", "remarks", "comment", "หมายเหตุ", "บันทึก", "รายละเอียด"]));
+      return {
+        ...record,
+        timestamp: cleanText(timestamp),
+        date: parseDateToIso(dateValue) || cleanText(record.date || ""),
+        studentId: cleanText(getAny(record, ["studentId", "studentID", "id", "รหัสนักเรียน", "เลขประจำตัว", "เลขประจำตัวนักเรียน"])),
+        fullName,
+        room: normalizeRoom(getAny(record, ["room", "classRoom", "class", "ห้อง", "ชั้น/ห้อง"])),
+        number: cleanText(studentNumberFrom(record)),
+        behaviorType: behaviorType || "ไม่ระบุ",
+        actionType,
+        note
+      };
     }
 
     function studentNumberFrom(value = {}) {
@@ -2489,36 +2767,6 @@
       return pages.length ? pages : [`<section class="doc-section"><div class="doc-empty">ไม่ปรากฏข้อมูล</div></section>`];
     }
 
-    function getRecordAction(record) {
-      return record?.actionType
-        || record?.action
-        || record?.actionTaken
-        || record?.behaviorAction
-        || record?.management
-        || record?.manageType
-        || record?.status
-        || record?.["การดำเนินการ"]
-        || record?.["ดำเนินการ"]
-        || record?.["การจัดการ"]
-        || record?.["สถานะ"]
-        || "";
-    }
-
-    function normalizeReportRecord(record) {
-      if (!record || typeof record !== "object") return {};
-      return {
-        ...record,
-        actionType: getRecordAction(record),
-        note: record.note || record.remark || record.comment || record["หมายเหตุ"] || record["บันทึกเพิ่มเติม"] || "",
-        behaviorType: record.behaviorType || record.behavior || record.type || record["ประเภทพฤติกรรม"] || record["พฤติกรรม"] || "ไม่ระบุ",
-        date: record.date || record.recordDate || record["วันที่"] || record.timestamp || "",
-        studentId: record.studentId || record.id || record["เลขประจำตัว"] || record["รหัสนักเรียน"] || "",
-        fullName: record.fullName || record.studentName || record.name || record["ชื่อ - สกุล"] || record["ชื่อ-สกุล"] || record["ชื่อ"] || "",
-        room: record.room || record.classRoom || record.class || record["ห้อง"] || "",
-        number: record.number || record.studentNo || record.no || record["เลขที่"] || ""
-      };
-    }
-
     function renderPersonPages(report) {
       const grouped = groupBy(report.records || [], "behaviorType");
       const behaviorNames = Object.keys(grouped).sort((a, b) => a.localeCompare(b, "th"));
@@ -2551,7 +2799,7 @@
                   <tr>
                     ${!isHidden("sectionCount") ? `<td>${chunkIndex * 18 + index + 1}</td>` : ""}
                     ${!isHidden("recordDate") ? `<td>${escapeHtml(formatThaiDate(record.date))}</td>` : ""}
-                    ${!isHidden("behaviorAction") ? `<td>${escapeHtml(getRecordAction(record))}</td>` : ""}
+                    ${!isHidden("behaviorAction") ? `<td>${escapeHtml(record.actionType || "")}</td>` : ""}
                     ${!isHidden("behaviorNote") ? `<td>${escapeHtml(record.note || "")}</td>` : ""}
                     ${headers ? "" : `<td>${escapeHtml(behaviorName)}</td>`}
                   </tr>
@@ -2637,7 +2885,7 @@
             const details = [
               !isHidden("sectionCount") ? `<strong>ครั้งที่</strong> ${index + 1}` : "",
               !isHidden("recordDate") ? escapeHtml(formatThaiDate(record.date)) : "",
-              !isHidden("behaviorAction") && getRecordAction(record) ? `<strong>การดำเนินการ</strong> ${escapeHtml(getRecordAction(record))}` : "",
+              !isHidden("behaviorAction") && record.actionType ? escapeHtml(record.actionType) : "",
               !isHidden("behaviorNote") && record.note ? escapeHtml(record.note) : ""
             ].filter(Boolean).join(" - ");
             if (!details) return;
@@ -2675,6 +2923,7 @@
     }
 
     function renderDocument(report, params) {
+      report.records = (report.records || []).map(normalizeRecord);
       const pageContents = selectedMode === "room"
         ? renderRoomPages(report)
         : renderPersonPages(report);
@@ -2690,12 +2939,12 @@
       const records = [];
 
       reports.forEach((report) => {
-        (report.records || []).forEach((rawRecord) => {
-          const record = normalizeReportRecord(rawRecord);
-          const key = [record.timestamp, record.studentId, record.date, record.behaviorType, record.actionType, record.note].join("|");
+        (report.records || []).forEach((record) => {
+          const normalized = normalizeRecord(record);
+          const key = [normalized.timestamp, normalized.studentId, normalized.date, normalized.behaviorType, normalized.actionType, normalized.note].join("|");
           if (seen.has(key)) return;
           seen.add(key);
-          records.push(record);
+          records.push(normalized);
         });
       });
 
@@ -2763,7 +3012,6 @@
       let report = null;
       try {
         const targets = behaviorTypes.length ? behaviorTypes : ["ทั้งหมด"];
-        const periodParams = reportPeriodParams();
         const reports = [];
         for (const behaviorType of targets) {
           reports.push(await jsonp("getReportData", {
@@ -2773,7 +3021,7 @@
             room: roomRaw,
             studentNo: noRaw,
             behaviorType,
-            ...periodParams
+            period: "ทั้งหมด"
           }));
         }
         report = mergeReports(reports, behaviorTypes);
@@ -2796,15 +3044,30 @@
       renderDocument(report, {nameRaw, roomRaw, noRaw, name, room, no, behavior, selectedStudent});
       playTapTone("success");
       vibrateFor("success");
+      updateMobileSheetScale();
       document.body.classList.add("document-ready");
-      document.getElementById("printSheets").scrollIntoView({behavior: "smooth", block: "start"});
+      openPreviewModal();
 
       updateCreateButtonState();
     });
 
-    document.getElementById("printAgain").addEventListener("click", () => {
-      window.print();
+    document.getElementById("downloadPdf").addEventListener("click", () => {
+      downloadPdfDocument();
     });
+
+    document.getElementById("closePreview").addEventListener("click", () => {
+      closePreviewModal();
+    });
+
+    previewModal.addEventListener("click", (event) => {
+      if (event.target === previewModal) closePreviewModal();
+    });
+
+    window.addEventListener("resize", updateMobileSheetScale);
+    window.addEventListener("orientationchange", () => {
+      window.setTimeout(updateMobileSheetScale, 180);
+    });
+    updateMobileSheetScale();
   </script>
 </body>
 </html>
