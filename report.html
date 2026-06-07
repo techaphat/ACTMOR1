@@ -2513,6 +2513,28 @@
       return items.filter((record) => record.date && record.date >= from && record.date <= to);
     }
 
+    function buildReportPeriodParams() {
+      if (selectedPeriod === "วัน") {
+        const from = selectedDateFrom || localIsoDate();
+        const to = selectedDateTo || from;
+        return {
+          period: "day",
+          dateFrom: from <= to ? from : to,
+          dateTo: from <= to ? to : from
+        };
+      }
+      if (selectedPeriod === "เดือน") {
+        return {
+          period: "month",
+          month: selectedMonth || localMonth()
+        };
+      }
+      // ปีการศึกษา = ตั้งแต่วันแรกของระบบถึงปัจจุบัน
+      return {
+        period: "all"
+      };
+    }
+
     function totalText(report) {
       const total = Number(report.total || 0);
       if (selectedMode === "room") {
@@ -2953,14 +2975,16 @@
         const targets = behaviorTypes.length ? behaviorTypes : ["ทั้งหมด"];
         const reports = [];
         for (const behaviorType of targets) {
+          const periodParams = buildReportPeriodParams();
           reports.push(await jsonp("getReportData", {
             reportMode: selectedMode,
             studentId: selectedMode === "person" && selectedStudent ? selectedStudent.studentId : "",
             studentName: selectedMode === "person" ? nameRaw : "",
-            room: roomRaw,
-            studentNo: noRaw,
+            room: selectedMode === "room" ? roomRaw : "",
+            // ไม่ส่ง studentNo ไปกรอง เพราะ BehaviorLogs ไม่มีเลขที่ และข้อมูลเก่า/ใหม่ไม่เท่ากัน
+            studentNo: "",
             behaviorType,
-            period: "ทั้งหมด"
+            ...periodParams
           }));
         }
         report = mergeReports(reports, behaviorTypes);
