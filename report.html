@@ -1543,6 +1543,7 @@
         <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="header"><span class="emoji">H</span><span>หัวกระดาษ</span><small>โลโก้และชื่อระบบ</small></button>
         <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="sectionCount"><span class="emoji">1</span><span>จำนวนในแต่ละพฤติกรรม</span><small>ครั้งที่และจำนวนรายหัวข้อ</small></button>
         <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="totalCount"><span class="emoji">Σ</span><span>รวมทั้งหมด</span><small>ยอดรวมท้ายเอกสาร</small></button>
+        <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="behaviorAction"><span class="emoji">✓</span><span>การดำเนินการในรายการ</span><small>ตักเตือน / ปกครอง ในรายการพฤติกรรม</small></button>
         <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="behaviorNote"><span class="emoji">N</span><span>หมายเหตุในรายการ</span><small>หมายเหตุของแต่ละพฤติกรรม</small></button>
         <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="footerNote"><span class="emoji">✎</span><span>หมายเหตุท้ายกระดาษ</span><small>ช่องหมายเหตุด้านล่าง</small></button>
         <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="pageNumber"><span class="emoji">P</span><span>เลขหน้า</span><small>หน้าที่ 1/2</small></button>
@@ -1583,7 +1584,7 @@
   </div>
 
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbzk_5fHu-a0mouf-rBiE33r3FBrCBtxMCT_Ui8zMa-ZjP9dOQ0vcxrU1O1JSRBk-yGF6g/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxxQP4dIOmcgpVVaEa1CwAeXb5YxGYAq9iuH3hYTEbuTP-EgPOuqzToJbEEbqNXiNc-MA/exec";
     const periodButtons = document.querySelectorAll(".period button[data-period]");
     const modeButtons = document.querySelectorAll(".tab");
     const studentFinder = document.getElementById("studentFinder");
@@ -2251,6 +2252,11 @@
       return localIsoDate(new Date(year, month, 0));
     }
 
+    function academicYearFromDate(value = localIsoDate()) {
+      const [year, month] = String(value || localIsoDate()).split("-").map(Number);
+      return String(month >= 5 ? year : year - 1);
+    }
+
     function selectedDateBounds(records = []) {
       const today = localIsoDate();
       if (selectedPeriod === "วัน") {
@@ -2278,11 +2284,35 @@
     function filterRecordsBySelectedPeriod(records) {
       const items = records || [];
       if (selectedPeriod === "ปีการศึกษา") {
-        const today = localIsoDate();
-        return items.filter((record) => !record.date || record.date <= today);
+        const academicYear = academicYearFromDate();
+        return items.filter((record) => !record.date || academicYearFromDate(record.date) === academicYear);
       }
       const {from, to} = selectedDateBounds(items);
       return items.filter((record) => record.date && record.date >= from && record.date <= to);
+    }
+
+    function reportPeriodParams() {
+      if (selectedPeriod === "วัน") {
+        const {from, to} = selectedDateBounds();
+        return {
+          period: "day",
+          date: from,
+          dateFrom: from,
+          dateTo: to
+        };
+      }
+
+      if (selectedPeriod === "เดือน") {
+        return {
+          period: "month",
+          month: selectedMonth || localMonth()
+        };
+      }
+
+      return {
+        period: "year",
+        academicYear: academicYearFromDate()
+      };
     }
 
     function totalText(report) {
@@ -2473,6 +2503,7 @@
           const headers = [
             !isHidden("sectionCount") ? "<th>ครั้งที่</th>" : "",
             !isHidden("recordDate") ? "<th>วันที่</th>" : "",
+            !isHidden("behaviorAction") ? "<th>การดำเนินการ</th>" : "",
             !isHidden("behaviorNote") ? "<th>หมายเหตุ</th>" : ""
           ].join("");
           blocks.push({
@@ -2490,6 +2521,7 @@
                   <tr>
                     ${!isHidden("sectionCount") ? `<td>${chunkIndex * 18 + index + 1}</td>` : ""}
                     ${!isHidden("recordDate") ? `<td>${escapeHtml(formatThaiDate(record.date))}</td>` : ""}
+                    ${!isHidden("behaviorAction") ? `<td>${escapeHtml(record.actionType || "")}</td>` : ""}
                     ${!isHidden("behaviorNote") ? `<td>${escapeHtml(record.note || "")}</td>` : ""}
                     ${headers ? "" : `<td>${escapeHtml(behaviorName)}</td>`}
                   </tr>
@@ -2575,6 +2607,7 @@
             const details = [
               !isHidden("sectionCount") ? `<strong>ครั้งที่</strong> ${index + 1}` : "",
               !isHidden("recordDate") ? escapeHtml(formatThaiDate(record.date)) : "",
+              !isHidden("behaviorAction") && record.actionType ? `<strong>การดำเนินการ</strong> ${escapeHtml(record.actionType)}` : "",
               !isHidden("behaviorNote") && record.note ? escapeHtml(record.note) : ""
             ].filter(Boolean).join(" - ");
             if (!details) return;
@@ -2628,7 +2661,7 @@
 
       reports.forEach((report) => {
         (report.records || []).forEach((record) => {
-          const key = [record.timestamp, record.studentId, record.date, record.behaviorType, record.note].join("|");
+          const key = [record.timestamp, record.studentId, record.date, record.behaviorType, record.actionType, record.note].join("|");
           if (seen.has(key)) return;
           seen.add(key);
           records.push(record);
@@ -2699,6 +2732,7 @@
       let report = null;
       try {
         const targets = behaviorTypes.length ? behaviorTypes : ["ทั้งหมด"];
+        const periodParams = reportPeriodParams();
         const reports = [];
         for (const behaviorType of targets) {
           reports.push(await jsonp("getReportData", {
@@ -2708,7 +2742,7 @@
             room: roomRaw,
             studentNo: noRaw,
             behaviorType,
-            period: "ทั้งหมด"
+            ...periodParams
           }));
         }
         report = mergeReports(reports, behaviorTypes);

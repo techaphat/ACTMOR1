@@ -4033,6 +4033,34 @@
       font-weight: 760;
     }
 
+    .overview-subtabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      padding: 5px;
+      margin-top: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .68);
+      border: 1px solid rgba(255, 255, 255, .82);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .92);
+    }
+
+    .overview-subtab {
+      min-height: 38px;
+      border: 0;
+      border-radius: 999px;
+      color: #607086;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 620;
+    }
+
+    .overview-subtab.active {
+      color: #1f65c7;
+      background: linear-gradient(180deg, rgba(237, 247, 255, .96), rgba(217, 235, 255, .9));
+      box-shadow: 0 10px 20px rgba(66, 126, 213, .13), inset 0 1px 0 rgba(255, 255, 255, .95);
+    }
+
     body.overview-page #mainPanel .behavior-summary-top {
       grid-template-columns: auto minmax(0, 1fr) auto !important;
       gap: 10px !important;
@@ -4391,21 +4419,26 @@
   </div>
 
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbzQ8YCMoXcem6E64Eqfdbl-7ogx5mIfVor6kjV5xivy34xSjItMmU56rGVN6KhU-YAgiA/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxxQP4dIOmcgpVVaEa1CwAeXb5YxGYAq9iuH3hYTEbuTP-EgPOuqzToJbEEbqNXiNc-MA/exec";
     const ROOMS = ["ALL", "ม.1/1", "ม.1/2", "ม.1/3", "ม.1/4", "ม.1/5", "ม.1/6", "ม.1/7", "ม.1/8", "ม.1/A", "ม.1/B"];
     const FALLBACK = {
       success: true,
       mode: "academic",
       total: 15,
       byType: {"สายเช้า": 4, "สายเที่ยง": 3, "สายพัก 10": 5, "ขาดแถวเที่ยง": 3, "เครื่องแต่งกาย": 4, "คำพูด": 2, "อื่น ๆ": 0},
+      byAction: {"ตักเตือน": 8, "ปกครอง1": 2, "ปกครอง2": 1, "ปกครอง3": 0},
       byRoom: {"ม.1/1": 2, "ม.1/2": 1, "ม.1/3": 1, "ม.1/4": 0},
       topStudents: [
         {fullName: "ชื่อ - สกุล", room: "ม.1/1", number: "12", studentId: "10001", count: 3, behaviorType: "สายเที่ยง"},
         {fullName: "ชื่อ - สกุล", room: "ม.1/3", number: "18", studentId: "10002", count: 2, behaviorType: "สายพัก 10"}
       ],
       recentRecords: [
-        {time: "07:55", fullName: "ชื่อ - สกุล", room: "ม.1/1", number: "12", studentId: "10001", behaviorType: "สายเช้า"},
-        {time: "12:35", fullName: "ชื่อ - สกุล", room: "ม.1/3", number: "18", studentId: "10002", behaviorType: "สายพัก 10"}
+        {time: "07:55", fullName: "ชื่อ - สกุล", room: "ม.1/1", number: "12", studentId: "10001", behaviorType: "สายเช้า", actionType: "ตักเตือน"},
+        {time: "12:35", fullName: "ชื่อ - สกุล", room: "ม.1/3", number: "18", studentId: "10002", behaviorType: "สายพัก 10", actionType: "ตักเตือน, ปกครอง1"}
+      ],
+      actionRecords: [
+        {time: "07:55", fullName: "ชื่อ - สกุล", room: "ม.1/1", number: "12", studentId: "10001", behaviorType: "สายเช้า", actionType: "ตักเตือน"},
+        {time: "12:35", fullName: "ชื่อ - สกุล", room: "ม.1/3", number: "18", studentId: "10002", behaviorType: "สายพัก 10", actionType: "ตักเตือน, ปกครอง1"}
       ],
       demo: true
     };
@@ -4442,6 +4475,13 @@
       "คำพูด": "behavior-other.webp",
       "อื่น ๆ": "behavior-other.webp"
     };
+    const ACTION_TONES = {
+      "ตักเตือน": ["#2d79c7", "rgba(226, 241, 255, .9)", "rgba(78, 151, 225, .25)", "rgba(78, 151, 225, .12)"],
+      "ปกครอง1": ["#b78916", "rgba(255, 246, 204, .9)", "rgba(239, 196, 57, .28)", "rgba(239, 196, 57, .13)"],
+      "ปกครอง2": ["#d96a25", "rgba(255, 238, 222, .9)", "rgba(226, 112, 44, .25)", "rgba(226, 112, 44, .12)"],
+      "ปกครอง3": ["#c84645", "rgba(255, 231, 229, .9)", "rgba(220, 80, 78, .26)", "rgba(220, 80, 78, .12)"]
+    };
+    const ACTION_ICONS = {"ตักเตือน": "!", "ปกครอง1": "1", "ปกครอง2": "2", "ปกครอง3": "3"};
     function toneStyle(source, fallback = "ALL") {
       const [text, bg, line, shadow] = source || ROOM_TONES[fallback] || ROOM_TONES.ALL;
       const cardTop = bg.replace(".92)", ".82)").replace(".9)", ".82)");
@@ -4450,6 +4490,7 @@
     }
     const roomToneStyle = room => toneStyle(ROOM_TONES[room] || ROOM_TONES.ALL);
     const behaviorToneStyle = behavior => toneStyle(BEHAVIOR_TONES[behavior] || BEHAVIOR_TONES["อื่น ๆ"]);
+    const actionToneStyle = action => toneStyle(ACTION_TONES[action] || ACTION_TONES["ตักเตือน"]);
     const behaviorImage = behavior => BEHAVIOR_IMAGES[behavior] || BEHAVIOR_IMAGES["อื่น ๆ"];
     let feedbackAudioCtx = null;
     let lastFeedbackAt = 0;
@@ -4515,6 +4556,7 @@
     const state = {
       mode: "daily",
       page: "overview",
+      overviewTab: "behavior",
       room: "ALL",
       behavior: "ALL",
       query: "",
@@ -4654,6 +4696,7 @@
         studentId: record.studentId || record.student_id || record.id || record["เลขประจำตัว"] || record["รหัสนักเรียน"] || "เลขประจำตัว",
         count: asNumber(record.count || record.total || 1),
         behaviorType: normalizeBehaviorName(record.behaviorType || record.type || record.behavior || record["พฤติกรรม"] || record["ประเภท"] || fallbackType || "รายการ"),
+        actionType: record.actionType || record.action || record.action_type || record["การดำเนินการ"] || "",
         time: record.time || record.recordedAt || record.createdAt || record["เวลา"] || record.date || "",
         date: rawDate ? formatRecordDate(rawDate) : ""
       };
@@ -4671,19 +4714,39 @@
     function normalizeData(raw) {
       const data = raw && raw.success ? raw : FALLBACK;
       const byType = data.byType || {};
+      const byAction = normalizeActionSummary(data.byAction, data);
       const byRoom = data.byRoom || {};
       const topStudents = collectStudentRecords(data, ["topStudents", "topStudent", "top", "students", "studentSummary", "byStudent"])
         .map(item => normalizeStudent(item));
       const recentRecords = collectStudentRecords(data, ["recentRecords", "recentRecord", "recent", "latest", "latestRecords", "records", "items", "logs", "history"])
         .map(item => normalizeStudent(item));
+      const actionRecords = collectStudentRecords(data, ["actionRecords", "actionRecord", "actions"])
+        .map(item => normalizeStudent(item));
       return {
         ...data,
         total: asNumber(data.total || Object.values(byType).reduce((sum, value) => sum + asNumber(value), 0)),
         byType,
+        byAction,
         byRoom,
         topStudents,
-        recentRecords
+        recentRecords,
+        actionRecords
       };
+    }
+
+    function normalizeActionSummary(source, data = {}) {
+      const actions = {"ตักเตือน": 0, "ปกครอง1": 0, "ปกครอง2": 0, "ปกครอง3": 0};
+      Object.entries(source || {}).forEach(([key, value]) => {
+        if (Object.prototype.hasOwnProperty.call(actions, key)) actions[key] = asNumber(value);
+      });
+      if (Object.values(actions).some(Boolean)) return actions;
+      collectStudentRecords(data, ["recentRecords", "recentRecord", "recent", "latest", "latestRecords", "records", "items", "logs", "history"])
+        .forEach(item => String(item.actionType || item.action || item.action_type || "")
+          .split(",")
+          .map(value => value.trim())
+          .filter(action => Object.prototype.hasOwnProperty.call(actions, action))
+          .forEach(action => actions[action] += Math.max(1, asNumber(item.count || 1))));
+      return actions;
     }
 
     function collectStudentRecords(data, keys) {
@@ -4970,6 +5033,34 @@
       tactileFeedback($("detailSheet"), "select");
     }
 
+    function actionDetailStudents(action) {
+      return actionOverviewRecords()
+        .filter(student => String(student.actionType || "")
+          .split(",")
+          .map(value => value.trim())
+          .includes(action))
+        .sort((a, b) => String(b.date || b.time).localeCompare(String(a.date || a.time)) || a.fullName.localeCompare(b.fullName, "th"));
+    }
+
+    function openActionDetails(action) {
+      const students = actionDetailStudents(action);
+      const tone = ACTION_TONES[action] || ACTION_TONES["ตักเตือน"];
+      $("detailSheet").style.setProperty("--modal-accent", tone[0]);
+      $("detailTitle").textContent = action;
+      $("detailSubtitle").textContent = state.mode === "academic" ? "รายการนักเรียนที่ถูกดำเนินการในปีการศึกษานี้" : "รายการนักเรียนในช่วงเวลาที่เลือก";
+      $("detailList").innerHTML = students.length ? students.map(student => `
+        <a class="detail-person" href="${escapeHtml(studentHistoryHref(student))}" aria-label="ดูประวัติ ${escapeHtml(student.fullName)}">
+          <div>
+            <div class="detail-person-name">${escapeHtml(student.fullName)}</div>
+            <div class="detail-person-meta">${escapeHtml(student.room)} · เลขที่ ${escapeHtml(student.number)} · ${escapeHtml(student.studentId)} · ${escapeHtml(student.behaviorType)}${student.date ? ` · ${escapeHtml(student.date)}` : ""}</div>
+          </div>
+          <div class="detail-count">${escapeHtml(student.actionType || action)}</div>
+        </a>
+      `).join("") : `<div class="empty">ยังไม่มีนักเรียนในรายการ ${escapeHtml(action)} หากในชีทมีข้อมูลแล้ว ให้ใช้ code-gs.txt เวอร์ชันใหม่ใน Apps Script ก่อน</div>`;
+      $("detailModal").classList.remove("hidden");
+      tactileFeedback($("detailSheet"), "select");
+    }
+
     function closeBehaviorDetails() {
       $("detailModal").classList.add("hidden");
     }
@@ -5165,12 +5256,14 @@
       const maxCount = Math.max(1, ...entries.map(([, count]) => asNumber(count)));
       const shareLabel = state.mode === "academic" ? "จากทั้งหมดในปีการศึกษา" : state.mode === "monthly" ? "จากทั้งหมดในเดือนนี้" : "จากทั้งหมดวันนี้";
       if (!entries.length) return `<div class="empty">ยังไม่มีข้อมูล</div>`;
+      if (state.overviewTab === "action") return renderActionOverview();
       return `
         <div class="panel-sticky">
           <div class="panel-head">
             <h2>${escapeHtml(title)}</h2>
             <div class="status">${entries.length} ประเภท</div>
           </div>
+          ${renderOverviewSubtabs()}
         </div>
         <div class="student-list overview-list">
           <article class="overview-chart-card" aria-label="แผนภูมิแท่งรวม 7 พฤติกรรม">
@@ -5234,6 +5327,125 @@
       `;
     }
 
+    function renderOverviewSubtabs() {
+      return `
+        <div class="overview-subtabs" role="tablist" aria-label="เลือกภาพรวม">
+          <button class="overview-subtab ${state.overviewTab === "behavior" ? "active" : ""}" type="button" data-overview-tab="behavior">พฤติกรรม</button>
+          <button class="overview-subtab ${state.overviewTab === "action" ? "active" : ""}" type="button" data-overview-tab="action">การดำเนินการ</button>
+        </div>
+      `;
+    }
+
+    function renderActionOverview() {
+      const entries = Object.keys(ACTION_TONES).map(name => [name, asNumber((state.data.byAction || {})[name])]);
+      const total = entries.reduce((sum, [, count]) => sum + asNumber(count), 0);
+      const maxCount = Math.max(1, ...entries.map(([, count]) => asNumber(count)));
+      const shareLabel = state.mode === "academic" ? "จากทั้งหมดในปีการศึกษา" : state.mode === "monthly" ? "จากทั้งหมดในเดือนนี้" : "จากทั้งหมดวันนี้";
+      return `
+        <div class="panel-sticky">
+          <div class="panel-head">
+            <h2>การดำเนินการ</h2>
+            <div class="status">${total} ครั้ง</div>
+          </div>
+          ${renderOverviewSubtabs()}
+        </div>
+        <div class="student-list overview-list">
+          <article class="overview-chart-card" aria-label="แผนภูมิการดำเนินการ">
+            <div class="overview-chart-head">
+              <div>
+                <h3>แผนภูมิการดำเนินการ</h3>
+                <p>${shareLabel}</p>
+              </div>
+              <div class="status">${total} ครั้ง</div>
+            </div>
+            <div class="overview-bar-chart">
+              ${entries.map(([name, count]) => {
+                const value = asNumber(count);
+                const percent = Math.round(value / maxCount * 100);
+                return `
+                  <div class="overview-bar-row" style="${actionToneStyle(name)}">
+                    <div class="overview-bar-label">${escapeHtml(name)}</div>
+                    <div class="overview-bar-track"><span style="--w:${percent}%"></span></div>
+                    <div class="overview-bar-value">${value}</div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </article>
+          ${entries.map(([name, count]) => {
+            const percent = total ? Math.round(asNumber(count) / total * 100) : 0;
+            return `
+              <article class="behavior-summary-card" style="${actionToneStyle(name)}" aria-label="${escapeHtml(name)} ${asNumber(count)} ครั้ง">
+                <div class="behavior-summary-top">
+                  <div class="behavior-summary-icon" aria-hidden="true">${escapeHtml(ACTION_ICONS[name] || "!")}</div>
+                  <div>
+                    <h3 class="behavior-summary-name">${escapeHtml(name)}</h3>
+                    <div class="behavior-summary-sub">การดำเนินการ</div>
+                  </div>
+                  <button class="behavior-detail-button" type="button" data-action-detail="${escapeHtml(name)}">รายละเอียด</button>
+                </div>
+                <div class="behavior-summary-mid">
+                  <div class="behavior-summary-rank">
+                    <span>${shareLabel}</span>
+                    <strong>${percent}%</strong>
+                  </div>
+                  <div class="behavior-summary-progress" aria-hidden="true"><span style="--w:${percent}%"></span></div>
+                  <div class="behavior-summary-caption">${asNumber(count) ? `บันทึก ${asNumber(count)} ครั้ง` : "ยังไม่มีรายการในช่วงนี้"}</div>
+                </div>
+                <div class="behavior-summary-stats">
+                  <div class="behavior-summary-stat">
+                    <div class="behavior-summary-number">${asNumber(count)}</div>
+                    <div class="behavior-summary-label">ครั้ง</div>
+                  </div>
+                  <div class="behavior-summary-stat">
+                    <div class="behavior-summary-number">${percent}</div>
+                    <div class="behavior-summary-label">%</div>
+                  </div>
+                </div>
+              </article>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function actionOverviewRecords() {
+      const source = state.data.actionRecords?.length ? state.data.actionRecords : state.data.recentRecords.length ? state.data.recentRecords : combinedStudentRecords();
+      const query = state.query.trim().toLowerCase();
+      return source
+        .filter(student => state.room === "ALL" || student.room === state.room)
+        .filter(student => String(student.actionType || "").trim())
+        .filter(student => {
+          if (!query) return true;
+          return [student.fullName, student.room, student.number, student.studentId, student.behaviorType, student.actionType]
+            .join(" ")
+            .toLowerCase()
+            .includes(query);
+        })
+        .sort((a, b) => String(b.date || b.time).localeCompare(String(a.date || a.time)))
+        .slice(0, 30);
+    }
+
+    function actionRecordCard(student) {
+      const primaryAction = String(student.actionType || "").split(",")[0].trim() || "ตักเตือน";
+      return `
+        <a class="student-card stack-card" style="${actionToneStyle(primaryAction)}" href="${escapeHtml(studentHistoryHref(student))}" aria-label="ดูประวัติ ${escapeHtml(student.fullName)}">
+          <div class="student-main">
+            <div class="student-name">${escapeHtml(student.fullName)}</div>
+            <div class="student-meta">
+              <span class="tag tone-pill" style="${roomToneStyle(student.room)}">${escapeHtml(student.room)}</span>
+              <span class="tag">เลขที่ ${escapeHtml(student.number)}</span>
+              <span class="tag">${escapeHtml(student.studentId)}</span>
+              ${student.date ? `<span class="tag">${escapeHtml(student.date)}</span>` : ""}
+              ${student.time ? `<span class="tag">${escapeHtml(student.time)}</span>` : ""}
+              <span class="tag behavior">${escapeHtml(student.behaviorType)}</span>
+              <span class="tag behavior">${escapeHtml(student.actionType)}</span>
+            </div>
+          </div>
+        </a>
+      `;
+    }
+
     function studentCard(student, options = {}) {
       return `
         <a class="student-card stack-card" style="${behaviorToneStyle(student.behaviorType)}" href="${escapeHtml(studentHistoryHref(student))}" aria-label="ดูประวัติ ${escapeHtml(student.fullName)}">
@@ -5246,6 +5458,7 @@
               ${options.showDate && student.date ? `<span class="tag">${escapeHtml(student.date)}</span>` : ""}
               ${student.time ? `<span class="tag">${escapeHtml(student.time)}</span>` : ""}
               <span class="tag behavior">${escapeHtml(student.behaviorType)}</span>
+              ${student.actionType ? `<span class="tag behavior">${escapeHtml(student.actionType)}</span>` : ""}
             </div>
           </div>
           ${options.hideCount ? "" : `<div class="count-badge">${student.count}${options.countLabel ? `<span class="count-label">${escapeHtml(options.countLabel)}</span>` : ""}</div>`}
@@ -5729,9 +5942,11 @@
 
     document.addEventListener("click", event => {
       const tab = event.target.closest("[data-page]");
+      const overviewTab = event.target.closest("[data-overview-tab]");
       const room = event.target.closest("[data-room]");
       const behavior = event.target.closest("[data-behavior]");
       const detail = event.target.closest("[data-behavior-detail]");
+      const actionDetail = event.target.closest("[data-action-detail]");
       if (!event.target.closest(".sort-control")) {
         $("sortMenu").classList.add("hidden");
         $("sortButton").setAttribute("aria-expanded", "false");
@@ -5739,6 +5954,15 @@
       if (!event.target.closest(".date-control")) closeDateMenus();
       if (detail) {
         openBehaviorDetails(detail.dataset.behaviorDetail);
+        return;
+      }
+      if (actionDetail) {
+        openActionDetails(actionDetail.dataset.actionDetail);
+        return;
+      }
+      if (overviewTab) {
+        state.overviewTab = overviewTab.dataset.overviewTab;
+        renderMainPanel();
         return;
       }
       if (tab) {
