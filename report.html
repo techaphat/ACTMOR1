@@ -1785,7 +1785,7 @@
       const sheets = document.getElementById("printSheets");
       if (!sheets || !sheets.children.length) return;
 
-      if (!window.html2pdf) {
+      if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) {
         alert("ยังโหลดเครื่องมือดาวน์โหลด PDF ไม่สำเร็จ กรุณาต่ออินเทอร์เน็ตแล้วลองใหม่อีกครั้ง");
         return;
       }
@@ -1794,60 +1794,75 @@
       button.disabled = true;
       button.textContent = "กำลังทำไฟล์ PDF...";
 
-      const clone = sheets.cloneNode(true);
-      clone.id = "pdfExportSheets";
-      clone.style.cssText = [
-        "display:block",
+      // html2pdf/html2canvas มักจับภาพว่างเมื่อ element ถูกวางนอกจอหรืออยู่ใน modal ที่มี transform/zoom
+      // จึงสร้างพื้นที่ export ใหม่ให้มองเห็นจริงที่มุมซ้ายบนชั่วคราว แล้วจับทีละหน้าเป็นภาพใส่ jsPDF
+      const exportRoot = document.createElement("div");
+      exportRoot.id = "pdfExportRoot";
+      exportRoot.style.cssText = [
         "position:fixed",
-        "left:-10000px",
+        "left:0",
         "top:0",
         "width:210mm",
-        "background:#fff",
-        "z-index:-1",
-        "overflow:visible"
+        "min-height:297mm",
+        "background:#ffffff",
+        "z-index:2147483647",
+        "opacity:1",
+        "pointer-events:none",
+        "overflow:visible",
+        "transform:none",
+        "zoom:1"
       ].join(";");
 
+      const clone = sheets.cloneNode(true);
+      clone.style.cssText = "display:block;width:210mm;background:#fff;overflow:visible;transform:none;zoom:1;";
+
       const cloneSheets = Array.from(clone.querySelectorAll(".print-sheet"));
-      cloneSheets.forEach((sheet, index) => {
+      cloneSheets.forEach((sheet) => {
         sheet.style.cssText += [
           "display:block",
           "width:210mm",
           "height:297mm",
           "margin:0",
+          "padding:16mm 18mm 12mm",
           "box-shadow:none",
-          "zoom:1",
+          "background:#ffffff",
+          "color:#000000",
+          "overflow:hidden",
           "transform:none",
-          "break-after:page",
-          "page-break-after:always"
+          "zoom:1"
         ].join(";");
-        if (index === cloneSheets.length - 1) {
-          sheet.style.breakAfter = "auto";
-          sheet.style.pageBreakAfter = "auto";
-        }
       });
 
-      document.body.appendChild(clone);
+      exportRoot.appendChild(clone);
+      document.body.appendChild(exportRoot);
 
       try {
         if (document.fonts?.ready) await document.fonts.ready;
-        await window.html2pdf()
-          .set({
-            margin: 0,
-            filename: pdfFileName(),
-            image: { type: "jpeg", quality: .98 },
-            html2canvas: {
-              scale: Math.min(2, window.devicePixelRatio || 2),
-              useCORS: true,
-              allowTaint: false,
-              backgroundColor: "#ffffff",
-              scrollX: 0,
-              scrollY: 0
-            },
-            jsPDF: { unit: "mm", format: "a4", orientation: "portrait", compress: true },
-            pagebreak: { mode: ["css", "legacy"], after: ".print-sheet" }
-          })
-          .from(clone)
-          .save();
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+        const pages = Array.from(exportRoot.querySelectorAll(".print-sheet"));
+
+        for (let i = 0; i < pages.length; i++) {
+          const page = pages[i];
+          const canvas = await window.html2canvas(page, {
+            scale: Math.min(2, window.devicePixelRatio || 2),
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: "#ffffff",
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: page.scrollWidth,
+            windowHeight: page.scrollHeight
+          });
+
+          const imgData = canvas.toDataURL("image/jpeg", 0.98);
+          if (i > 0) pdf.addPage("a4", "portrait");
+          pdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
+        }
+
+        pdf.save(pdfFileName());
         playTapTone("success");
         vibrateFor("success");
       } catch (error) {
@@ -1855,7 +1870,7 @@
         vibrateFor("error");
         alert("ดาวน์โหลด PDF ไม่สำเร็จ: " + (error.message || String(error)));
       } finally {
-        clone.remove();
+        exportRoot.remove();
         button.disabled = false;
         button.textContent = originalText;
       }
