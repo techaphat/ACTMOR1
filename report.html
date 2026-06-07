@@ -1999,6 +1999,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzcGLXGlsvtjfNXn-qw9R-LJSEVHXjm7dLIoUG5yY_7CA4QvO0BhGNvY7uF_ruOi55Qxw/exec";
+    const DASHBOARD_GAS_URL = "https://script.google.com/macros/s/AKfycbxxQP4dIOmcgpVVaEa1CwAeXb5YxGYAq9iuH3hYTEbuTP-EgPOuqzToJbEEbqNXiNc-MA/exec";
     const periodButtons = document.querySelectorAll(".period button[data-period]");
     const modeButtons = document.querySelectorAll(".tab");
     const studentFinder = document.getElementById("studentFinder");
@@ -2390,7 +2391,7 @@
       }[char]));
     }
 
-    function jsonp(action, params = {}) {
+    function jsonpFrom(url, action, params = {}) {
       return new Promise((resolve, reject) => {
         const cb = "m1_report_cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
         const script = document.createElement("script");
@@ -2415,9 +2416,13 @@
           cleanup();
           reject(new Error("เชื่อมต่อ Apps Script ไม่สำเร็จ"));
         };
-        script.src = GAS_URL + "?" + qs.toString();
+        script.src = url + "?" + qs.toString();
         document.body.appendChild(script);
       });
+    }
+
+    function jsonp(action, params = {}) {
+      return jsonpFrom(GAS_URL, action, params);
     }
 
     function localIsoDate(date = new Date()) {
@@ -3137,6 +3142,161 @@
       return found === undefined ? "" : found;
     }
 
+    function collectRecordsFromPayload(payload, seen = new Set()) {
+      if (Array.isArray(payload)) {
+        return payload.flatMap((item) => collectRecordsFromPayload(item, seen));
+      }
+      if (!payload || typeof payload !== "object") return [];
+      const keys = [
+        "records", "items", "logs", "data", "rows", "latest", "latestLogs",
+        "recentRecords", "actionRecords", "behaviorRecords", "studentRecords", "payloads"
+      ];
+      const records = [];
+      keys.forEach((key) => {
+        const value = payload[key];
+        if (Array.isArray(value)) {
+          value.forEach((item) => {
+            if (!item || typeof item !== "object") return;
+            const recordKey = [
+              item.rowNumber, item.timestamp, item.createdAt, item.date,
+              item.studentId, item.fullName, item.behaviorType,
+              item["เลขประจำตัว"], item["ชื่อ - สกุล"], item["ประเภทพฤติกรรม"]
+            ].join("|");
+            if (seen.has(recordKey)) return;
+            seen.add(recordKey);
+            records.push(item);
+          });
+        } else if (value && typeof value === "object") {
+          records.push(...collectRecordsFromPayload(value, seen));
+        }
+      });
+      return records;
+    }
+
+    function currentAcademicYear() {
+      const now = new Date();
+      return now.getMonth() + 1 >= 5 ? now.getFullYear() : now.getFullYear() - 1;
+    }
+
+    function selectedDashboardMode() {
+      if (selectedPeriod === "วัน") return "daily";
+      if (selectedPeriod === "เดือน") return "monthly";
+      return "academic";
+    }
+
+    function dashboardPeriodParams() {
+      const params = {
+        mode: selectedDashboardMode(),
+        academicYear: currentAcademicYear()
+      };
+      if (selectedPeriod === "วัน") {
+        params.date = selectedDateFrom || localIsoDate();
+      } else if (selectedPeriod === "เดือน") {
+        params.month = selectedMonth || localMonth();
+      }
+      return params;
+    }
+
+    function normalizeDashboardRecord(record = {}) {
+      const fullName = firstFilled(
+        record.fullName,
+        record.studentName,
+        record.name,
+        record.fullname,
+        record["ชื่อ - สกุล"],
+        record["ชื่อสกุล"],
+        record["ชื่อ"]
+      );
+      const studentId = firstFilled(
+        record.studentId,
+        record.studentID,
+        record.id,
+        record.code,
+        record["เลขประจำตัว"],
+        record["รหัสนักเรียน"]
+      );
+      const room = firstFilled(
+        record.room,
+        record.classRoom,
+        record.class,
+        record.levelRoom,
+        record["ห้อง"],
+        record["ชั้น"]
+      );
+      const behaviorType = firstFilled(
+        record.behaviorType,
+        record.type,
+        record.category,
+        record.behavior,
+        record["ประเภทพฤติกรรม"],
+        record["พฤติกรรม"]
+      );
+      const actionType = getActionText(record);
+      const note = firstFilled(
+        record.note,
+        record.remark,
+        record.description,
+        record.detail,
+        record.details,
+        record["หมายเหตุ"],
+        record["รายละเอียด"]
+      );
+      return {
+        ...record,
+        fullName,
+        studentId,
+        room,
+        number: studentNumberFrom(record),
+        behaviorType: behaviorType || "ไม่ระบุ",
+        actionType,
+        note,
+        date: getRecordDate(record),
+        timestamp: firstFilled(record.timestamp, record.createdAt, record.recordedAt, record.date, record["วันที่"])
+      };
+    }
+
+    function recordMatchesTarget(record, roomRaw, nameRaw) {
+      if (selectedMode === "room") {
+        return !roomRaw || normalizeRoomValue(record.room) === normalizeRoomValue(roomRaw);
+      }
+      if (!selectedStudent) return true;
+      const sameId = selectedStudent.studentId && record.studentId && String(selectedStudent.studentId) === String(record.studentId);
+      const sameName = selectedStudent.fullName && record.fullName && String(selectedStudent.fullName) === String(record.fullName);
+      const sameRoom = !record.room || !selectedStudent.room || normalizeRoomValue(record.room) === normalizeRoomValue(selectedStudent.room);
+      const typedName = nameRaw && record.fullName && String(record.fullName).includes(nameRaw);
+      return Boolean(sameId || (sameName && sameRoom) || typedName);
+    }
+
+    async function loadDashboardReportFallback(roomRaw, nameRaw, behaviorTypes) {
+      const dashboardParams = {
+        ...dashboardPeriodParams(),
+        room: selectedMode === "room" ? (roomRaw || "ALL") : "ALL"
+      };
+      const payloads = [];
+
+      try {
+        payloads.push(await jsonpFrom(DASHBOARD_GAS_URL, "getDashboard", dashboardParams));
+      } catch (error) {
+        console.warn("dashboard report fallback getDashboard failed", error);
+      }
+
+      try {
+        payloads.push(await jsonpFrom(DASHBOARD_GAS_URL, "getLatestLogs", {limit: 1000}));
+      } catch (error) {
+        console.warn("dashboard report fallback getLatestLogs failed", error);
+      }
+
+      const records = collectRecordsFromPayload(payloads)
+        .map(normalizeDashboardRecord)
+        .filter((record) => recordMatchesTarget(record, roomRaw, nameRaw))
+        .filter((record) => {
+          if (!behaviorTypes.length) return true;
+          return behaviorTypes.includes(record.behaviorType);
+        });
+
+      return mergeReports([{success: true, records}], behaviorTypes);
+    }
+
     function studentNumberFrom(value = {}) {
       return firstFilled(
         value.number,
@@ -3607,6 +3767,13 @@
           const fallback = mergeReports(fallbackReports, behaviorTypes);
           fallback.records = (fallback.records || []).filter((record) => normalizeRoomValue(record.room) === normalizeRoomValue(roomRaw));
           report = mergeReports([{...fallback, records: fallback.records}], behaviorTypes);
+        }
+
+        if ((!report.records || report.records.length === 0) && (roomRaw || selectedStudent)) {
+          const dashboardFallback = await loadDashboardReportFallback(roomRaw, nameRaw, behaviorTypes);
+          if (dashboardFallback.records && dashboardFallback.records.length) {
+            report = dashboardFallback;
+          }
         }
       } catch (error) {
         playTapTone("error");
