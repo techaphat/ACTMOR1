@@ -266,7 +266,7 @@
 
 const STUDENT_BOY_IMG='student-boy.webp';
 const STUDENT_GIRL_IMG='student-girl.webp';
-const GAS_URL='https://script.google.com/macros/s/AKfycbxxQP4dIOmcgpVVaEa1CwAeXb5YxGYAq9iuH3hYTEbuTP-EgPOuqzToJbEEbqNXiNc-MA/exec';
+const GAS_URL='https://script.google.com/macros/s/AKfycbxsH8KDL5e2USLz8O_B9oeX4BogvkI12hceoDB0Njwu8eudMl4-43G4ZkMm7AjElq-BLw/exec';
 let currentStudent=null, selectedBehaviors=[], selectedActions=[], typingTimer=null, groupTypingTimer=null, lastSuggestions=[], lastGroupSuggestions=[], groupStudents=[], selectedGroupBehaviors=[], selectedGroupActions=[], currentHistory=[], isSaving=false, latestSearchQ='', latestGroupSearchQ='', latestHistoryStudentId='';
 const WARNING_ACTION='ตักเตือน';
 const GOVERNANCE_ACTIONS=['ปกครอง1','ปกครอง2','ปกครอง3'];
@@ -412,6 +412,10 @@ async function submitBehavior(){
         fullName:currentStudent.fullName,
         behaviorType,
         actionType:selectedActions.join(', '),
+        action:selectedActions.join(', '),
+        behaviorAction:selectedActions.join(', '),
+        status:selectedActions.join(', '),
+        'การดำเนินการ':selectedActions.join(', '),
         note
       };
       const res=await jsonp('saveBehavior',data);
@@ -475,6 +479,10 @@ async function submitGroupBehavior(){
           fullName:student.fullName,
           behaviorType,
           actionType:selectedGroupActions.join(', '),
+          action:selectedGroupActions.join(', '),
+          behaviorAction:selectedGroupActions.join(', '),
+          status:selectedGroupActions.join(', '),
+          'การดำเนินการ':selectedGroupActions.join(', '),
           note
         };
         const res=await jsonp('saveBehavior',data);
