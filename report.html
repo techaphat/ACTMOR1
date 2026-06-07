@@ -811,6 +811,135 @@
       transform: translateY(-1px);
     }
 
+    .display-panel {
+      width: min(520px, 100%);
+      padding: 18px;
+      gap: 14px;
+      border-radius: 32px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.96), rgba(247,251,255,.92)),
+        rgba(255,255,255,.94);
+    }
+
+    .display-panel .modal-head {
+      padding: 2px 2px 0;
+    }
+
+    .display-panel .modal-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .display-panel .modal-close {
+      width: 44px;
+      height: 44px;
+      background: #eaf4ff;
+      color: #5e6b7d;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .display-panel .selection-hint {
+      justify-self: start;
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: rgba(230,240,252,.78);
+      color: #526174;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .display-grid {
+      gap: 9px;
+      max-height: min(560px, 60vh);
+      padding: 2px 2px 4px;
+    }
+
+    .display-option {
+      --display-accent: #2568c9;
+      position: relative;
+      min-height: 68px;
+      grid-template-columns: 36px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      border-radius: 20px;
+      border: 1px solid rgba(122,145,178,.16);
+      background: rgba(255,255,255,.82);
+      color: #25364a;
+      padding: 10px 12px;
+      text-align: left;
+      box-shadow: 0 10px 22px rgba(31,45,70,.06), inset 0 1px 0 rgba(255,255,255,.92);
+    }
+
+    .display-option:nth-child(n) {
+      --pill-bg: rgba(255,255,255,.92);
+      --pill-border: rgba(122,145,178,.16);
+      --pill-ink: #25364a;
+    }
+
+    .display-option .emoji {
+      width: 36px;
+      height: 36px;
+      border: 0;
+      color: var(--display-accent);
+      background: rgba(231,242,255,.92);
+      font-size: 15px;
+      font-weight: 800;
+      box-shadow: inset 0 0 0 1px rgba(37,104,201,.13);
+    }
+
+    .display-option > span:not(.emoji) {
+      display: block;
+      min-width: 0;
+      color: #223049;
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.18;
+      overflow-wrap: anywhere;
+    }
+
+    .display-option small {
+      display: block;
+      grid-column: 2;
+      margin-top: -5px;
+      color: #788395;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .display-option[aria-pressed="true"],
+    .display-option.active {
+      border-color: rgba(37,104,201,.42);
+      background: linear-gradient(180deg, rgba(232,242,255,.98), rgba(246,251,255,.94));
+      color: #1f65c7;
+      box-shadow: 0 14px 26px rgba(37,104,201,.13), inset 0 1px 0 rgba(255,255,255,.95);
+    }
+
+    .display-option[aria-pressed="true"]::after,
+    .display-option.active::after {
+      content: "ซ่อน";
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      border-radius: 999px;
+      padding: 3px 7px;
+      background: #1f65c7;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .display-option[aria-pressed="true"] .emoji,
+    .display-option.active .emoji {
+      color: #fff;
+      background: #1f65c7;
+      box-shadow: 0 8px 16px rgba(37,104,201,.22);
+    }
+
     .modal-actions {
       display: flex;
       gap: 10px;
@@ -1213,6 +1342,17 @@
 
       .behavior-grid {
         grid-template-columns: 1fr;
+      }
+
+      .display-panel {
+        max-height: min(820px, 90vh);
+        padding: 16px;
+        border-radius: 28px;
+      }
+
+      .display-grid {
+        grid-template-columns: 1fr;
+        max-height: min(560px, 58vh);
       }
 
       .bottom-nav {
@@ -1645,13 +1785,13 @@
   </div>
 
   <div class="modal-backdrop" id="displayModal" aria-hidden="true">
-    <section class="room-modal" role="dialog" aria-modal="true" aria-labelledby="displayModalTitle">
+    <section class="room-modal display-panel" role="dialog" aria-modal="true" aria-labelledby="displayModalTitle">
       <div class="modal-head">
         <div class="modal-title" id="displayModalTitle">การแสดงข้อมูล</div>
         <button class="modal-close" type="button" id="closeDisplayModal" aria-label="ปิด">×</button>
       </div>
       <div class="selection-hint">เลือกเพื่อไม่แสดงข้อมูล</div>
-      <div class="behavior-grid" id="displayChoices">
+      <div class="behavior-grid display-grid" id="displayChoices">
         <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="fullName"><span class="emoji">ก</span><span>ชื่อ - สกุล</span><small>ชื่อผู้เรียนในเอกสาร</small></button>
         <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="room"><span class="emoji">ห</span><span>ห้อง</span><small>ห้องเรียนในช่องข้อมูล</small></button>
         <button class="behavior-option display-option" type="button" aria-pressed="false" data-hide="studentNo"><span class="emoji">#</span><span>เลขที่</span><small>เลขที่นักเรียน</small></button>
