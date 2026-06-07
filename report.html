@@ -2559,22 +2559,8 @@
     }
 
     function buildReportPeriodParams() {
-      if (selectedPeriod === "วัน") {
-        const from = selectedDateFrom || localIsoDate();
-        const to = selectedDateTo || from;
-        return {
-          period: "day",
-          dateFrom: from <= to ? from : to,
-          dateTo: from <= to ? to : from
-        };
-      }
-      if (selectedPeriod === "เดือน") {
-        return {
-          period: "month",
-          month: selectedMonth || localMonth()
-        };
-      }
-      // ปีการศึกษา = ตั้งแต่วันแรกของระบบถึงปัจจุบัน
+      // ดึงข้อมูลจากหลังบ้านแบบกว้างที่สุดก่อน แล้วค่อยกรองช่วงเวลาในหน้าเว็บ
+      // เพื่อให้รายห้อง/รายบุคคลใช้ตรรกะเดียวกัน และไม่พังจาก period คนละชื่อใน Apps Script
       return {
         period: "all"
       };
@@ -2596,6 +2582,10 @@
         map[name].push(record);
         return map;
       }, {});
+    }
+
+    function normalizeRoomValue(value) {
+      return String(value || "").trim().replace(/\s+/g, "");
     }
 
     function firstFilled(...values) {
@@ -2825,16 +2815,18 @@
       const records = report.records || [];
       const byBehavior = groupBy(records, "behaviorType");
       const behaviorNames = Object.keys(byBehavior).sort((a, b) => a.localeCompare(b, "th"));
-      const studentHeaders = [
-        "<th>ลำดับที่</th>",
-        !isHidden("fullName") ? "<th>ชื่อ - สกุล</th>" : "",
-        !isHidden("studentId") ? "<th>เลขประจำตัว</th>" : "",
-        !isHidden("studentNo") ? "<th>เลขที่</th>" : ""
-      ].join("");
-      const columnCount = 1
-        + (isHidden("fullName") ? 0 : 1)
-        + (isHidden("studentId") ? 0 : 1)
-        + (isHidden("studentNo") ? 0 : 1);
+      const showOrder = !isHidden("sectionCount");
+      const showName = !isHidden("fullName");
+      const showId = !isHidden("studentId");
+      const showNo = !isHidden("studentNo");
+      const studentHeadersRaw = [
+        showOrder ? "<th>ลำดับที่</th>" : "",
+        showName ? "<th>ชื่อ - สกุล</th>" : "",
+        showId ? "<th>เลขประจำตัว</th>" : "",
+        showNo ? "<th>เลขที่</th>" : ""
+      ].filter(Boolean);
+      const studentHeaders = studentHeadersRaw.join("") || "<th>รายการ</th>";
+      const columnCount = Math.max(studentHeadersRaw.length, 1);
 
       if (!behaviorNames.length) {
         return [`
@@ -2853,11 +2845,11 @@
         const behaviorRecords = byBehavior[behaviorName] || [];
         const studentMap = {};
         behaviorRecords.forEach((record) => {
-          const key = record.studentId || `${record.fullName || ""}|${record.room || ""}`;
+          const key = record.studentId || `${record.fullName || record.studentName || ""}|${record.room || ""}`;
           if (!studentMap[key]) {
             studentMap[key] = {
               studentId: record.studentId || "",
-              fullName: record.fullName || "",
+              fullName: record.fullName || record.studentName || "",
               number: getStudentNumber(record),
               logs: []
             };
@@ -2880,14 +2872,14 @@
           const logs = student.logs
             .slice()
             .sort((a, b) => String(a.timestamp || a.date).localeCompare(String(b.timestamp || b.date)));
-          tableRows.push(`
-            <tr>
-              <td>${studentIndex + 1}</td>
-              ${!isHidden("fullName") ? `<td>${escapeHtml(student.fullName || "")}</td>` : ""}
-              ${!isHidden("studentId") ? `<td>${escapeHtml(student.studentId || "")}</td>` : ""}
-              ${!isHidden("studentNo") ? `<td class="center">${escapeHtml(student.number || "")}</td>` : ""}
-            </tr>
-          `);
+          const studentCells = [
+            showOrder ? `<td>${studentIndex + 1}</td>` : "",
+            showName ? `<td>${escapeHtml(student.fullName || "")}</td>` : "",
+            showId ? `<td>${escapeHtml(student.studentId || "")}</td>` : "",
+            showNo ? `<td class="center">${escapeHtml(student.number || "")}</td>` : ""
+          ].filter(Boolean).join("") || `<td></td>`;
+          tableRows.push(`<tr>${studentCells}</tr>`);
+
           logs.forEach((record, index) => {
             const actionText = getActionText(record);
             const details = [
@@ -2897,12 +2889,21 @@
               !isHidden("behaviorNote") && record.note ? escapeHtml(record.note) : ""
             ].filter(Boolean).join(" - ");
             if (!details) return;
-            tableRows.push(`
-              <tr>
-                <td></td>
-                <td colspan="${Math.max(columnCount - 1, 1)}">${details}</td>
-              </tr>
-            `);
+
+            if (showOrder && columnCount > 1) {
+              tableRows.push(`
+                <tr>
+                  <td></td>
+                  <td colspan="${columnCount - 1}">${details}</td>
+                </tr>
+              `);
+            } else {
+              tableRows.push(`
+                <tr>
+                  <td colspan="${columnCount}">${details}</td>
+                </tr>
+              `);
+            }
           });
         });
 
@@ -3033,6 +3034,24 @@
           }));
         }
         report = mergeReports(reports, behaviorTypes);
+
+        // รายห้อง: ถ้าหลังบ้านกรองห้องแล้วไม่เจอ ให้ดึงกว้างทั้งระบบแล้วกรองห้องในหน้าเว็บอีกครั้ง
+        // ช่วยแก้กรณีชื่อห้อง/ช่วงเวลา/ข้อมูลเก่า-ใหม่ไม่ตรงกันระหว่าง Behavior กับ BehaviorLogs
+        if (selectedMode === "room" && (!report.records || report.records.length === 0) && roomRaw) {
+          const fallbackReports = [];
+          for (const behaviorType of targets) {
+            fallbackReports.push(await jsonp("getReportData", {
+              reportMode: "room",
+              room: "",
+              studentNo: "",
+              behaviorType,
+              period: "all"
+            }));
+          }
+          const fallback = mergeReports(fallbackReports, behaviorTypes);
+          fallback.records = (fallback.records || []).filter((record) => normalizeRoomValue(record.room) === normalizeRoomValue(roomRaw));
+          report = mergeReports([{...fallback, records: fallback.records}], behaviorTypes);
+        }
       } catch (error) {
         playTapTone("error");
         vibrateFor("error");
