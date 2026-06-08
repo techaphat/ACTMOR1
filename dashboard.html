@@ -4710,7 +4710,7 @@
     }
 
     function dashboardPeriod() {
-      if (state.mode === "academic") return "year";
+      if (state.mode === "academic") return "academic";
       if (state.mode === "monthly") return "month";
       return "today";
     }
@@ -4987,7 +4987,9 @@
       const shouldUseDerived = data.summaryMissing || !hasSummaryCounts;
       const byType = shouldUseDerived ? derived.byType : sourceByType;
       const byAction = shouldUseDerived ? derived.byAction : normalizeActionSummary(data.byAction, data);
-      const byRoom = shouldUseDerived ? derived.byRoom : (data.byRoom || {});
+      const byRoom = shouldUseDerived || !Object.values(data.byRoom || {}).some(value => asNumber(value) > 0)
+        ? derived.byRoom
+        : (data.byRoom || {});
       const finalTopStudents = topStudents.length ? topStudents : derived.topStudents;
       const derivedSummary = shouldUseDerived;
       return {
@@ -5123,6 +5125,16 @@
         seen.add(key);
         return true;
       });
+    }
+
+    function roomSummaryFromPeriodRecords() {
+      const summary = {};
+      filterRecordsForDashboardPeriod(combinedStudentRecords(), state.data)
+        .forEach(record => {
+          const room = record.room || "ไม่ระบุห้อง";
+          summary[room] = (summary[room] || 0) + Math.max(1, asNumber(record.count));
+        });
+      return summary;
     }
 
     function studentKey(student, includeBehavior = true) {
@@ -5863,7 +5875,9 @@
     function renderRoomsPage() {
       if (state.room !== "ALL") return renderRoomBehaviorPage();
 
-      const entries = sortNamedEntries(ROOMS.filter(room => room !== "ALL").map(room => [room, asNumber((state.data.byRoom || {})[room])]));
+      const liveByRoom = roomSummaryFromPeriodRecords();
+      const sourceByRoom = Object.values(liveByRoom).some(Boolean) ? liveByRoom : (state.data.byRoom || {});
+      const entries = sortNamedEntries(ROOMS.filter(room => room !== "ALL").map(room => [room, asNumber(sourceByRoom[room])]));
       const max = Math.max(1, ...entries.map(([, count]) => asNumber(count)));
       if (!entries.length) return `<div class="empty">ยังไม่มีข้อมูลแยกตามห้อง</div>`;
       return `
@@ -5986,10 +6000,11 @@
       $("status").textContent = "";
       try {
         const requestMode = isUntimedPage() ? "academic" : state.mode;
-        const period = requestMode === "academic" ? "year" : requestMode === "monthly" ? "month" : "today";
+        const period = requestMode === "academic" ? "academic" : requestMode === "monthly" ? "month" : "today";
         const params = {
           action: "getDashboard",
           mode: requestMode,
+          period,
           room: state.room,
           academicYear: currentAcademicYear()
         };
@@ -6009,9 +6024,36 @@
           loadError: error.message || String(error)
         });
       }
+      await ensureAcademicRecordsForOverviewAndRooms();
       await ensureLatestRecordsForUntimedPages();
       document.body.classList.remove("is-loading");
       renderMainPanel();
+    }
+
+    async function ensureAcademicRecordsForOverviewAndRooms() {
+      if (state.mode !== "academic") return;
+      if (state.page !== "overview" && state.page !== "rooms") return;
+      const periodRecords = filterRecordsForDashboardPeriod(combinedStudentRecords(), state.data);
+      const hasRoomSummary = Object.values(state.data.byRoom || {}).some(value => asNumber(value) > 0);
+      const hasTypeSummary = Object.values(state.data.byType || {}).some(value => asNumber(value) > 0);
+      if (periodRecords.length >= 100 || (periodRecords.length && hasRoomSummary && hasTypeSummary)) return;
+      try {
+        const latest = await jsonp({action: "getLatestLogs", limit: 1000}, 12000);
+        const logs = collectStudentRecords(latest, ["logs", "recentRecords", "records", "items", "latest", "history"]);
+        if (latest && latest.success && logs.length) {
+          state.data = normalizeData({
+            ...state.data,
+            mode: "academic",
+            academicYear: currentAcademicYear(),
+            recentRecords: logs,
+            actionRecords: [
+              ...(state.data.actionRecords || []),
+              ...logs
+            ],
+            updatedAt: latest.updatedAt || state.data.updatedAt
+          });
+        }
+      } catch (error) {}
     }
 
     async function ensureLatestRecordsForUntimedPages() {
