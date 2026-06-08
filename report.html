@@ -1366,6 +1366,43 @@
       width: 82%;
     }
 
+    .doc-section.room-compact {
+      margin-bottom: 12px;
+    }
+
+    .room-compact .section-head {
+      margin-bottom: 4px;
+      padding-bottom: 3px;
+      border-bottom: 1px solid #555;
+      font-size: 8.75pt;
+    }
+
+    .doc-table.room-table.room-compact-table {
+      width: 92%;
+      margin-left: 8mm;
+      font-size: 7.05pt;
+    }
+
+    .doc-table.room-compact-table th {
+      padding: 2.5px 4px;
+    }
+
+    .doc-table.room-compact-table td {
+      padding: 2.5px 4px;
+      line-height: 1.22;
+    }
+
+    .room-log-lines {
+      font-size: 6.7pt;
+      line-height: 1.22;
+      color: #222;
+    }
+
+    .room-log-lines .muted {
+      color: #666;
+      font-weight: 500;
+    }
+
     .doc-table th {
       border-bottom: 1.5px solid #222;
       padding: 4px 6px;
@@ -3523,11 +3560,14 @@
       const showName = !isHidden("fullName");
       const showId = !isHidden("studentId");
       const showNo = !isHidden("studentNo");
+      const showDetails = !isHidden("recordDate") || !isHidden("behaviorAction") || !isHidden("behaviorNote");
       const studentHeadersRaw = [
         showOrder ? "<th>ลำดับที่</th>" : "",
         showName ? "<th>ชื่อ - สกุล</th>" : "",
         showId ? "<th>เลขประจำตัว</th>" : "",
-        showNo ? "<th>เลขที่</th>" : ""
+        showNo ? "<th>เลขที่</th>" : "",
+        showOrder ? "<th class=\"center\">ครั้ง</th>" : "",
+        showDetails ? "<th>รายการ</th>" : ""
       ].filter(Boolean);
       const studentHeaders = studentHeadersRaw.join("") || "<th>รายการ</th>";
       const columnCount = Math.max(studentHeadersRaw.length, 1);
@@ -3570,60 +3610,53 @@
             return noDiff || String(a.number || "").localeCompare(String(b.number || ""), "th", {numeric: true}) || String(a.fullName || "").localeCompare(String(b.fullName || ""), "th");
           });
         const totalText = `${students.length} คน ${behaviorRecords.length} ครั้ง`;
-        const tableRows = [];
-
-        students.forEach((student, studentIndex) => {
-          const logs = student.logs
+        const sortedStudents = students.map((student) => ({
+          ...student,
+          logs: student.logs
             .slice()
-            .sort((a, b) => String(a.timestamp || a.date).localeCompare(String(b.timestamp || b.date)));
+            .sort((a, b) => String(a.timestamp || a.date).localeCompare(String(b.timestamp || b.date)))
+        }));
+
+        chunkArray(sortedStudents, 18).forEach((chunk, pageIndex) => {
+          const tableRows = chunk.map((student, chunkStudentIndex) => {
+            const studentIndex = pageIndex * 18 + chunkStudentIndex;
+            const logs = student.logs || [];
           const studentCells = [
             showOrder ? `<td>${studentIndex + 1}</td>` : "",
             showName ? `<td>${escapeHtml(student.fullName || "")}</td>` : "",
             showId ? `<td>${escapeHtml(student.studentId || "")}</td>` : "",
-            showNo ? `<td class="center">${escapeHtml(student.number || "")}</td>` : ""
-          ].filter(Boolean).join("") || `<td></td>`;
-          tableRows.push(`<tr>${studentCells}</tr>`);
-
-          logs.forEach((record, index) => {
-            const actionText = getActionText(record);
-            const details = [
-              !isHidden("sectionCount") ? `<strong>ครั้งที่</strong> ${index + 1}` : "",
-              !isHidden("recordDate") ? escapeHtml(formatThaiDate(record.date)) : "",
-              !isHidden("behaviorAction") && actionText ? `<strong>การดำเนินการ</strong> ${escapeHtml(actionText)}` : "",
-              !isHidden("behaviorNote") && record.note ? escapeHtml(record.note) : ""
-            ].filter(Boolean).join(" - ");
-            if (!details) return;
-
-            if (showOrder && columnCount > 1) {
-              tableRows.push(`
-                <tr>
-                  <td></td>
-                  <td colspan="${columnCount - 1}">${details}</td>
-                </tr>
-              `);
-            } else {
-              tableRows.push(`
-                <tr>
-                  <td colspan="${columnCount}">${details}</td>
-                </tr>
-              `);
-            }
+            showNo ? `<td class="center">${escapeHtml(student.number || "")}</td>` : "",
+            showOrder ? `<td class="center">${logs.length}</td>` : "",
+            showDetails ? `<td>
+              <div class="room-log-lines">
+                ${logs.map((record, index) => {
+                  const actionText = getActionText(record);
+                  const details = [
+                    !isHidden("sectionCount") ? `<span class="muted">${index + 1}.</span>` : "",
+                    !isHidden("recordDate") ? escapeHtml(formatThaiDate(record.date)) : "",
+                    !isHidden("behaviorAction") && actionText ? escapeHtml(actionText) : "",
+                    !isHidden("behaviorNote") && record.note ? escapeHtml(record.note) : ""
+                  ].filter(Boolean).join(" - ");
+                  return details ? `<div>${details}</div>` : "";
+                }).join("") || "-"}
+              </div>
+            </td>` : ""
+          ].filter(Boolean).join("") || `<td>${escapeHtml(student.fullName || student.studentId || "")}</td>`;
+            return `<tr>${studentCells}</tr>`;
           });
-        });
-
-        chunkArray(tableRows, 24).forEach((chunk, pageIndex) => {
+          const unitWeight = chunk.reduce((sum, student) => sum + 1 + Math.min(4, (student.logs || []).length) * .42, 0);
           blocks.push({
-            units: 4 + chunk.length,
+            units: 3 + unitWeight,
             html: `
-              <section class="doc-section">
+              <section class="doc-section room-compact">
                 <div class="section-head">
                   <div><strong>ประเภทพฤติกรรม :</strong> ${escapeHtml(behaviorName)}${pageIndex ? " (ต่อ)" : ""}</div>
                   ${!isHidden("sectionCount") ? `<div><strong>จำนวน :</strong> ${escapeHtml(totalText)}</div>` : ""}
                 </div>
-                <table class="doc-table room-table">
+                <table class="doc-table room-table room-compact-table">
                   <thead><tr>${studentHeaders}</tr></thead>
                   <tbody>
-                    ${chunk.join("")}
+                    ${tableRows.join("")}
                   </tbody>
                 </table>
               </section>
@@ -3632,7 +3665,7 @@
         });
       });
 
-      return packBlocks(blocks, 25);
+      return packBlocks(blocks, 42);
     }
 
     function renderDocument(report, params) {
