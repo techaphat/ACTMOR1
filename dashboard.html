@@ -4544,6 +4544,7 @@
       "ม.1/B": ["#5f6875", "rgba(255, 255, 255, .92)", "rgba(190, 200, 212, .28)", "rgba(120, 135, 150, .10)"],
       "ALL": ["#b756d9", "rgba(247, 231, 255, .9)", "rgba(183, 86, 217, .24)", "rgba(183, 86, 217, .12)"]
     };
+    const BEHAVIOR_NAMES = ["สายเช้า", "เครื่องแต่งกาย", "สายเที่ยง", "สายพัก 10", "ขาดแถวเที่ยง", "คำพูด", "อื่น ๆ"];
     const BEHAVIOR_TONES = {
       "สายเช้า": ["#b78916", "rgba(255, 246, 204, .9)", "rgba(239, 196, 57, .28)", "rgba(239, 196, 57, .13)"],
       "สายเที่ยง": ["#2d79c7", "rgba(226, 241, 255, .9)", "rgba(78, 151, 225, .25)", "rgba(78, 151, 225, .12)"],
@@ -4814,6 +4815,7 @@
     function normalizeStudent(record, fallbackType = "") {
       const rawDate = record.date || record.recordDate || record.day || record.createdDate || record.recordedAt || "";
       const rawTime = record.time || record.recordedAt || record.createdAt || record["เวลา"] || record.date || "";
+      const isoDate = normalizeRecordIsoDate(record);
       return {
         fullName: record.fullName || record.name || record.studentName || record["ชื่อ"] || record["ชื่อ - สกุล"] || record["ชื่อ-สกุล"] || "ชื่อ - สกุล",
         room: record.room || record.classroom || record.class || record["ห้อง"] || record["ห้องเรียน"] || "ห้องเรียน",
@@ -4824,8 +4826,37 @@
         actionType: record.actionType || record.action || record.action_type || record["การดำเนินการ"] || "",
         time: rawTime ? formatRecordTime(rawTime) : "",
         date: rawDate ? formatRecordDate(rawDate) : "",
+        isoDate,
         sortAt: recordSortValue(record)
       };
+    }
+
+    function normalizeCalendarYear(yearValue) {
+      const year = Number(yearValue);
+      if (!Number.isFinite(year)) return "";
+      return String(year > 2400 ? year - 543 : year).padStart(4, "0");
+    }
+
+    function normalizeRecordIsoDate(record = {}) {
+      const raw = String(record.timestamp || record.recordedAt || record.createdAt || record.date || record.recordDate || record.day || record.createdDate || record["วันที่"] || "").trim();
+      if (!raw) return "";
+      if (/^\d{4}-\d{1,2}-\d{1,2}T/.test(raw)) {
+        const parsed = new Date(raw);
+        if (!Number.isNaN(parsed.getTime())) {
+          const parts = bangkokParts(parsed);
+          return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+        }
+      }
+      const iso = raw.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (iso) return `${normalizeCalendarYear(iso[1])}-${String(iso[2]).padStart(2, "0")}-${String(iso[3]).padStart(2, "0")}`;
+      const slash = raw.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+      if (slash) return `${normalizeCalendarYear(slash[3])}-${String(slash[2]).padStart(2, "0")}-${String(slash[1]).padStart(2, "0")}`;
+      const parsed = new Date(raw);
+      if (!Number.isNaN(parsed.getTime())) {
+        const parts = bangkokParts(parsed);
+        return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+      }
+      return "";
     }
 
     function formatRecordDate(value) {
@@ -4842,9 +4873,9 @@
         }
       }
       const iso = raw.match(/(\d{4})-(\d{2})-(\d{2})/);
-      if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+      if (iso) return `${iso[3]}/${iso[2]}/${normalizeCalendarYear(iso[1])}`;
       const slash = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-      if (slash) return `${slash[1].padStart(2, "0")}/${slash[2].padStart(2, "0")}/${slash[3]}`;
+      if (slash) return `${slash[1].padStart(2, "0")}/${slash[2].padStart(2, "0")}/${normalizeCalendarYear(slash[3])}`;
       return raw.length > 10 ? raw.slice(0, 10) : raw;
     }
 
@@ -4870,20 +4901,28 @@
       const timeText = String(record.time || record["เวลา"] || "").trim();
       const isoDate = dateText.match(/(\d{4})-(\d{2})-(\d{2})/);
       if (isoDate) {
-        const parsedDate = new Date(`${isoDate[1]}-${isoDate[2]}-${isoDate[3]}T${timeText || "00:00:00"}`);
+        const parsedDate = new Date(`${normalizeCalendarYear(isoDate[1])}-${isoDate[2]}-${isoDate[3]}T${timeText || "00:00:00"}`);
+        if (!Number.isNaN(parsedDate.getTime())) return parsedDate.getTime();
+      }
+      const slashDate = dateText.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+      if (slashDate) {
+        const parsedDate = new Date(`${normalizeCalendarYear(slashDate[3])}-${String(slashDate[2]).padStart(2, "0")}-${String(slashDate[1]).padStart(2, "0")}T${timeText || "00:00:00"}`);
         if (!Number.isNaN(parsedDate.getTime())) return parsedDate.getTime();
       }
       return 0;
     }
 
     function recordBangkokIsoDate(record = {}) {
+      if (record.isoDate) return record.isoDate;
+      const normalized = normalizeRecordIsoDate(record);
+      if (normalized) return normalized;
       if (asNumber(record.sortAt)) {
         const parts = bangkokParts(new Date(asNumber(record.sortAt)));
         return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
       }
       const slash = String(record.date || "").match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
       if (slash) {
-        return `${slash[3]}-${slash[2].padStart(2, "0")}-${slash[1].padStart(2, "0")}`;
+        return `${normalizeCalendarYear(slash[3])}-${slash[2].padStart(2, "0")}-${slash[1].padStart(2, "0")}`;
       }
       return "";
     }
@@ -4984,7 +5023,9 @@
       const derived = deriveDashboardSummary(periodRecords);
       const sourceByType = data.byType || {};
       const hasSummaryCounts = Object.values(sourceByType).some(value => asNumber(value) > 0);
-      const shouldUseDerived = data.summaryMissing || !hasSummaryCounts;
+      const hasDerivedCounts = Object.values(derived.byType || {}).some(value => asNumber(value) > 0);
+      const summaryLooksGrouped = Object.keys(sourceByType).some(name => !BEHAVIOR_NAMES.includes(normalizeBehaviorName(name)));
+      const shouldUseDerived = data.summaryMissing || !hasSummaryCounts || (hasDerivedCounts && summaryLooksGrouped);
       const byType = shouldUseDerived ? derived.byType : sourceByType;
       const byAction = shouldUseDerived ? derived.byAction : normalizeActionSummary(data.byAction, data);
       const byRoom = shouldUseDerived || !Object.values(data.byRoom || {}).some(value => asNumber(value) > 0)
@@ -5099,6 +5140,13 @@
       });
     }
 
+    function behaviorSummaryEntries(object = {}) {
+      const canonical = BEHAVIOR_NAMES.map(name => [name, asNumber((object || {})[name])]);
+      const extras = Object.entries(object || {})
+        .filter(([name, count]) => !BEHAVIOR_NAMES.includes(normalizeBehaviorName(name)) && asNumber(count) > 0);
+      return sortNamedEntries([...canonical, ...extras]);
+    }
+
     function normalizeBehaviorName(value) {
       return String(value || "").replace(/\s+/g, " ").trim();
     }
@@ -5135,6 +5183,14 @@
           summary[room] = (summary[room] || 0) + Math.max(1, asNumber(record.count));
         });
       return summary;
+    }
+
+    function behaviorSummaryFromRecords(records = []) {
+      return records.reduce((summary, record) => {
+        const behavior = normalizeBehaviorName(record.behaviorType) || "อื่น ๆ";
+        summary[behavior] = (summary[behavior] || 0) + Math.max(1, asNumber(record.count));
+        return summary;
+      }, {});
     }
 
     function studentKey(student, includeBehavior = true) {
@@ -5287,7 +5343,7 @@
       const countedTimes = records.reduce((sum, student) => sum + Math.max(1, asNumber(student.count)), 0);
       return {
         people,
-        times: behavior === "ALL" ? Math.max(asNumber(state.data.total), countedTimes) : Math.max(asNumber(totalTimes), countedTimes)
+        times: countedTimes || asNumber(totalTimes)
       };
     }
 
@@ -5563,8 +5619,7 @@
     }
 
     function renderBars(title, object) {
-      const behaviorNames = Object.keys(BEHAVIOR_TONES);
-      const entries = sortNamedEntries(behaviorNames.map(name => [name, asNumber((object || {})[name])]));
+      const entries = behaviorSummaryEntries(object);
       const total = Math.max(1, entries.reduce((sum, [, count]) => sum + asNumber(count), 0));
       const maxCount = Math.max(1, ...entries.map(([, count]) => asNumber(count)));
       const shareLabel = state.mode === "academic" ? "จากทั้งหมดในปีการศึกษา" : state.mode === "monthly" ? "จากทั้งหมดในเดือนนี้" : "จากทั้งหมดวันนี้";
@@ -5902,9 +5957,8 @@
     }
 
     function renderRoomBehaviorPage() {
-      const entries = sortNamedEntries(Object.entries(state.data.byType || {})
-        .filter(([, count]) => asNumber(count) > 0));
       const students = roomBehaviorStudents();
+      const entries = behaviorSummaryEntries(behaviorSummaryFromRecords(roomSourceRecords()));
       const activeLabel = state.behavior === "ALL" ? "ทุกพฤติกรรม" : state.behavior;
       const allStats = behaviorStats("ALL", state.data.total);
       return `
