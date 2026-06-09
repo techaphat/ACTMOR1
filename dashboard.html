@@ -5025,7 +5025,7 @@
       const hasSummaryCounts = Object.values(sourceByType).some(value => asNumber(value) > 0);
       const hasDerivedCounts = Object.values(derived.byType || {}).some(value => asNumber(value) > 0);
       const summaryLooksGrouped = Object.keys(sourceByType).some(name => !BEHAVIOR_NAMES.includes(normalizeBehaviorName(name)));
-      const shouldUseDerived = data.summaryMissing || !hasSummaryCounts || (hasDerivedCounts && summaryLooksGrouped);
+      const shouldUseDerived = data.forceDerivedSummary || data.summaryMissing || !hasSummaryCounts || (hasDerivedCounts && summaryLooksGrouped);
       const byType = shouldUseDerived ? derived.byType : sourceByType;
       const byAction = shouldUseDerived ? derived.byAction : normalizeActionSummary(data.byAction, data);
       const byRoom = shouldUseDerived || !Object.values(data.byRoom || {}).some(value => asNumber(value) > 0)
@@ -6079,9 +6079,41 @@
         });
       }
       await ensureAcademicRecordsForOverviewAndRooms();
+      await ensureCompletePeriodRecordsForOverviewAndRooms();
       await ensureLatestRecordsForUntimedPages();
       document.body.classList.remove("is-loading");
       renderMainPanel();
+    }
+
+    function summaryTotal(data = state.data) {
+      const byTypeTotal = Object.values(data.byType || {}).reduce((sum, value) => sum + asNumber(value), 0);
+      return asNumber(data.total || byTypeTotal);
+    }
+
+    async function ensureCompletePeriodRecordsForOverviewAndRooms() {
+      if (state.mode !== "monthly" && state.mode !== "daily") return;
+      if (state.page !== "overview" && state.page !== "rooms") return;
+      const existingPeriodRecords = filterRecordsForDashboardPeriod(combinedStudentRecords(), state.data);
+      const currentTotal = summaryTotal();
+      try {
+        const latest = await jsonp({action: "getLatestLogs", limit: 2000}, 12000);
+        const logs = collectStudentRecords(latest, ["logs", "recentRecords", "records", "items", "latest", "history"]);
+        if (!latest || !latest.success || !logs.length) return;
+        const periodLogs = filterRecordsForDashboardPeriod(logs.map(item => normalizeStudent(item)), state.data);
+        const derived = deriveDashboardSummary(periodLogs);
+        const hasMorePeriodRecords = derived.total > currentTotal || periodLogs.length > existingPeriodRecords.length;
+        if (!periodLogs.length || !hasMorePeriodRecords) return;
+        state.data = normalizeData({
+          ...state.data,
+          forceDerivedSummary: true,
+          recentRecords: logs,
+          actionRecords: [
+            ...(state.data.actionRecords || []),
+            ...logs
+          ],
+          updatedAt: latest.updatedAt || state.data.updatedAt
+        });
+      } catch (error) {}
     }
 
     async function ensureAcademicRecordsForOverviewAndRooms() {
