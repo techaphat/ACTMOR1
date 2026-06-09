@@ -1912,6 +1912,7 @@
         <button class="behavior-option" type="button" aria-pressed="false" data-behavior="สายพัก 10"><span class="emoji">🏃</span><span>สายพัก 10</span><small>กลับจากพักช้า</small></button>
         <button class="behavior-option" type="button" aria-pressed="false" data-behavior="ขาดแถวเที่ยง"><span class="emoji">🚫</span><span>ขาดแถวเที่ยง</span><small>ไม่มาเข้าแถว</small></button>
         <button class="behavior-option" type="button" aria-pressed="false" data-behavior="เครื่องแต่งกาย"><span class="emoji">👕</span><span>เครื่องแต่งกาย</span><small>ตรวจระเบียบ</small></button>
+        <button class="behavior-option" type="button" aria-pressed="false" data-behavior="คำพูด"><span class="emoji">💬</span><span>คำพูด</span><small>การใช้วาจาไม่เหมาะสม</small></button>
         <button class="behavior-option" type="button" aria-pressed="false" data-behavior="อื่น ๆ"><span class="emoji">•••</span><span>อื่น ๆ</span><small>ระบุหมายเหตุ</small></button>
       </div>
       <div class="modal-actions">
@@ -3083,7 +3084,13 @@
 
     function normalizeReportRecord(record = {}) {
       const date = getRecordDate(record);
-      return date ? {...record, date} : {...record};
+      return {
+        ...record,
+        room: canonicalRoomName(record.room || record.classRoom || record.class || record["ห้อง"] || record["ชั้น"]),
+        behaviorType: normalizeBehaviorName(record.behaviorType || record.type || record.behavior || record["ประเภทพฤติกรรม"] || record["พฤติกรรม"]),
+        actionType: getActionText(record),
+        ...(date ? {date} : {})
+      };
     }
 
     function formatThaiDate(value) {
@@ -3158,11 +3165,15 @@
 
     function groupBy(records, key) {
       return (records || []).reduce((map, record) => {
-        const name = record[key] || "ไม่ระบุ";
+        const name = key === "behaviorType" ? normalizeBehaviorName(record[key]) : (record[key] || "ไม่ระบุ");
         if (!map[name]) map[name] = [];
         map[name].push(record);
         return map;
       }, {});
+    }
+
+    function normalizeBehaviorName(value) {
+      return String(value || "").replace(/\s+/g, " ").trim() || "ไม่ระบุ";
     }
 
     function normalizeRoomValue(value) {
@@ -3172,6 +3183,12 @@
         .replace(/^ม\.?/, "")
         .replace(/^มัธยมศึกษาปีที่/, "")
         .replace(/^ชั้น/, "");
+    }
+
+    function canonicalRoomName(value) {
+      const rooms = ["ม.1/1", "ม.1/2", "ม.1/3", "ม.1/4", "ม.1/5", "ม.1/6", "ม.1/7", "ม.1/8", "ม.1/A", "ม.1/B"];
+      const normalized = normalizeRoomValue(value);
+      return rooms.find((room) => normalizeRoomValue(room) === normalized) || String(value || "ไม่ระบุห้อง").trim() || "ไม่ระบุห้อง";
     }
 
     function firstFilled(...values) {
@@ -3282,9 +3299,9 @@
         ...record,
         fullName,
         studentId,
-        room,
+        room: canonicalRoomName(room),
         number: studentNumberFrom(record),
-        behaviorType: behaviorType || "ไม่ระบุ",
+        behaviorType: normalizeBehaviorName(behaviorType),
         actionType,
         note,
         date: getRecordDate(record),
@@ -3328,7 +3345,7 @@
         .filter((record) => recordMatchesTarget(record, roomRaw, nameRaw))
         .filter((record) => {
           if (!behaviorTypes.length) return true;
-          return behaviorTypes.includes(record.behaviorType);
+          return behaviorTypes.map(normalizeBehaviorName).includes(normalizeBehaviorName(record.behaviorType));
         });
 
       return mergeReports([{success: true, records}], behaviorTypes);
@@ -3372,10 +3389,20 @@
         record["การจัดการ"],
         record["สถานะ"]
       );
-      if (direct) return direct;
+      if (direct) return normalizeActionName(direct);
       const noteText = String(record.note || "").trim();
-      if (/^(ตักเตือน|เตือน|ปกครอง\s*[123๑๒๓]|ปกครองครั้งที่\s*[123๑๒๓])$/.test(noteText)) return noteText;
+      if (/^(ตักเตือน|เตือน|ปกครอง\s*[123๑๒๓]|ปกครองครั้งที่\s*[123๑๒๓])$/.test(noteText)) return normalizeActionName(noteText);
       return "";
+    }
+
+    function normalizeActionName(value) {
+      const text = String(value || "").replace(/\s+/g, "").trim();
+      if (!text) return "";
+      if (text === "เตือน" || text === "ตักเตือน") return "ตักเตือน";
+      if (/^ปกครอง(?:ครั้งที่)?[1๑]$/.test(text)) return "ปกครอง1";
+      if (/^ปกครอง(?:ครั้งที่)?[2๒]$/.test(text)) return "ปกครอง2";
+      if (/^ปกครอง(?:ครั้งที่)?[3๓]$/.test(text)) return "ปกครอง3";
+      return String(value || "").trim();
     }
 
     function numberSortValue(value) {
@@ -3705,9 +3732,9 @@
       const byRoom = {};
       const byStudent = {};
       filteredRecords.forEach((record) => {
-        const type = record.behaviorType || "ไม่ระบุ";
-        const room = record.room || "ไม่ระบุห้อง";
-        const studentKey = [record.studentId, record.fullName, record.room].join("|");
+        const type = normalizeBehaviorName(record.behaviorType);
+        const room = canonicalRoomName(record.room);
+        const studentKey = [record.studentId, record.fullName, room].join("|");
         byType[type] = (byType[type] || 0) + 1;
         byRoom[room] = (byRoom[room] || 0) + 1;
         if (!byStudent[studentKey]) {
