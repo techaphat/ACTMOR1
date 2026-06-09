@@ -337,7 +337,16 @@ document.addEventListener('pointerdown',e=>{
   if(!target||target.disabled)return;
   tactileFeedback(target,target.closest('.bottom-nav')?'nav':target.classList.contains('behavior-option')?'select':'tap');
 },{passive:true});
-function jsonp(action,params={}){return new Promise((resolve,reject)=>{const cb='m1gg_cb_'+Date.now()+'_'+Math.floor(Math.random()*100000);const script=document.createElement('script');const timeout=setTimeout(()=>{cleanup();reject(new Error('เชื่อมต่อช้าเกินไป กรุณาลองใหม่'));},12000);function cleanup(){clearTimeout(timeout);delete window[cb];script.remove();}window[cb]=data=>{cleanup();resolve(data)};const qs=new URLSearchParams(Object.assign({},params,{action,callback:cb}));script.onerror=()=>{cleanup();reject(new Error('เชื่อมต่อ Apps Script ไม่สำเร็จ'))};script.src=GAS_URL+'?'+qs.toString();document.body.appendChild(script);});}
+const SAVE_TIMEOUT_MS=120000;
+const SAVE_CONCURRENCY=2;
+function jsonp(action,params={},options={}){return new Promise((resolve,reject)=>{const cb='m1gg_cb_'+Date.now()+'_'+Math.floor(Math.random()*100000);const script=document.createElement('script');const timeoutMs=options.timeoutMs||12000;const timeout=setTimeout(()=>{const error=new Error('เชื่อมต่อช้าเกินไป กรุณาลองใหม่');error.code='timeout';cleanup();reject(error);},timeoutMs);function cleanup(){clearTimeout(timeout);delete window[cb];script.remove();}window[cb]=data=>{cleanup();resolve(data)};const qs=new URLSearchParams(Object.assign({},params,{action,callback:cb}));script.onerror=()=>{const error=new Error('เชื่อมต่อ Apps Script ไม่สำเร็จ');error.code='network';cleanup();reject(error)};script.src=GAS_URL+'?'+qs.toString();document.body.appendChild(script);});}
+async function showAmbiguousSaveError(error){
+  if(error?.code==='timeout'||error?.code==='network'){
+    Swal.fire({icon:'warning',title:'ระบบใช้เวลานานเกินไป',html:'การบันทึกยังไม่ตอบกลับหลังรอนานแล้ว<br>ลองส่งใหม่อีกครั้งเมื่ออินเทอร์เน็ตนิ่งขึ้น'});
+    return;
+  }
+  Swal.fire('เชื่อมต่อไม่ได้',error.message||String(error),'error');
+}
 async function clearOldServiceWorker(){try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();for(const r of regs) await r.unregister();} if(window.caches){const keys=await caches.keys(); for(const k of keys) await caches.delete(k);}}catch(e){}}
 document.addEventListener('DOMContentLoaded',()=>{installSwalFeedback();clearOldServiceWorker();const input=document.getElementById('studentIdInput');input.addEventListener('input',handleTyping);input.addEventListener('keydown',e=>{if(e.key==='Enter') searchStudent()});const groupInput=document.getElementById('groupSearchInput');groupInput.addEventListener('input',handleGroupTyping);groupInput.addEventListener('keydown',e=>{if(e.key==='Enter') searchGroupStudent()});updateSaveButtonState();updateGroupSaveButtonState();input.focus();openInitialStudentFromUrl();});
 function openReportLauncher(){const launcher=document.getElementById('reportLauncher');if(!launcher)return;moveBottomNav('act');document.body.classList.add('report-launcher-open');launcher.classList.add('show');launcher.setAttribute('aria-hidden','false')}
@@ -353,7 +362,7 @@ function moveBottomNav(active){const nav=document.querySelector('.bottom-nav');c
 function updateBottomNav(name){moveBottomNav('home')}
 function updatePageBackground(name){document.body.classList.toggle('record-bg',name==='group'||name==='form'||name==='history')}
 function applyScreen(name){Object.values(screens).forEach(s=>s.classList.remove('active'));screens[name].classList.add('active');updateBottomNav(name);updatePageBackground(name);window.scrollTo({top:0,behavior:'smooth'});}
-function showScreen(name){if(document.startViewTransition){document.startViewTransition(()=>applyScreen(name));return}applyScreen(name);}function setSearchLoading(on){document.getElementById('searchBtn').classList.toggle('loading',!!on)}function setLoading(on){document.getElementById('loading').classList.toggle('show',!!on)}function escapeHtml(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}function escapeAttr(v){return escapeHtml(v).replace(/'/g,'&#39;')}
+function showScreen(name){if(document.startViewTransition){document.startViewTransition(()=>applyScreen(name));return}applyScreen(name);}function setSearchLoading(on){document.getElementById('searchBtn').classList.toggle('loading',!!on)}function setLoading(on,message='กำลังทำงาน...'){const loading=document.getElementById('loading');loading.classList.toggle('show',!!on);const text=loading.querySelector('.loader-card .mt-2');if(text)text.textContent=message}function escapeHtml(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}function escapeAttr(v){return escapeHtml(v).replace(/'/g,'&#39;')}
 document.querySelectorAll('.bottom-nav a').forEach(link=>{link.addEventListener('click',e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();if(link.dataset.nav==='act'){openReportLauncher();return}moveBottomNav(link.dataset.nav);setTimeout(()=>document.body.classList.add('page-leaving'),140);setTimeout(()=>{window.location.href=link.href},440)})});
 function handleTyping(){const input=document.getElementById('studentIdInput');document.getElementById('clearBtn').classList.toggle('show',!!input.value);clearTimeout(typingTimer);typingTimer=setTimeout(()=>loadSuggestions(input.value.trim()),180)}
 async function loadSuggestions(q){latestSearchQ=q;if(q.length<2){clearSuggestions();return}const cached=getCachedStudents(q);if(cached.length){lastSuggestions=cached;renderSuggestions(cached,q);return}setSearchLoading(true);try{const res=await jsonp('searchStudent',{q});if(q!==latestSearchQ)return;if(res&&res.success){lastSuggestions=res.students||[];rememberStudents(q,lastSuggestions);renderSuggestions(lastSuggestions,q)}else{renderMessage(res.message||'ไม่พบนักเรียน')}}catch(e){if(q===latestSearchQ)renderMessage(e.message||String(e))}finally{if(q===latestSearchQ)setSearchLoading(false)}}
@@ -376,7 +385,7 @@ function removeGroupStudent(id){groupStudents=groupStudents.filter(s=>String(s.s
 function getStudentAvatarSrc(student){const name=String(student?.fullName||'').trim();if(/^(เด็กชาย|ด\.ช\.|นาย)/.test(name))return STUDENT_BOY_IMG;if(/^(เด็กหญิง|ด\.ญ\.|นางสาว|น\.ส\.)/.test(name))return STUDENT_GIRL_IMG;return ''}
 function renderAvatarHtml(student){const src=getStudentAvatarSrc(student);return src?`<img src="${src}" alt="">`:'🎓'}
 function renderGroupStudents(){const list=document.getElementById('groupList');document.getElementById('groupCount').textContent=groupStudents.length?`เลือกแล้ว ${groupStudents.length} คน`:'ยังไม่ได้เลือกนักเรียน';if(!groupStudents.length){list.innerHTML='<div class="empty-state">ค้นหาแล้วเลือกนักเรียนเข้ากลุ่ม</div>';return}list.innerHTML=groupStudents.map(s=>`<div class="group-student"><div class="group-avatar">${renderAvatarHtml(s)}</div><div><div class="group-name">${escapeHtml(s.fullName||'-')}</div><div class="group-meta">${escapeHtml(s.room||'-')} · เลขที่ ${escapeHtml(s.number||'-')} · ${escapeHtml(s.studentId||'-')}</div></div><button class="remove-student" type="button" onclick="removeGroupStudent('${escapeAttr(s.studentId)}')" aria-label="ลบ">×</button></div>`).join('')}
-function selectStudent(student,view){currentStudent=student;clearSearchBox();if(view==='history'){loadHistory();return}goToForm();prefetchHistory(student)}
+function selectStudent(student,view){currentStudent=student;clearSearchBox();if(view==='history'){loadHistory();return}goToForm()}
 function openInitialStudentFromUrl(){const params=new URLSearchParams(window.location.search);const q=params.get('studentId')||params.get('q');if(!q)return;document.getElementById('studentIdInput').value=q;document.getElementById('clearBtn').classList.add('show');searchStudent(params.get('view')==='history'?'history':'form')}
 async function prefetchHistory(student){const id=student?.studentId;if(!id||cacheGet(historyCacheKey(id)))return;try{const res=await jsonp('getHistory',{studentId:id});if(res&&res.success)cacheSet(historyCacheKey(id),res.history||[])}catch(e){}}
 function renderStudent(){if(!currentStudent)return;const full=`${currentStudent.room||'-'} · เลขที่ ${currentStudent.number||'-'} · เลขประจำตัว ${currentStudent.studentId||'-'}`;['studentName','formStudentName','historyStudentName'].forEach(id=>document.getElementById(id).textContent=currentStudent.fullName||'-');['studentDetail','formStudentDetail','historyStudentDetail'].forEach(id=>document.getElementById(id).textContent=full);['studentAvatar','formStudentAvatar','historyStudentAvatar'].forEach(id=>document.getElementById(id).innerHTML=renderAvatarHtml(currentStudent));document.getElementById('studentRoom').textContent='ห้อง '+(currentStudent.room||'-');document.getElementById('studentNumber').textContent='เลขที่ '+(currentStudent.number||'-');}
@@ -386,6 +395,38 @@ function updateGroupSaveButtonState(){const btn=document.getElementById('groupSa
 function setOptionPressed(el,pressed){el.classList.toggle('active',pressed);el.setAttribute('aria-pressed',pressed?'true':'false')}
 function syncActionButtons(selector,selected){document.querySelectorAll(selector).forEach(button=>setOptionPressed(button,selected.includes(button.dataset.action)))}
 function toggleActionSelection(selected,type){const isSelected=selected.includes(type);if(isSelected)return selected.filter(v=>v!==type);if(GOVERNANCE_ACTIONS.includes(type))return selected.filter(v=>!GOVERNANCE_ACTIONS.includes(v)).concat(type);return selected.concat(type)}
+function buildBehaviorRecord(student,behaviorType,actions,note){const actionText=actions.join(', ');return{studentId:student.studentId,room:student.room,number:student.number,fullName:student.fullName,behaviorType,actionType:actionText,action:actionText,behaviorAction:actionText,status:actionText,'การดำเนินการ':actionText,note}}
+async function saveBehaviorRecord(record,label){
+  let res;
+  try{
+    res=await jsonp('saveBehavior',record,{timeoutMs:SAVE_TIMEOUT_MS});
+  }catch(error){
+    throw error;
+  }
+  if(!res.success){
+    const error=new Error(res.message||`บันทึก ${label} ไม่สำเร็จ`);
+    error.code='server';
+    throw error;
+  }
+  return res;
+}
+async function saveBehaviorRecords(records,onProgress){
+  let next=0,done=0,failed=null;
+  const workers=Array.from({length:Math.min(SAVE_CONCURRENCY,records.length)},async()=>{
+    while(!failed&&next<records.length){
+      const item=records[next++];
+      try{
+        await saveBehaviorRecord(item.record,item.label);
+        done++;
+        onProgress?.(done,records.length,item);
+      }catch(error){
+        failed=error;
+      }
+    }
+  });
+  await Promise.allSettled(workers);
+  if(failed)throw failed;
+}
 function goToGroup(){currentStudent=null;groupStudents=[];clearGroupSearchBox();resetGroupBehaviorSelection();document.getElementById('groupNoteInput').value='';renderGroupStudents();showScreen('group');setTimeout(()=>document.getElementById('groupSearchInput').focus(),100)}function goToForm(){if(!currentStudent)return goToSearch();resetBehaviorSelection();document.getElementById('noteInput').value='';renderStudent();showScreen('form')}function selectBehavior(el,type){const isSelected=selectedBehaviors.includes(type);if(isSelected){selectedBehaviors=selectedBehaviors.filter(v=>v!==type);el.classList.remove('active');el.setAttribute('aria-pressed','false');updateSaveButtonState();return}selectedBehaviors.push(type);el.classList.add('active');el.setAttribute('aria-pressed','true');updateSaveButtonState()}function selectGroupBehavior(el,type){const isSelected=selectedGroupBehaviors.includes(type);if(isSelected){selectedGroupBehaviors=selectedGroupBehaviors.filter(v=>v!==type);el.classList.remove('active');el.setAttribute('aria-pressed','false');updateGroupSaveButtonState();return}selectedGroupBehaviors.push(type);el.classList.add('active');el.setAttribute('aria-pressed','true');updateGroupSaveButtonState()}function selectAction(el,type){selectedActions=toggleActionSelection(selectedActions,type);syncActionButtons('#formScreen .action-option',selectedActions);updateSaveButtonState()}function selectGroupAction(el,type){selectedGroupActions=toggleActionSelection(selectedGroupActions,type);syncActionButtons('#groupScreen .group-action-option',selectedGroupActions);updateGroupSaveButtonState()}
 async function submitBehavior(){
   if(isSaving||document.getElementById('saveBtn')?.disabled)return;
@@ -400,32 +441,15 @@ async function submitBehavior(){
   }
 
   isSaving=true;
-  setLoading(true);
+  setLoading(true,'กำลังบันทึกข้อมูล...');
   const note=document.getElementById('noteInput').value.trim();
+  const records=selectedBehaviors.map(behaviorType=>({
+    record:buildBehaviorRecord(currentStudent,behaviorType,selectedActions,note),
+    label:behaviorType
+  }));
 
   try{
-    for(const behaviorType of selectedBehaviors){
-      const data={
-        studentId:currentStudent.studentId,
-        room:currentStudent.room,
-        number:currentStudent.number,
-        fullName:currentStudent.fullName,
-        behaviorType,
-        actionType:selectedActions.join(', '),
-        action:selectedActions.join(', '),
-        behaviorAction:selectedActions.join(', '),
-        status:selectedActions.join(', '),
-        'การดำเนินการ':selectedActions.join(', '),
-        note
-      };
-      const res=await jsonp('saveBehavior',data);
-      if(!res.success){
-        setLoading(false);
-        isSaving=false;
-        Swal.fire('บันทึกไม่สำเร็จ',res.message||`บันทึก ${behaviorType} ไม่สำเร็จ`,'error');
-        return;
-      }
-    }
+    await saveBehaviorRecords(records,(done,total)=>setLoading(true,`กำลังบันทึก ${done}/${total} รายการ...`));
 
     const savedStudent=currentStudent;
     invalidateHistory(savedStudent.studentId);
@@ -447,7 +471,7 @@ async function submitBehavior(){
   }catch(e){
     setLoading(false);
     isSaving=false;
-    Swal.fire('เชื่อมต่อไม่ได้',e.message||String(e),'error');
+    await showAmbiguousSaveError(e);
   }
 }
 async function submitGroupBehavior(){
@@ -466,34 +490,20 @@ async function submitGroupBehavior(){
   }
 
   isSaving=true;
-  setLoading(true);
+  setLoading(true,'กำลังเตรียมบันทึกกลุ่ม...');
   const note=document.getElementById('groupNoteInput').value.trim();
+  const records=[];
+  for(const student of groupStudents){
+    for(const behaviorType of selectedGroupBehaviors){
+      records.push({
+        record:buildBehaviorRecord(student,behaviorType,selectedGroupActions,note),
+        label:`${student.fullName} / ${behaviorType}`
+      });
+    }
+  }
 
   try{
-    for(const student of groupStudents){
-      for(const behaviorType of selectedGroupBehaviors){
-        const data={
-          studentId:student.studentId,
-          room:student.room,
-          number:student.number,
-          fullName:student.fullName,
-          behaviorType,
-          actionType:selectedGroupActions.join(', '),
-          action:selectedGroupActions.join(', '),
-          behaviorAction:selectedGroupActions.join(', '),
-          status:selectedGroupActions.join(', '),
-          'การดำเนินการ':selectedGroupActions.join(', '),
-          note
-        };
-        const res=await jsonp('saveBehavior',data);
-        if(!res.success){
-          setLoading(false);
-          isSaving=false;
-          Swal.fire('บันทึกไม่สำเร็จ',res.message||`บันทึก ${student.fullName} / ${behaviorType} ไม่สำเร็จ`,'error');
-          return;
-        }
-      }
-    }
+    await saveBehaviorRecords(records,(done,total)=>setLoading(true,`กำลังบันทึกกลุ่ม ${done}/${total} รายการ...`));
 
     const savedStudents=[...groupStudents];
     savedStudents.forEach(s=>invalidateHistory(s.studentId));
@@ -516,7 +526,7 @@ async function submitGroupBehavior(){
   }catch(e){
     setLoading(false);
     isSaving=false;
-    Swal.fire('เชื่อมต่อไม่ได้',e.message||String(e),'error');
+    await showAmbiguousSaveError(e);
   }
 }
 async function loadHistory(){if(!currentStudent)return goToSearch();const id=currentStudent.studentId;latestHistoryStudentId=String(id);const cached=cacheGet(historyCacheKey(id));if(cached){currentHistory=cached;renderStudent();renderHistory(currentHistory);showScreen('history')}else{setLoading(true)}try{const res=await jsonp('getHistory',{studentId:id});if(String(id)!==latestHistoryStudentId)return;if(!res.success){if(!cached)Swal.fire('โหลดประวัติไม่ได้',res.message||'เกิดข้อผิดพลาด','error');return}currentHistory=res.history||[];cacheSet(historyCacheKey(id),currentHistory);renderStudent();renderHistory(currentHistory);showScreen('history')}catch(e){if(!cached)Swal.fire('เชื่อมต่อไม่ได้',e.message||String(e),'error')}finally{setLoading(false)}}
