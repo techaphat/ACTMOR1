@@ -4819,7 +4819,7 @@
       const isoDate = normalizeRecordIsoDate(record);
       return {
         fullName: record.fullName || record.name || record.studentName || record["ชื่อ"] || record["ชื่อ - สกุล"] || record["ชื่อ-สกุล"] || "ชื่อ - สกุล",
-        room: record.room || record.classroom || record.class || record["ห้อง"] || record["ห้องเรียน"] || "ห้องเรียน",
+        room: canonicalRoomName(record.room || record.classroom || record.class || record["ห้อง"] || record["ห้องเรียน"] || "ห้องเรียน"),
         number: record.number || record.no || record.studentNo || record["เลขที่"] || "",
         studentId: record.studentId || record.student_id || record.id || record["เลขประจำตัว"] || record["รหัสนักเรียน"] || "เลขประจำตัว",
         count: asNumber(record.count || record.total || 1),
@@ -4977,13 +4977,13 @@
 
       uniqueRecords.forEach(record => {
         const behavior = normalizeBehaviorName(record.behaviorType) || "อื่น ๆ";
-        const room = record.room || "ไม่ระบุห้อง";
+        const room = canonicalRoomName(record.room);
         byType[behavior] = (byType[behavior] || 0) + 1;
         byRoom[room] = (byRoom[room] || 0) + 1;
 
         String(record.actionType || "")
           .split(",")
-          .map(value => value.trim())
+          .map(normalizeActionName)
           .filter(action => Object.prototype.hasOwnProperty.call(byAction, action))
           .forEach(action => byAction[action] += 1);
 
@@ -5022,16 +5022,17 @@
         .map(item => normalizeStudent(item));
       const periodRecords = filterRecordsForDashboardPeriod([...recentRecords, ...actionRecords], data);
       const derived = deriveDashboardSummary(periodRecords);
-      const sourceByType = data.byType || {};
+      const sourceByType = normalizeBehaviorSummary(data.byType || {});
       const hasSummaryCounts = Object.values(sourceByType).some(value => asNumber(value) > 0);
       const hasDerivedCounts = Object.values(derived.byType || {}).some(value => asNumber(value) > 0);
       const summaryLooksGrouped = Object.keys(sourceByType).some(name => !BEHAVIOR_NAMES.includes(normalizeBehaviorName(name)));
       const shouldUseDerived = data.forceDerivedSummary || data.summaryMissing || !hasSummaryCounts || (hasDerivedCounts && summaryLooksGrouped);
       const byType = shouldUseDerived ? derived.byType : sourceByType;
       const byAction = shouldUseDerived ? derived.byAction : normalizeActionSummary(data.byAction, data);
-      const byRoom = shouldUseDerived || !Object.values(data.byRoom || {}).some(value => asNumber(value) > 0)
+      const sourceByRoom = normalizeRoomSummary(data.byRoom || {});
+      const byRoom = shouldUseDerived || !Object.values(sourceByRoom).some(value => asNumber(value) > 0)
         ? derived.byRoom
-        : (data.byRoom || {});
+        : sourceByRoom;
       const finalTopStudents = topStudents.length ? topStudents : derived.topStudents;
       const derivedSummary = shouldUseDerived;
       return {
@@ -5050,16 +5051,27 @@
     function normalizeActionSummary(source, data = {}) {
       const actions = {"ตักเตือน": 0, "ปกครอง1": 0, "ปกครอง2": 0, "ปกครอง3": 0};
       Object.entries(source || {}).forEach(([key, value]) => {
-        if (Object.prototype.hasOwnProperty.call(actions, key)) actions[key] = asNumber(value);
+        const action = normalizeActionName(key);
+        if (Object.prototype.hasOwnProperty.call(actions, action)) actions[action] += asNumber(value);
       });
       if (Object.values(actions).some(Boolean)) return actions;
       collectStudentRecords(data, ["recentRecords", "recentRecord", "recent", "latest", "latestRecords", "records", "items", "logs", "history"])
         .forEach(item => String(item.actionType || item.action || item.action_type || "")
           .split(",")
-          .map(value => value.trim())
+          .map(normalizeActionName)
           .filter(action => Object.prototype.hasOwnProperty.call(actions, action))
           .forEach(action => actions[action] += Math.max(1, asNumber(item.count || 1))));
       return actions;
+    }
+
+    function normalizeActionName(value) {
+      const text = String(value || "").replace(/\s+/g, "").trim();
+      if (!text) return "";
+      if (text === "เตือน" || text === "ตักเตือน") return "ตักเตือน";
+      if (/^ปกครอง(?:ครั้งที่)?[1๑]$/.test(text)) return "ปกครอง1";
+      if (/^ปกครอง(?:ครั้งที่)?[2๒]$/.test(text)) return "ปกครอง2";
+      if (/^ปกครอง(?:ครั้งที่)?[3๓]$/.test(text)) return "ปกครอง3";
+      return text;
     }
 
     function collectStudentRecords(data, keys) {
@@ -5076,7 +5088,7 @@
         : combinedStudentRecords();
       const query = state.query.trim().toLowerCase();
       return [...source]
-        .filter(student => state.room === "ALL" || student.room === state.room)
+        .filter(matchesSelectedRoom)
         .filter(student => {
           if (!query) return true;
           return [student.fullName, student.room, student.number, student.studentId, student.behaviorType]
@@ -5116,7 +5128,7 @@
       const source = combinedStudentRecords();
       const query = state.query.trim().toLowerCase();
       return aggregateStudents(source.filter(student => normalizeBehaviorName(student.behaviorType) === "สายเที่ยง"), false)
-        .filter(student => state.room === "ALL" || student.room === state.room)
+        .filter(matchesSelectedRoom)
         .filter(student => {
           if (!query) return true;
           return [student.fullName, student.room, student.number, student.studentId]
@@ -5151,6 +5163,40 @@
       return String(value || "").replace(/\s+/g, " ").trim();
     }
 
+    function normalizeBehaviorSummary(source = {}) {
+      return Object.entries(source || {}).reduce((summary, [behavior, count]) => {
+        const key = normalizeBehaviorName(behavior) || "อื่น ๆ";
+        summary[key] = (summary[key] || 0) + asNumber(count);
+        return summary;
+      }, {});
+    }
+
+    function normalizeRoomValue(value) {
+      return String(value || "")
+        .trim()
+        .replace(/\s+/g, "")
+        .replace(/^ม\.?/, "")
+        .replace(/^มัธยมศึกษาปีที่/, "")
+        .replace(/^ชั้น/, "");
+    }
+
+    function canonicalRoomName(value) {
+      const normalized = normalizeRoomValue(value);
+      return ROOMS.find(room => room !== "ALL" && normalizeRoomValue(room) === normalized) || String(value || "ไม่ระบุห้อง").trim() || "ไม่ระบุห้อง";
+    }
+
+    function normalizeRoomSummary(source = {}) {
+      return Object.entries(source || {}).reduce((summary, [room, count]) => {
+        const key = canonicalRoomName(room);
+        summary[key] = (summary[key] || 0) + asNumber(count);
+        return summary;
+      }, {});
+    }
+
+    function matchesSelectedRoom(student) {
+      return state.room === "ALL" || normalizeRoomValue(student.room) === normalizeRoomValue(state.room);
+    }
+
     function combinedStudentRecords() {
       const liveRecords = [
         ...(state.data.recentRecords || []),
@@ -5179,7 +5225,7 @@
       const summary = {};
       filterRecordsForDashboardPeriod(combinedStudentRecords(), state.data)
         .forEach(record => {
-          const room = record.room || "ไม่ระบุห้อง";
+          const room = canonicalRoomName(record.room);
           summary[room] = (summary[room] || 0) + Math.max(1, asNumber(record.count));
         });
       return summary;
@@ -5330,7 +5376,7 @@
 
     function roomSourceRecords() {
       const source = filterRecordsForDashboardPeriod(combinedStudentRecords(), state.data);
-      return source.filter(student => state.room === "ALL" || student.room === state.room);
+      return source.filter(matchesSelectedRoom);
     }
 
 	    function behaviorStats(behavior, totalTimes) {
@@ -5350,7 +5396,7 @@
     function behaviorDetailStudents(behavior) {
       const records = roomSourceRecords().filter(student => normalizeBehaviorName(student.behaviorType) === normalizeBehaviorName(behavior));
       const fallback = (state.data.topStudents || [])
-        .filter(student => (state.room === "ALL" || student.room === state.room) && normalizeBehaviorName(student.behaviorType) === normalizeBehaviorName(behavior));
+        .filter(student => matchesSelectedRoom(student) && normalizeBehaviorName(student.behaviorType) === normalizeBehaviorName(behavior));
       return aggregateStudents(records.length ? records : fallback, false)
         .sort((a, b) => b.count - a.count || a.fullName.localeCompare(b.fullName, "th"));
     }
@@ -5378,7 +5424,7 @@
       return actionOverviewRecords()
         .filter(student => String(student.actionType || "")
           .split(",")
-          .map(value => value.trim())
+          .map(normalizeActionName)
           .includes(action))
         .sort((a, b) => String(b.date || b.time).localeCompare(String(a.date || a.time)) || a.fullName.localeCompare(b.fullName, "th"));
     }
@@ -5781,8 +5827,8 @@
       const source = state.data.actionRecords?.length ? state.data.actionRecords : state.data.recentRecords.length ? state.data.recentRecords : combinedStudentRecords();
       const query = state.query.trim().toLowerCase();
       return source
-        .filter(student => state.room === "ALL" || student.room === state.room)
-        .filter(student => String(student.actionType || "").trim())
+        .filter(matchesSelectedRoom)
+        .filter(student => String(student.actionType || "").split(",").map(normalizeActionName).some(Boolean))
         .filter(student => {
           if (!query) return true;
           return [student.fullName, student.room, student.number, student.studentId, student.behaviorType, student.actionType]
@@ -5795,7 +5841,7 @@
     }
 
     function actionRecordCard(student) {
-      const primaryAction = String(student.actionType || "").split(",")[0].trim() || "ตักเตือน";
+      const primaryAction = normalizeActionName(String(student.actionType || "").split(",")[0]) || "ตักเตือน";
       const numberTag = String(student.number || "").trim()
         ? `<span class="tag">เลขที่ ${escapeHtml(student.number)}</span>`
         : "";
@@ -6054,25 +6100,45 @@
 	      $("liveBadge").innerHTML = `<span class="loading-dots" aria-label="กำลังโหลด"><span></span><span></span><span></span></span>`;
 	      $("status").textContent = "";
 	      try {
-        const requestMode = isUntimedPage() ? "academic" : state.mode;
-        const period = requestMode === "academic" ? "academic" : requestMode === "monthly" ? "month" : "today";
-        const params = {
-          action: "getDashboard",
-          mode: requestMode,
-          period,
-          room: state.room,
-          academicYear: currentAcademicYear()
-        };
-        if (period === "today") {
-          params.date = $("date").value;
-        }
-        if (period === "month") {
-          params.month = $("month").value;
+	        const requestMode = isUntimedPage() ? "academic" : state.mode;
+	        const period = requestMode === "academic" ? "academic" : requestMode === "monthly" ? "month" : "today";
+	        const params = {
+	          action: "getDashboard",
+	          mode: requestMode,
+	          period,
+	          room: state.room,
+	          academicYear: currentAcademicYear()
+	        };
+	        if (period === "today") {
+	          params.date = $("date").value;
+	        }
+	        if (period === "month") {
+	          params.month = $("month").value;
 	        }
 	        const data = await jsonp(params);
 	        if (loadId !== dashboardLoadSeq) return;
 	        if (!data.success) throw new Error(data.message || "โหลดข้อมูลไม่สำเร็จ");
-	        state.data = normalizeData(data);
+	        let dataForRender = data;
+	        if ((requestMode === "monthly" || requestMode === "daily") && (state.page === "overview" || state.page === "rooms") && data.summaryMissing) {
+	          try {
+	            const latest = await jsonp({action: "getLatestLogs", limit: 2000}, 12000);
+	            if (loadId !== dashboardLoadSeq) return;
+	            const logs = collectStudentRecords(latest, ["logs", "recentRecords", "records", "items", "latest", "history"]);
+	            const fallbackRecords = latest && latest.success
+	              ? logs.map(item => normalizeStudent(item)).filter(matchesSelectedRoom)
+	              : [];
+	            if (fallbackRecords.length) {
+	              dataForRender = {
+	                ...data,
+	                forceDerivedSummary: true,
+	                recentRecords: fallbackRecords,
+	                actionRecords: fallbackRecords,
+	                updatedAt: latest.updatedAt || data.updatedAt
+	              };
+	            }
+	          } catch (error) {}
+	        }
+	        state.data = normalizeData(dataForRender);
 	      } catch (error) {
 	        if (loadId !== dashboardLoadSeq) return;
 	        state.data = normalizeData({
@@ -6103,25 +6169,30 @@
 	    async function ensureCompletePeriodRecordsForOverviewAndRooms(loadId) {
 	      if (state.mode !== "monthly" && state.mode !== "daily") return false;
 	      if (state.page !== "overview" && state.page !== "rooms") return false;
-	      if (state.page === "rooms") return false;
-	      const existingPeriodRecords = filterRecordsForDashboardPeriod(combinedStudentRecords(), state.data);
+	      const existingPeriodRecords = filterRecordsForDashboardPeriod(combinedStudentRecords().filter(matchesSelectedRoom), state.data);
+	      const existingRoomSummary = deriveDashboardSummary(existingPeriodRecords).byRoom || {};
 	      const currentTotal = summaryTotal();
 	      try {
 	        const latest = await jsonp({action: "getLatestLogs", limit: 2000}, 12000);
 	        if (loadId !== dashboardLoadSeq) return false;
 	        const logs = collectStudentRecords(latest, ["logs", "recentRecords", "records", "items", "latest", "history"]);
 	        if (!latest || !latest.success || !logs.length) return false;
-	        const periodLogs = filterRecordsForDashboardPeriod(logs.map(item => normalizeStudent(item)), state.data);
+	        const fallbackRecords = logs.map(item => normalizeStudent(item)).filter(matchesSelectedRoom);
+	        const periodLogs = filterRecordsForDashboardPeriod(fallbackRecords, state.data);
 	        const derived = deriveDashboardSummary(periodLogs);
-	        const hasMorePeriodRecords = derived.total > currentTotal || periodLogs.length > existingPeriodRecords.length;
+	        const hasRoomCoverageGap = ROOMS
+	          .filter(room => room !== "ALL" && (state.room === "ALL" || normalizeRoomValue(room) === normalizeRoomValue(state.room)))
+	          .some(room => asNumber(derived.byRoom?.[room]) > asNumber(existingRoomSummary[room]));
+	        const hasIncompleteSummary = Boolean(state.data.summaryMissing || state.data.forceDerivedSummary);
+	        const hasMorePeriodRecords = hasIncompleteSummary || derived.total > currentTotal || periodLogs.length > existingPeriodRecords.length || hasRoomCoverageGap;
 	        if (!periodLogs.length || !hasMorePeriodRecords) return false;
 	        state.data = normalizeData({
 	          ...state.data,
 	          forceDerivedSummary: true,
-          recentRecords: logs,
-          actionRecords: [
-            ...(state.data.actionRecords || []),
-            ...logs
+	          recentRecords: fallbackRecords,
+	          actionRecords: [
+	            ...(state.data.actionRecords || []),
+	            ...fallbackRecords
 	          ],
 	          updatedAt: latest.updatedAt || state.data.updatedAt
 	        });
