@@ -5092,13 +5092,12 @@
         });
     }
 
-    function roomBehaviorStudents() {
-      const source = combinedStudentRecords();
-      const query = state.query.trim().toLowerCase();
-      return aggregateStudents(source, state.behavior !== "ALL")
-        .filter(student => state.room === "ALL" || student.room === state.room)
-        .filter(student => state.behavior === "ALL" || student.behaviorType === state.behavior)
-        .filter(student => {
+	    function roomBehaviorStudents() {
+	      const source = roomSourceRecords();
+	      const query = state.query.trim().toLowerCase();
+	      return aggregateStudents(source, state.behavior !== "ALL")
+	        .filter(student => state.behavior === "ALL" || student.behaviorType === state.behavior)
+	        .filter(student => {
           if (!query) return true;
           return [student.fullName, student.room, student.number, student.studentId, student.behaviorType]
             .join(" ")
@@ -5334,19 +5333,19 @@
       return source.filter(student => state.room === "ALL" || student.room === state.room);
     }
 
-    function behaviorStats(behavior, totalTimes) {
-      const records = roomSourceRecords().filter(student => behavior === "ALL" || student.behaviorType === behavior);
-      const people = new Set(records.map(student => [
+	    function behaviorStats(behavior, totalTimes) {
+	      const records = roomSourceRecords().filter(student => behavior === "ALL" || student.behaviorType === behavior);
+	      const people = new Set(records.map(student => [
         student.studentId || "",
         student.fullName || "",
         student.room || ""
       ].join("|"))).size;
-      const countedTimes = records.reduce((sum, student) => sum + Math.max(1, asNumber(student.count)), 0);
-      return {
-        people,
-        times: countedTimes || asNumber(totalTimes)
-      };
-    }
+	      const countedTimes = records.reduce((sum, student) => sum + Math.max(1, asNumber(student.count)), 0);
+	      return {
+	        people,
+	        times: countedTimes || (state.page === "rooms" && state.room !== "ALL" ? 0 : asNumber(totalTimes))
+	      };
+	    }
 
     function behaviorDetailStudents(behavior) {
       const records = roomSourceRecords().filter(student => normalizeBehaviorName(student.behaviorType) === normalizeBehaviorName(behavior));
@@ -6104,6 +6103,7 @@
 	    async function ensureCompletePeriodRecordsForOverviewAndRooms(loadId) {
 	      if (state.mode !== "monthly" && state.mode !== "daily") return false;
 	      if (state.page !== "overview" && state.page !== "rooms") return false;
+	      if (state.page === "rooms") return false;
 	      const existingPeriodRecords = filterRecordsForDashboardPeriod(combinedStudentRecords(), state.data);
 	      const currentTotal = summaryTotal();
 	      try {
