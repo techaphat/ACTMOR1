@@ -4652,10 +4652,11 @@
       searchResults: [],
       searchLoading: false,
       data: EMPTY_DATA
-    };
-    let searchTimer = null;
-    let latestSearchQuery = "";
-    let latestSuggestQuery = "";
+	    };
+	    let searchTimer = null;
+	    let dashboardLoadSeq = 0;
+	    let latestSearchQuery = "";
+	    let latestSuggestQuery = "";
     const SORT_LABELS = {
       "count-desc": "เรียงตามจำนวนมากสุด",
       "name-asc": "เรียงตามชื่อ",
@@ -6048,11 +6049,12 @@
       return state.page === "follow" || state.page === "recent";
     }
 
-    async function loadDashboard() {
-      document.body.classList.add("is-loading");
-      $("liveBadge").innerHTML = `<span class="loading-dots" aria-label="กำลังโหลด"><span></span><span></span><span></span></span>`;
-      $("status").textContent = "";
-      try {
+	    async function loadDashboard() {
+	      const loadId = ++dashboardLoadSeq;
+	      document.body.classList.add("is-loading");
+	      $("liveBadge").innerHTML = `<span class="loading-dots" aria-label="กำลังโหลด"><span></span><span></span><span></span></span>`;
+	      $("status").textContent = "";
+	      try {
         const requestMode = isUntimedPage() ? "academic" : state.mode;
         const period = requestMode === "academic" ? "academic" : requestMode === "monthly" ? "month" : "today";
         const params = {
@@ -6067,67 +6069,80 @@
         }
         if (period === "month") {
           params.month = $("month").value;
-        }
-        const data = await jsonp(params);
-        if (!data.success) throw new Error(data.message || "โหลดข้อมูลไม่สำเร็จ");
-        state.data = normalizeData(data);
-      } catch (error) {
-        state.data = normalizeData({
-          ...EMPTY_DATA,
-          mode: state.mode,
-          loadError: error.message || String(error)
-        });
-      }
-      await ensureAcademicRecordsForOverviewAndRooms();
-      await ensureCompletePeriodRecordsForOverviewAndRooms();
-      await ensureLatestRecordsForUntimedPages();
-      document.body.classList.remove("is-loading");
-      renderMainPanel();
-    }
+	        }
+	        const data = await jsonp(params);
+	        if (loadId !== dashboardLoadSeq) return;
+	        if (!data.success) throw new Error(data.message || "โหลดข้อมูลไม่สำเร็จ");
+	        state.data = normalizeData(data);
+	      } catch (error) {
+	        if (loadId !== dashboardLoadSeq) return;
+	        state.data = normalizeData({
+	          ...EMPTY_DATA,
+	          mode: state.mode,
+	          loadError: error.message || String(error)
+	        });
+	      }
+	      document.body.classList.remove("is-loading");
+	      renderMainPanel();
+	      refreshDashboardSupplements(loadId);
+	    }
+
+	    async function refreshDashboardSupplements(loadId) {
+	      let changed = false;
+	      changed = await ensureAcademicRecordsForOverviewAndRooms(loadId) || changed;
+	      changed = await ensureCompletePeriodRecordsForOverviewAndRooms(loadId) || changed;
+	      changed = await ensureLatestRecordsForUntimedPages(loadId) || changed;
+	      if (loadId !== dashboardLoadSeq || !changed) return;
+	      renderMainPanel();
+	    }
 
     function summaryTotal(data = state.data) {
       const byTypeTotal = Object.values(data.byType || {}).reduce((sum, value) => sum + asNumber(value), 0);
       return asNumber(data.total || byTypeTotal);
     }
 
-    async function ensureCompletePeriodRecordsForOverviewAndRooms() {
-      if (state.mode !== "monthly" && state.mode !== "daily") return;
-      if (state.page !== "overview" && state.page !== "rooms") return;
-      const existingPeriodRecords = filterRecordsForDashboardPeriod(combinedStudentRecords(), state.data);
-      const currentTotal = summaryTotal();
-      try {
-        const latest = await jsonp({action: "getLatestLogs", limit: 2000}, 12000);
-        const logs = collectStudentRecords(latest, ["logs", "recentRecords", "records", "items", "latest", "history"]);
-        if (!latest || !latest.success || !logs.length) return;
-        const periodLogs = filterRecordsForDashboardPeriod(logs.map(item => normalizeStudent(item)), state.data);
-        const derived = deriveDashboardSummary(periodLogs);
-        const hasMorePeriodRecords = derived.total > currentTotal || periodLogs.length > existingPeriodRecords.length;
-        if (!periodLogs.length || !hasMorePeriodRecords) return;
-        state.data = normalizeData({
-          ...state.data,
-          forceDerivedSummary: true,
+	    async function ensureCompletePeriodRecordsForOverviewAndRooms(loadId) {
+	      if (state.mode !== "monthly" && state.mode !== "daily") return false;
+	      if (state.page !== "overview" && state.page !== "rooms") return false;
+	      const existingPeriodRecords = filterRecordsForDashboardPeriod(combinedStudentRecords(), state.data);
+	      const currentTotal = summaryTotal();
+	      try {
+	        const latest = await jsonp({action: "getLatestLogs", limit: 2000}, 12000);
+	        if (loadId !== dashboardLoadSeq) return false;
+	        const logs = collectStudentRecords(latest, ["logs", "recentRecords", "records", "items", "latest", "history"]);
+	        if (!latest || !latest.success || !logs.length) return false;
+	        const periodLogs = filterRecordsForDashboardPeriod(logs.map(item => normalizeStudent(item)), state.data);
+	        const derived = deriveDashboardSummary(periodLogs);
+	        const hasMorePeriodRecords = derived.total > currentTotal || periodLogs.length > existingPeriodRecords.length;
+	        if (!periodLogs.length || !hasMorePeriodRecords) return false;
+	        state.data = normalizeData({
+	          ...state.data,
+	          forceDerivedSummary: true,
           recentRecords: logs,
           actionRecords: [
             ...(state.data.actionRecords || []),
             ...logs
-          ],
-          updatedAt: latest.updatedAt || state.data.updatedAt
-        });
-      } catch (error) {}
-    }
+	          ],
+	          updatedAt: latest.updatedAt || state.data.updatedAt
+	        });
+	        return true;
+	      } catch (error) {}
+	      return false;
+	    }
 
-    async function ensureAcademicRecordsForOverviewAndRooms() {
-      if (state.mode !== "academic") return;
-      if (state.page !== "overview" && state.page !== "rooms") return;
-      const periodRecords = filterRecordsForDashboardPeriod(combinedStudentRecords(), state.data);
-      const hasRoomSummary = Object.values(state.data.byRoom || {}).some(value => asNumber(value) > 0);
-      const hasTypeSummary = Object.values(state.data.byType || {}).some(value => asNumber(value) > 0);
-      if (periodRecords.length >= 100 || (periodRecords.length && hasRoomSummary && hasTypeSummary)) return;
-      try {
-        const latest = await jsonp({action: "getLatestLogs", limit: 1000}, 12000);
-        const logs = collectStudentRecords(latest, ["logs", "recentRecords", "records", "items", "latest", "history"]);
-        if (latest && latest.success && logs.length) {
-          state.data = normalizeData({
+	    async function ensureAcademicRecordsForOverviewAndRooms(loadId) {
+	      if (state.mode !== "academic") return false;
+	      if (state.page !== "overview" && state.page !== "rooms") return false;
+	      const periodRecords = filterRecordsForDashboardPeriod(combinedStudentRecords(), state.data);
+	      const hasRoomSummary = Object.values(state.data.byRoom || {}).some(value => asNumber(value) > 0);
+	      const hasTypeSummary = Object.values(state.data.byType || {}).some(value => asNumber(value) > 0);
+	      if (periodRecords.length >= 100 || (periodRecords.length && hasRoomSummary && hasTypeSummary)) return false;
+	      try {
+	        const latest = await jsonp({action: "getLatestLogs", limit: 1000}, 12000);
+	        if (loadId !== dashboardLoadSeq) return false;
+	        const logs = collectStudentRecords(latest, ["logs", "recentRecords", "records", "items", "latest", "history"]);
+	        if (latest && latest.success && logs.length) {
+	          state.data = normalizeData({
             ...state.data,
             mode: "academic",
             academicYear: currentAcademicYear(),
@@ -6135,29 +6150,34 @@
             actionRecords: [
               ...(state.data.actionRecords || []),
               ...logs
-            ],
-            updatedAt: latest.updatedAt || state.data.updatedAt
-          });
-        }
-      } catch (error) {}
-    }
+	            ],
+	            updatedAt: latest.updatedAt || state.data.updatedAt
+	          });
+	          return true;
+	        }
+	      } catch (error) {}
+	      return false;
+	    }
 
-    async function ensureLatestRecordsForUntimedPages() {
-      if (!isUntimedPage()) return;
-      if (state.page !== "recent" && state.page !== "follow") return;
-      if (state.page === "follow" && lunchLateStudents().length) return;
-      try {
-        const latest = await jsonp({action: "getLatestLogs", limit: 100}, 12000);
-        const logs = collectStudentRecords(latest, ["logs", "recentRecords", "records", "items", "latest", "history"]);
-        if (latest && latest.success && logs.length) {
-          state.data = normalizeData({
+	    async function ensureLatestRecordsForUntimedPages(loadId) {
+	      if (!isUntimedPage()) return false;
+	      if (state.page !== "recent" && state.page !== "follow") return false;
+	      if (state.page === "follow" && lunchLateStudents().length) return false;
+	      try {
+	        const latest = await jsonp({action: "getLatestLogs", limit: 100}, 12000);
+	        if (loadId !== dashboardLoadSeq) return false;
+	        const logs = collectStudentRecords(latest, ["logs", "recentRecords", "records", "items", "latest", "history"]);
+	        if (latest && latest.success && logs.length) {
+	          state.data = normalizeData({
             ...state.data,
-            recentRecords: logs,
-            updatedAt: latest.updatedAt || state.data.updatedAt
-          });
-        }
-      } catch (error) {}
-    }
+	            recentRecords: logs,
+	            updatedAt: latest.updatedAt || state.data.updatedAt
+	          });
+	          return true;
+	        }
+	      } catch (error) {}
+	      return false;
+	    }
 
     $("date").value = today();
     $("month").value = thisMonth();
