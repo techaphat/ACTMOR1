@@ -252,7 +252,7 @@
     }
 
     .live {
-      min-width: 58px;
+      min-width: 64px;
       min-height: 30px;
       border: 0;
       border-radius: 999px;
@@ -265,8 +265,10 @@
       font-weight: 520;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
       flex: 0 0 auto;
+      font-variant-numeric: tabular-nums;
     }
 
     .live::before {
@@ -291,30 +293,54 @@
       animation: pulse 900ms ease-in-out infinite;
     }
 
-    .loading-dots {
-      display: inline-flex;
+    .dashboard-load {
+      display: none;
+      min-width: 100%;
+      gap: 7px;
       align-items: center;
-      gap: 4px;
-      min-width: 32px;
-      min-height: 15px;
-      justify-content: center;
+      color: #526174;
+      font-size: 12px;
+      font-weight: 520;
     }
 
-    .loading-dots span {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: currentColor;
-      opacity: .32;
-      animation: bounceDot 780ms ease-in-out infinite;
+    body.is-loading .dashboard-load {
+      display: grid;
     }
 
-    .loading-dots span:nth-child(2) {
-      animation-delay: 120ms;
+    .dashboard-load-track {
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(219, 236, 255, .74);
+      border: 1px solid rgba(255, 255, 255, .78);
+      box-shadow: inset 0 1px 2px rgba(31, 45, 70, .07), 0 8px 18px rgba(66, 126, 213, .08);
     }
 
-    .loading-dots span:nth-child(3) {
-      animation-delay: 240ms;
+    .dashboard-load-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #7ab8ff, #49dbff 52%, #f07bb5);
+      box-shadow: 0 8px 18px rgba(66, 126, 213, .18);
+      position: relative;
+      transition: width 320ms cubic-bezier(.2, .84, .2, 1);
+    }
+
+    .dashboard-load-fill::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .64), transparent);
+      transform: translateX(-110%);
+      animation: loadSheen 1.2s ease-in-out infinite;
+    }
+
+    .dashboard-load-label {
+      min-height: 16px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .top > .status {
@@ -2620,6 +2646,12 @@
       }
     }
 
+    @keyframes loadSheen {
+      to {
+        transform: translateX(110%);
+      }
+    }
+
     @media (max-width: 760px) {
       .top {
         top: 6px;
@@ -4396,6 +4428,12 @@
       </div>
 
       <div id="status" class="status">กำลังเตรียมข้อมูล</div>
+      <div id="dashboardLoad" class="dashboard-load" aria-live="polite">
+        <div class="dashboard-load-track" aria-hidden="true">
+          <div id="dashboardLoadFill" class="dashboard-load-fill"></div>
+        </div>
+        <div id="dashboardLoadLabel" class="dashboard-load-label">กำลังโหลดข้อมูล...</div>
+      </div>
     </section>
 
     <button id="floatingBackdrop" class="floating-backdrop hidden" type="button" aria-label="ปิดแถบลอย"></button>
@@ -4494,7 +4532,7 @@
   </div>
 
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxxQP4dIOmcgpVVaEa1CwAeXb5YxGYAq9iuH3hYTEbuTP-EgPOuqzToJbEEbqNXiNc-MA/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyW1CSi9Qczw9HQAYYsdIRVwXwjZfLcOSh9DitnCaIZT7C4cVH7EuNQuzI-pEC-iH3O/exec";
     const ROOMS = ["ALL", "ม.1/1", "ม.1/2", "ม.1/3", "ม.1/4", "ม.1/5", "ม.1/6", "ม.1/7", "ม.1/8", "ม.1/A", "ม.1/B"];
     const FALLBACK = {
       success: true,
@@ -4663,6 +4701,13 @@
       "room-asc": "เรียงตามห้อง",
       "latest": "เรียงล่าสุด"
     };
+    function setDashboardLoading(on, percent = 0, label = "กำลังโหลดข้อมูล...") {
+      const safePercent = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
+      document.body.classList.toggle("is-loading", Boolean(on));
+      if ($("dashboardLoadFill")) $("dashboardLoadFill").style.width = (on ? safePercent : 0) + "%";
+      if ($("dashboardLoadLabel")) $("dashboardLoadLabel").textContent = label;
+      if ($("liveBadge")) $("liveBadge").textContent = on ? `${safePercent}%` : "พร้อม";
+    }
     const BANGKOK_TIME_ZONE = "Asia/Bangkok";
     const MONTH_NAMES = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
     const MONTH_FULL_NAMES = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
@@ -5578,9 +5623,9 @@
     }
 
     function renderStatus() {
-      $("liveBadge").textContent = "พร้อม";
+      if (!document.body.classList.contains("is-loading")) $("liveBadge").textContent = "พร้อม";
       if (state.data.loadError) {
-        $("liveBadge").textContent = "ตรวจสอบ";
+        if (!document.body.classList.contains("is-loading")) $("liveBadge").textContent = "ตรวจสอบ";
         $("status").textContent = `โหลดข้อมูลหลังบ้านไม่สำเร็จ: ${state.data.loadError}`;
         return;
       }
@@ -6096,8 +6141,7 @@
 
 	    async function loadDashboard() {
 	      const loadId = ++dashboardLoadSeq;
-	      document.body.classList.add("is-loading");
-	      $("liveBadge").innerHTML = `<span class="loading-dots" aria-label="กำลังโหลด"><span></span><span></span><span></span></span>`;
+	      setDashboardLoading(true, 12, "กำลังเชื่อมต่อข้อมูล...");
 	      $("status").textContent = "";
 	      try {
 	        const requestMode = isUntimedPage() ? "academic" : state.mode;
@@ -6117,10 +6161,12 @@
 	        }
 	        const data = await jsonp(params);
 	        if (loadId !== dashboardLoadSeq) return;
+	        setDashboardLoading(true, 64, "กำลังจัดรูปแบบข้อมูล...");
 	        if (!data.success) throw new Error(data.message || "โหลดข้อมูลไม่สำเร็จ");
 	        let dataForRender = data;
 	        if ((requestMode === "monthly" || requestMode === "daily") && (state.page === "overview" || state.page === "rooms") && data.summaryMissing) {
 	          try {
+	            setDashboardLoading(true, 74, "กำลังเติมข้อมูลล่าสุด...");
 	            const latest = await jsonp({action: "getLatestLogs", limit: 2000}, 12000);
 	            if (loadId !== dashboardLoadSeq) return;
 	            const logs = collectStudentRecords(latest, ["logs", "recentRecords", "records", "items", "latest", "history"]);
@@ -6147,18 +6193,25 @@
 	          loadError: error.message || String(error)
 	        });
 	      }
-	      document.body.classList.remove("is-loading");
+	      setDashboardLoading(true, 92, "กำลังวาด dashboard...");
 	      renderMainPanel();
 	      refreshDashboardSupplements(loadId);
 	    }
 
 	    async function refreshDashboardSupplements(loadId) {
 	      let changed = false;
+	      setDashboardLoading(true, 94, "กำลังตรวจข้อมูลประกอบ...");
 	      changed = await ensureAcademicRecordsForOverviewAndRooms(loadId) || changed;
+	      if (loadId === dashboardLoadSeq) setDashboardLoading(true, 96, "กำลังตรวจรายการช่วงเวลา...");
 	      changed = await ensureCompletePeriodRecordsForOverviewAndRooms(loadId) || changed;
+	      if (loadId === dashboardLoadSeq) setDashboardLoading(true, 98, "กำลังตรวจรายการล่าสุด...");
 	      changed = await ensureLatestRecordsForUntimedPages(loadId) || changed;
-	      if (loadId !== dashboardLoadSeq || !changed) return;
-	      renderMainPanel();
+	      if (loadId !== dashboardLoadSeq) return;
+	      if (changed) renderMainPanel();
+	      setDashboardLoading(true, 100, "เสร็จแล้ว");
+	      setTimeout(() => {
+	        if (loadId === dashboardLoadSeq) setDashboardLoading(false);
+	      }, 360);
 	    }
 
     function summaryTotal(data = state.data) {
